@@ -2,14 +2,15 @@
 
 Website tata kelola inovasi warga: pengajuan, verifikasi berjenjang, uji warga, dan Evidence Passport. KampungLab mencatat keputusan dan realisasi dana; transfer uang dilakukan di luar platform oleh pihak berwenang.
 
-**Status saat ini: fondasi proyek.** Tersedia halaman pengantar dan panduan alur. Pengajuan, autentikasi, database, uji warga, dan pencairan belum diimplementasikan. Belum terhubung ke Supabase atau dideploy ke Vercel.
+**Status saat ini: fondasi proyek dan konfigurasi Supabase.** Tersedia halaman pengantar dan panduan alur. Proyek Supabase sudah dibuat, dengan template environment, factory client publik tanpa sesi, dan script pemeriksaan koneksi. Halaman belum memakai query database. Schema aplikasi, autentikasi, pengajuan, uji warga, dan pencairan belum diimplementasikan. Belum dideploy ke Vercel.
 
 ## Teknologi
 
 - Next.js App Router dan TypeScript.
 - React Server Components untuk halaman informasi.
 - Tailwind CSS, ESLint, dan npm lockfile.
-- Target berikutnya: Supabase untuk auth/database/storage dan Vercel untuk hosting.
+- Supabase SDK dan konfigurasi publik; auth/database/storage aplikasi pada milestone berikutnya.
+- Target hosting: Vercel.
 
 Versi dependency tercatat di `package.json` dan `package-lock.json`. Repository publik; field `private: true` pada `package.json` mencegah publikasi package npm dan tidak mengubah visibilitas GitHub.
 
@@ -24,7 +25,7 @@ npm ci
 npm run dev
 ```
 
-Buka folder `kampunglab-surabaya` di Antigravity, kemudian buka [localhost:3000](http://localhost:3000). Fondasi ini belum memerlukan akun Supabase atau file environment.
+Buka folder `kampunglab-surabaya` di Antigravity, kemudian buka [localhost:3000](http://localhost:3000). Halaman informasi belum memerlukan file environment. Untuk memeriksa koneksi Supabase, ikuti [panduan konfigurasi](docs/SUPABASE_SETUP.md) dan buat `.env.local` di root proyek.
 
 Setelah perubahan berikutnya sudah masuk GitHub, jalankan dari folder proyek:
 
@@ -40,6 +41,7 @@ Jika ada perubahan lokal, periksa `git status` dan selesaikan terlebih dahulu. J
 ```bash
 npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
 
@@ -61,12 +63,13 @@ AGENTS.md            Petunjuk pengembangan untuk AI
 - [PRD sistem](PRD_KampungLab_Surabaya_v1.md): baca sebelum menambah aturan bisnis.
 - [Status proyek](docs/PROJECT_STATUS.md): yang tersedia, belum diimplementasikan, dan belum diverifikasi.
 - [Petunjuk AI](AGENTS.md): aturan teknis dan batas pengembangan.
+- [Konfigurasi Supabase](docs/SUPABASE_SETUP.md): proyek yang dipilih, environment lokal, dan pemeriksaan hanya-baca `npm run check:supabase`.
 
 Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijakan. Jangan menampilkannya sebagai ketetapan resmi Pemkot. Keputusan `D-01` sampai `D-24` pada PRD belum otomatis disetujui.
 
 ## Konfigurasi berikutnya
 
-1. Pilih project Supabase dan akun yang benar sebelum membuat schema atau migrasi.
+1. Gunakan proyek Supabase yang sudah dipilih dan tercatat pada panduan konfigurasi; jangan membuat proyek duplikat.
 2. Sepakati model mandat akun dan keputusan yang menghambat milestone terkait.
 3. Susun schema, kebijakan akses, serta migrasi dari kondisi proyek yang benar-benar tersedia.
 4. Siapkan project Vercel dan environment; verifikasi akses repository untuk build/deploy.
