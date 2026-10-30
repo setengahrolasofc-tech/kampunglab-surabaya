@@ -2,14 +2,14 @@
 
 Website tata kelola inovasi warga: pengajuan, verifikasi berjenjang, uji warga, dan Evidence Passport. KampungLab mencatat keputusan dan realisasi dana; transfer uang dilakukan di luar platform oleh pihak berwenang.
 
-**Status saat ini: fondasi proyek dan konfigurasi Supabase.** Tersedia halaman pengantar dan panduan alur. Proyek Supabase sudah dibuat, dengan template environment, factory client publik tanpa sesi, dan script pemeriksaan koneksi. Halaman belum memakai query database. Schema aplikasi, autentikasi, pengajuan, uji warga, dan pencairan belum diimplementasikan. Belum dideploy ke Vercel.
+**Status saat ini: akun pribadi dan fondasi mandat jabatan.** Daftar/masuk email-password, callback konfirmasi, pemulihan kata sandi, dashboard pribadi, edit nama, dan keluar akun telah diimplementasikan. Database profil, wilayah, jabatan, mandat, role grant, serta audit privat telah dibuat dengan RLS. Pengajuan, penilaian, dana, dan uji warga belum diimplementasikan. Google OAuth, UI pengelolaan mandat, dan deployment Vercel masih pekerjaan berikutnya. UAT email dan tampilan akun belum selesai.
 
 ## Teknologi
 
 - Next.js App Router dan TypeScript.
 - React Server Components untuk halaman informasi.
 - Tailwind CSS, ESLint, dan npm lockfile.
-- Supabase SDK dan konfigurasi publik; auth/database/storage aplikasi pada milestone berikutnya.
+- Supabase Auth SSR berbasis cookie, database identitas dengan RLS, dan SDK publik tanpa privilege admin.
 - Target hosting: Vercel.
 
 Versi dependency tercatat di `package.json` dan `package-lock.json`. Repository publik; field `private: true` pada `package.json` mencegah publikasi package npm dan tidak mengubah visibilitas GitHub.
@@ -64,14 +64,16 @@ AGENTS.md            Petunjuk pengembangan untuk AI
 - [Status proyek](docs/PROJECT_STATUS.md): yang tersedia, belum diimplementasikan, dan belum diverifikasi.
 - [Petunjuk AI](AGENTS.md): aturan teknis dan batas pengembangan.
 - [Konfigurasi Supabase](docs/SUPABASE_SETUP.md): proyek yang dipilih, environment lokal, dan pemeriksaan hanya-baca `npm run check:supabase`.
+- [Desain identitas/mandat](docs/IDENTITY_ACCESS_DESIGN.md): keputusan D-18 yang disetujui, hak akses, dan batas milestone.
+- [UAT akun](docs/AUTH_UAT.md): langkah pengujian email, sesi, profil, dan batas verifikasi.
 
 Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijakan. Jangan menampilkannya sebagai ketetapan resmi Pemkot. Keputusan `D-01` sampai `D-24` pada PRD belum otomatis disetujui.
 
 ## Konfigurasi berikutnya
 
 1. Gunakan proyek Supabase yang sudah dipilih dan tercatat pada panduan konfigurasi; jangan membuat proyek duplikat.
-2. Sepakati model mandat akun dan keputusan yang menghambat milestone terkait.
-3. Susun schema, kebijakan akses, serta migrasi dari kondisi proyek yang benar-benar tersedia.
+2. Uji daftar/masuk lewat email pribadi dan pastikan callback tetap sesuai origin aplikasi.
+3. Tentukan identitas admin pertama setelah pemilik memverifikasinya, lalu bangun UI penugasan dan data wilayah. Tidak ada admin yang ditetapkan otomatis.
 4. Siapkan project Vercel dan environment; verifikasi akses repository untuk build/deploy.
 5. Implementasikan fitur bertahap dan laporkan verifikasi yang benar-benar dilakukan.
 

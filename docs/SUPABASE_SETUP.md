@@ -12,7 +12,7 @@
 | URL API | https://zxfaotlqldfrlccahebw.supabase.co |
 | Dashboard | https://supabase.com/dashboard/project/zxfaotlqldfrlccahebw |
 
-Proyek dibuat dan diperiksa pada 30 Oktober 2026. Status yang dikembalikan Supabase: `ACTIVE_HEALTHY`. Inspeksi awal schema `public` menemukan nol tabel aplikasi. Ini bukan penilaian kelayakan operasional seluruh sistem.
+Proyek dibuat pada 30 Oktober 2026 dengan status `ACTIVE_HEALTHY`. Schema awal kosong; milestone akun kemudian menambahkan profiles, territories, offices, office_mandates, platform_role_grants, serta audit privat. Lihat desain identitas dan status proyek untuk perkembangan terkini.
 
 ## Konfigurasi lokal Windows
 
@@ -29,11 +29,14 @@ Isi dua variabel berikut di `.env.local`:
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://zxfaotlqldfrlccahebw.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 Ganti placeholder key dengan **publishable key** aktif dari dialog **Connect** atau halaman **Settings > API Keys** di dashboard proyek. Gunakan nilai berawalan `sb_publishable_`. Jangan memakai secret key, password database, atau legacy `service_role`/`anon` JWT key. Nilai key tidak dicatat dalam dokumen ini atau contoh environment di Git.
 
-File environment berada di root proyek, sejajar dengan `package.json`, bukan di `src/`. `.env.local` tetap diabaikan Git. Key publik bukan pemberi hak admin; keamanan baris dan berkas tetap memerlukan policy yang benar ketika schema dibuat.
+File environment berada di root proyek, sejajar dengan `package.json`, bukan di `src/`. `.env.local` tetap diabaikan Git. Key publik bukan pemberi hak admin. Untuk localhost:3000, NEXT_PUBLIC_APP_URL memiliki default yang sama; isi secara eksplisit saat port atau domain berubah.
+
+Pada deployment, atur NEXT_PUBLIC_APP_URL ke origin HTTPS yang benar dan izinkan callback `/auth/callback` pada pengaturan redirect Supabase. Jangan memakai nilai Host dari pengunjung untuk membuat tautan email. Pendaftaran tetap memakai konfirmasi sesuai konfigurasi Auth; tahap ini tidak mematikan konfirmasi atau mengubah provider email. Google OAuth belum dikonfigurasi.
 
 Kemudian jalankan:
 
@@ -53,11 +56,11 @@ Saat pemeriksaan awal, endpoint root metadata Data API `/rest/v1/` menolak key p
 - `scripts/check-supabase.mjs`: pemeriksaan koneksi hanya-baca dari CLI.
 - `tests/supabase-config.test.mjs`: pengujian konfigurasi kosong, URL tidak aman, dan penolakan privileged key.
 
-Halaman informasi tetap dapat dibangun tanpa file environment karena client baru dibuat ketika fungsi dipanggil. Sebelum mengimplementasikan login SSR, buat client berbasis cookie dan refresh proxy sesuai dokumentasi terkini; jangan memakai client publik stateless untuk autentikasi.
+Halaman informasi tetap dapat dibangun tanpa file environment karena client baru dibuat ketika fungsi dipanggil. Login kini menggunakan `src/lib/supabase/server.ts` dan `src/proxy.ts` untuk cookie/refresh. Client publik stateless tetap bukan client login. Akses dashboard dan mutasi memeriksa identitas lewat getUser; hak tambahan dibaca dari database, bukan user_metadata.
 
 ## Batas tahap ini
 
-Belum dibuat: schema aplikasi, migrasi, policy RLS/Storage, bucket berkas, akun warga/petugas, UI login, mandat jabatan, atau konfigurasi Vercel. Hindari membuat tabel/profile palsu hanya untuk menunjukkan koneksi sukses. Selesaikan keputusan `D-18` pada PRD sebelum mengunci model autentikasi/mandat.
+Sudah dibuat: schema identitas/mandat, migrasi, RLS, dan UI akun. Belum dibuat: schema pengajuan, penilaian, dana, uji warga; bucket/policy Storage; UI admin untuk mandat; Google OAuth; konfigurasi Vercel. Model identitas D-18 telah disetujui pengguna; rincian lifecycle dan penugasan tim lainnya tetap perlu pembahasan.
 
 Untuk Vercel nanti, isi dua variabel publik tersebut pada environment yang tepat sebelum build. Secret berprivilege, bila benar-benar dibutuhkan, harus tetap server-only. Jangan otomatis memakai database ini untuk seluruh preview dengan data warga nyata.
 

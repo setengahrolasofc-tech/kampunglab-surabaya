@@ -147,7 +147,7 @@ Sumber peran: [H, hlm. 3-4, 11-13]. Perincian pembatasan merupakan [U] untuk men
 
 [H] Setiap tingkat mempunyai satu akun utama dan satu akun cadangan. Jabatan dapat didelegasikan melalui surat tugas dan masa berlaku. Serah terima berdasarkan SK/surat tugas; admin dapat menonaktifkan atau mengganti. Tindakan delegasi berbunyi “oleh [petugas] atas nama [jabatan]”; kepala tingkat menerima notifikasi keputusan. [hlm. 3-4]
 
-[U, D-18] Implementasikan **jabatan sebagai entitas permanen** dan petugas sebagai identitas login individual yang mempunyai mandat utama/cadangan/delegasi. Ini menjaga atribusi saat pergantian pemegang jabatan. Jangan menyelesaikannya dengan berbagi satu password antarpersonel.
+[U, D-18: model disetujui pengguna 30 Oktober 2026] Implementasikan **jabatan sebagai entitas permanen** dan petugas sebagai identitas login individual yang mempunyai mandat utama/cadangan/delegasi. Ini menjaga atribusi saat pergantian pemegang jabatan. Jangan menyelesaikannya dengan berbagi satu password antarpersonel.
 
 Pemilihan peran saat pendaftaran adalah **permohonan peran**, bukan pemberian hak istimewa otomatis. Unggah SK saja tidak cukup; admin harus memverifikasi mandat, wilayah, dan tanggal berlaku.
 
@@ -957,7 +957,7 @@ Sebelum pitch/pilot, handbook menyarankan pengujian dengan RT, RW, dan staf kelu
 
 ## 16. Daftar keputusan tertunda
 
-**Status seluruh baris: BELUM DISETUJUI.** Kolom usulan membantu pembahasan, bukan izin menerapkan kebijakan nyata. Keputusan yang berdampak pada uang, kelulusan, privasi, dan kewenangan tidak boleh diberi default diam-diam.
+**Status: belum disetujui, kecuali bagian model identitas D-18 yang disetujui pengguna pada 30 Oktober 2026.** Akun pribadi, pendaftaran warga mandiri, penugasan hak petugas oleh pengelola, dan pemisahan jabatan dari pemegang telah disetujui. Rincian D-18 lainnya dan seluruh keputusan lain tetap memerlukan pembahasan. Kolom usulan bukan izin menerapkan kebijakan nyata. Keputusan uang, kelulusan, privasi, dan kewenangan tidak boleh diberi default diam-diam.
 
 | ID | Keputusan dan alasan | Usulan untuk dibahas | Menghambat |
 |---|---|---|---|
@@ -978,7 +978,7 @@ Sebelum pitch/pilot, handbook menyarankan pengujian dengan RT, RW, dan staf kelu
 | D-15 | Awal masa perawatan, biaya dan kewajiban pascaperawatan, penerima dan serah terima | Masa mulai dari serah terima; jangan menagih penerima otomatis | Distribusi dan pemeliharaan nyata |
 | D-16 | Passport publik setelah tahap 7 atau etalase tahap 10; publikasi gagal; moderasi | Passport dapat diverifikasi setelah tahap 7, etalase setelah distribusi; pelajaran gagal diberi label | Kebijakan publikasi |
 | D-17 | Definisi konflik; konflik kelurahan/fasilitator; sanksi/blacklist dan pemulihan | Reviewer pengganti independen; sanksi oleh pejabat berwenang, bukan flag otomatis | Penanganan kasus khusus |
-| D-18 | Makna akun utama/cadangan/delegasi, auth email, multi-peran, hak anggota tim | Login individu + mandat jabatan; owner tim sebagai penanggung jawab tunggal awal | Desain auth dan delegasi lengkap |
+| D-18 | Model akun pribadi + mandat jabatan, warga daftar sendiri dan penugasan petugas berwenang telah disetujui 30 Oktober 2026. Detail auth, multi-peran, serta hak anggota tim belum seluruhnya diputuskan | Milestone awal memakai email/password; Google OAuth menunggu konfigurasi. Owner tim dan lifecycle administrasi lengkap tetap perlu pembahasan | Model identitas tidak lagi menghambat fondasi; delegasi/admin UI lengkap tetap milestone berikutnya |
 | D-19 | Jenis tanda tangan digital dan siapa penerbit sah | Acknowledgement login untuk demo berlabel simulasi; TTE operasional ditentukan pengelola | Klaim verifikasi resmi |
 | D-20 | Bentuk reward/sertifikat dan penerbit | Penghargaan penyelesaian non-tunai; tidak bergantung rating | Fitur reward operasional |
 | D-21 | Verifikasi OPD/industri dan tindak lanjut minat pilot; kontak CS | Form publik dengan kontak privat dan triase pengelola | Penanganan minat nyata |

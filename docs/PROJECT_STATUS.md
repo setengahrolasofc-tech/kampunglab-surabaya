@@ -2,7 +2,7 @@
 
 Tanggal pembaruan: 30 Oktober 2026.
 
-## Milestone saat ini: fondasi Next.js dan konfigurasi Supabase
+## Milestone saat ini: akun pribadi dan fondasi mandat jabatan
 
 Tersedia:
 
@@ -14,16 +14,22 @@ Tersedia:
 - Script lint, typecheck, dan build.
 - Proyek Supabase `kampunglab-surabaya` pada koneksi SetengahRolasOfc, organisasi `setengahrolasofc-tech's Org`, region Singapore.
 - Template environment tanpa key asli, factory SDK publik stateless yang belum dipakai halaman, script pemeriksaan koneksi, dan tes validasi konfigurasi.
+- Model akun pribadi + mandat jabatan disetujui pengguna (bagian D-18).
+- Daftar/masuk email-password, callback PKCE, permintaan reset password, ubah password, dan keluar akun.
+- Dashboard terlindungi, profil sendiri, nama tampilan dapat diubah, serta daftar mandat/peran aktif dari database.
+- Lima tabel public dengan RLS (profiles, territories, offices, office_mandates, platform_role_grants), audit privat, dan dua migrasi yang sudah diterapkan. Tipe TypeScript dihasilkan dari schema nyata.
+- Pembatasan penulisan kolom profil, audit privat, dan exclusion constraints untuk periode mandat.
 
 Belum diimplementasikan:
 
-- Supabase Auth, profil wilayah, akun jabatan, dan delegasi.
+- Google OAuth, UI admin pemberian/pencabutan mandat, unggah SK, serta master wilayah resmi. Struktur mandat ada, workflow administratif lengkap belum dibangun.
 - Pengajuan, RAB, review RT/RW/kelurahan, serta panel.
-- Schema database, policy RLS/Storage, dan migrasi.
+- Schema modul pengajuan/dana/uji, policy Storage, dan bucket berkas.
 - Pencatatan dana, checkpoint, misi, consent, serta bukti uji.
 - Passport/QR, LPJ, distribusi, etalase data, minat pilot, dan banding.
 - Scheduler, email, dan audit operasional.
 - Hosting/deployment Vercel.
+- Penetapan admin pertama; tidak ada pengguna yang otomatis memperoleh hak tersebut.
 
 Tidak ada angka statistik, transaksi, akun jabatan, atau hasil uji fiktif yang disajikan sebagai data nyata.
 
@@ -35,16 +41,22 @@ Status pemeriksaan diperbarui setelah pemeriksaan selesai. Keberadaan script pem
 - Typecheck: lulus (`npm run typecheck`).
 - Build produksi: lulus (`npm run build`), halaman informasi berhasil diprerender.
 - Audit dependency produksi: `npm audit --omit=dev` melaporkan 0 kerentanan pada saat pemeriksaan; bukan jaminan keamanan seluruh sistem.
-- Tes konfigurasi: 4/4 lulus (`npm test`).
+- Tes unit: 10/10 lulus (`npm test`), mencakup konfigurasi dan validasi Auth/redirect/masa mandat.
 - Pemeriksaan koneksi HTTP: lulus untuk Auth JWKS dan Auth Settings (`npm run check:supabase`), memakai publishable key tanpa sesi pengguna.
-- Pemeriksaan database melalui koneksi pengelola: `SELECT 1` mengembalikan `connection_ok: 1`; ini tidak membuktikan akses pengguna/RLS.
+- SQL isolasi/constraint: `supabase/tests/identity_access.sql` lulus dan fixture di-rollback; promosi mandiri, akses lintas pengguna, perubahan ownership, audit, serta mandat tumpang-tindih ditolak.
+- HTTP non-browser: 11 skenario lulus pada hasil build, termasuk login/cookie SSR, guard dashboard, edit profil, cache private/no-store, penolakan Origin asing, query Data API bertoken, blok promosi mandiri, logout, dan callback aman.
 - Browser/UAT manusia: pengguna mengonfirmasi beranda tampil di localhost; UAT responsif, keyboard, dan alur bisnis belum dilakukan.
-- Supabase: status `ACTIVE_HEALTHY`; inspeksi schema `public` mengembalikan nol tabel aplikasi. Security advisors tidak melaporkan temuan saat pemeriksaan awal.
-- Root metadata Data API menolak key publik; pemeriksaan koneksi memakai endpoint Auth publik. Query aplikasi, login/sesi, RLS, dan Storage belum diverifikasi.
+- Database kini memiliki lima tabel aplikasi dengan RLS aktif. Root metadata Data API tetap membutuhkan privilege tambahan; query tabel menggunakan sesi pengguna telah diuji tanpa secret key.
+- Security advisors: peringatan proteksi password bocor belum aktif. Performance advisors: tiga index FK belum digunakan pada database baru. Tautan remediasi ada di AUTH_UAT.md.
+- Pengiriman/pembukaan email konfirmasi dan recovery nyata, Google, refresh token dalam browser setelah masa kedaluwarsa, serta UAT visual akun belum diverifikasi.
 - Deployment Vercel: belum dilakukan.
 
 ## Milestone berikutnya
 
-Selesaikan keputusan desain yang diperlukan untuk identitas dan wilayah sebelum membuat schema/auth. Target Supabase sudah dipilih: project ref `zxfaotlqldfrlccahebw`. Baca matriks keputusan pada PRD; seluruh 24 keputusan tidak harus dijawab hanya untuk menjalankan halaman informasi.
+Jalankan UAT email dan dashboard memakai akun pemilik. Setelah identitas admin pertama diverifikasi, lanjutkan penugasan/administrasi dan master wilayah sebelum modul pengajuan. Target Supabase: project ref `zxfaotlqldfrlccahebw`. Keputusan produk lain pada PRD tetap berlaku sesuai statusnya.
 
 Hak akses jabatan berhubungan dengan identitas, mandat, wilayah, waktu berlaku, dan objek yang diproses. KampungLab tidak melakukan transfer uang; persetujuan dan realisasi dana dipisahkan ketika modul tersebut dibangun.
+
+## Pembersihan QA
+
+Fixture SQL seluruhnya di-rollback. Satu akun sintetis untuk uji HTTP telah dinonaktifkan/soft-delete, password acaknya diganti, dan seluruh sesi tersisanya dibuat kedaluwarsa (0 sesi yang belum kedaluwarsa). File kredensial QA lokal sudah dihapus. Penghapusan permanen melalui execute_sql tertahan karena konfirmasi bawaan Supabase dua kali kedaluwarsa; baris akun/profil QA berlabel `Synthetic HTTP QA (disabled)` dan jejak pseudonimnya masih tersimpan. Tidak ada jabatan/role program yang diberikan kepada akun tersebut. Pengelola dapat menghapus permanen lewat jalur administrasi berwenang saat konfirmasi tersedia; jangan menganggap baris ini sebagai warga program.

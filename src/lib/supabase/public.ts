@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { getSupabasePublicConfig } from "./config.mjs";
+import type { Database } from "./database.types";
 
 /**
  * Stateless, unauthenticated client for future public-data reads only.
@@ -12,7 +13,7 @@ export function createPublicSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   );
 
-  return createClient(url, publishableKey, {
+  return createClient<Database>(url, publishableKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

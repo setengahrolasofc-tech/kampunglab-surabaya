@@ -15,6 +15,7 @@ export function SiteHeader() {
         <nav aria-label="Navigasi utama" className="flex items-center gap-6 text-sm font-semibold">
           <Link href="/#alur" className="rounded-sm hover:text-emerald-700">Alur program</Link>
           <Link href="/panduan" className="rounded-sm hover:text-emerald-700">Panduan</Link>
+          <Link href="/dashboard" className="rounded-sm hover:text-emerald-700">Akun</Link>
         </nav>
       </div>
     </header>
