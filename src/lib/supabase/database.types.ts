@@ -86,6 +86,7 @@ export type Database = {
       }
       innovation_simulations: {
         Row: {
+          attempt: number
           document: Json
           draft_id: string
           draft_revision: number
@@ -93,14 +94,18 @@ export type Database = {
           kelurahan_id: string
           mode: string
           owner_id: string
+          previous_simulation_id: string | null
+          reached_stage: number
           reference: string | null
           rt_id: string
           rw_id: string
           status: string
           submitted_at: string
           title: string | null
+          workflow_version: number
         }
         Insert: {
+          attempt?: number
           document: Json
           draft_id: string
           draft_revision: number
@@ -108,14 +113,18 @@ export type Database = {
           kelurahan_id: string
           mode?: string
           owner_id: string
+          previous_simulation_id?: string | null
+          reached_stage?: number
           reference?: string | null
           rt_id: string
           rw_id: string
           status?: string
           submitted_at?: string
           title?: string | null
+          workflow_version?: number
         }
         Update: {
+          attempt?: number
           document?: Json
           draft_id?: string
           draft_revision?: number
@@ -123,18 +132,21 @@ export type Database = {
           kelurahan_id?: string
           mode?: string
           owner_id?: string
+          previous_simulation_id?: string | null
+          reached_stage?: number
           reference?: string | null
           rt_id?: string
           rw_id?: string
           status?: string
           submitted_at?: string
           title?: string | null
+          workflow_version?: number
         }
         Relationships: [
           {
             foreignKeyName: "innovation_simulations_draft_id_fkey"
             columns: ["draft_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "innovation_drafts"
             referencedColumns: ["id"]
           },
@@ -150,6 +162,13 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "innovation_simulations_previous_simulation_id_fkey"
+            columns: ["previous_simulation_id"]
+            isOneToOne: true
+            referencedRelation: "innovation_simulations"
             referencedColumns: ["id"]
           },
           {
@@ -383,6 +402,92 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "territories"
             referencedColumns: ["id", "kind"]
+          },
+        ]
+      }
+      simulation_review_events: {
+        Row: {
+          actor_id: string
+          actor_name: string
+          body: string
+          checks: Json
+          created_at: string
+          expected_version: number
+          from_status: string
+          id: string
+          mandate_id: string
+          office_id: string
+          office_name: string
+          outcome: string
+          request_id: string
+          simulation_id: string
+          stage: string
+          to_status: string
+        }
+        Insert: {
+          actor_id: string
+          actor_name: string
+          body: string
+          checks: Json
+          created_at?: string
+          expected_version: number
+          from_status: string
+          id?: string
+          mandate_id: string
+          office_id: string
+          office_name: string
+          outcome: string
+          request_id: string
+          simulation_id: string
+          stage: string
+          to_status: string
+        }
+        Update: {
+          actor_id?: string
+          actor_name?: string
+          body?: string
+          checks?: Json
+          created_at?: string
+          expected_version?: number
+          from_status?: string
+          id?: string
+          mandate_id?: string
+          office_id?: string
+          office_name?: string
+          outcome?: string
+          request_id?: string
+          simulation_id?: string
+          stage?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_review_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_review_events_mandate_id_fkey"
+            columns: ["mandate_id"]
+            isOneToOne: false
+            referencedRelation: "office_mandates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_review_events_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_review_events_simulation_id_fkey"
+            columns: ["simulation_id"]
+            isOneToOne: false
+            referencedRelation: "innovation_simulations"
+            referencedColumns: ["id"]
           },
         ]
       }

@@ -2,7 +2,7 @@
 
 Website tata kelola inovasi warga: pengajuan, verifikasi berjenjang, uji warga, dan Evidence Passport. KampungLab mencatat keputusan dan realisasi dana; transfer uang dilakukan di luar platform oleh pihak berwenang.
 
-**Status saat ini: akun pribadi dan fondasi mandat jabatan.** Daftar/masuk email-password, callback konfirmasi, pemulihan kata sandi, dashboard pribadi, edit nama, dan keluar akun telah diimplementasikan. Database profil, wilayah, jabatan, mandat, role grant, serta audit privat telah dibuat dengan RLS. Pengajuan, penilaian, dana, dan uji warga belum diimplementasikan. Google OAuth, UI pengelolaan mandat, dan deployment Vercel masih pekerjaan berikutnya. UAT email dan tampilan akun belum selesai.
+**Status saat ini: draf pribadi dan alur pemeriksaan DEMO RT → RW → kelurahan.** Akun, admin/mandat, domisili, editor empat langkah, salinan simulasi, keputusan RT/RW beralasan, serta kirim ulang revisi telah dibangun. Kelurahan dapat membaca rekomendasi; keputusan akhir program, panel, dana, uji warga, Google OAuth, dan deployment Vercel belum tersedia. Lint, tipe, dan build diperiksa; tes alur keputusan baru serta UAT ditunda atas permintaan pengguna. Lihat status proyek untuk batas verifikasi.
 
 ## Teknologi
 
@@ -68,7 +68,8 @@ AGENTS.md            Petunjuk pengembangan untuk AI
 - [UAT akun](docs/AUTH_UAT.md): langkah pengujian email, sesi, profil, dan batas verifikasi.
 - [Admin dan akses](docs/ADMIN_UAT.md): penetapan peran/mandat, wilayah/jabatan, pencabutan, audit, dan verifikasi.
 - [Profil wilayah dan draf](docs/DRAFTS_UAT.md): pengisian empat langkah, RAB sementara, simpan/edit, dan batas akses pribadi.
-- [Simulasi dan antrean RT](docs/SIMULATION_UAT.md): pengiriman salinan DEMO, pembacaan sesuai mandat, catatan awal RT, dan persiapan dua akun untuk UAT.
+- [Simulasi dan antrean petugas](docs/SIMULATION_UAT.md): salinan DEMO, keputusan RT/RW, revisi, akses kelurahan, dan pemeriksaan yang masih ditunda.
+- [Aturan alur DEMO](docs/DEMO_REVIEW_WORKFLOW.md): status, versi, kewenangan, riwayat, dan batas terhadap kebijakan operasional.
 
 Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijakan. Jangan menampilkannya sebagai ketetapan resmi Pemkot. Keputusan `D-01` sampai `D-24` pada PRD belum otomatis disetujui.
 

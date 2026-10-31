@@ -3,19 +3,24 @@ import Link from "next/link";
 import { useActionState,useState } from "react";
 import { submitSimulation,saveRtNote } from "@/app/simulasi/actions";
 import type { SimulationFormState,SimulationRef } from "@/lib/simulations/types";
+import {statusLabels} from "@/lib/simulations/workflow";
 const button="min-h-12 rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50";
 const input="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 aria-invalid:border-red-600";
 export function SimulationSubmitCard({draftId,revision,disabled,missing,existing}:{draftId:string;revision:number;disabled:boolean;missing:string[];existing:SimulationRef|null}){
   const [acknowledged,setAcknowledged]=useState(false);
   const [state,action,pending]=useActionState<SimulationFormState,FormData>(submitSimulation,{});
+  const resubmit=existing?.status==="revision_requested";
+  const unchanged=Boolean(resubmit&&existing&&revision<=existing.draft_revision);
   return <section aria-labelledby="simulation-submit-title" className="mt-7 rounded-2xl border border-emerald-300 bg-emerald-50 p-6">
     <p className="text-xs font-bold tracking-widest text-emerald-800">SIMULASI DEMO</p><h2 id="simulation-submit-title" className="mt-3 text-xl font-bold">Coba pengiriman ke antrean RT</h2>
-    {existing?<><p className="mt-4 leading-7 text-slate-700">Salinan draf revisi {existing.draft_revision} sudah dikirim untuk simulasi. Perubahan draf setelahnya tidak mengubah salinan itu. Pengiriman ulang belum diaktifkan.</p><Link href={`/simulasi/${existing.id}`} className="mt-5 inline-block font-semibold text-emerald-900 underline">Lihat salinan dan catatan RT</Link></>:<>
-      <p className="mt-4 leading-7 text-slate-700">Kirim satu salinan dari versi yang sudah disimpan. Salinan akan dibagikan kepada petugas dengan mandat utama RT yang aktif pada wilayah DEMO tersebut. Tahap ini hanya mencatat pemeriksaan awal; persetujuan program, lampiran, duplikasi, dan keputusan anggaran belum dijalankan.</p>
+    {existing?<><p className="mt-4 leading-7 text-slate-700">Putaran {existing.attempt} · {statusLabels[existing.status]??existing.status}. Salinan draf revisi {existing.draft_revision} tetap tersimpan; perubahan draf tidak mengubah salinan tersebut.</p><Link href={`/simulasi/${existing.id}`} className="mt-5 inline-block font-semibold text-emerald-900 underline">Lihat salinan dan riwayat pemeriksaan</Link></>:null}
+    {!existing||resubmit?<>
+      <p className="mt-4 leading-7 text-slate-700">{resubmit?"Perbaiki draf sesuai catatan, lalu kirim salinan baru. Untuk simulasi DEMO, seluruh pemeriksaan dimulai kembali dari RT. Salinan dan alasan revisi sebelumnya tetap tersimpan.":"Kirim salinan dari versi yang sudah disimpan. Salinan dibagikan kepada RT berwenang, lalu RW dan kelurahan ketika diteruskan. Keputusan ini hanya berlaku dalam simulasi DEMO."} Persetujuan program dan anggaran belum dijalankan.</p>
       {missing.length?<div className="mt-4 text-sm text-amber-950"><p className="font-semibold">Lengkapi terlebih dahulu:</p><ul className="mt-2 list-inside list-disc">{missing.map(label=><li key={label}>{label}</li>)}</ul></div>:null}
       {disabled?<p className="mt-4 text-sm font-semibold text-amber-900">Simpan seluruh perubahan draf sebelum mengirim simulasi.</p>:null}
-      <form action={action} noValidate className="mt-5 space-y-4"><input type="hidden" name="draft_id" value={draftId}/><input type="hidden" name="revision" value={revision}/>{state.error?<p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-900">{state.error}</p>:null}<fieldset disabled={disabled||missing.length>0||pending} className="space-y-4"><legend className="sr-only">Persetujuan berbagi salinan simulasi</legend><label className="flex items-start gap-3 text-sm leading-7"><input type="checkbox" name="acknowledged" checked={acknowledged} onChange={e=>setAcknowledged(e.target.checked)} className="mt-1 size-5 shrink-0 accent-emerald-900"/><span>Saya memahami ini simulasi DEMO dan menyetujui pembagian salinan yang tersimpan kepada petugas RT berwenang untuk pemeriksaan awal.</span></label><button type="submit" disabled={!acknowledged} className={button}>{pending?"Mengirim simulasi…":"Kirim simulasi ke antrean RT"}</button></fieldset></form>
-    </>}
+      {unchanged?<p className="mt-4 text-sm font-semibold text-amber-900">Ubah dan simpan isi draf sebelum kirim ulang.</p>:null}
+      <form action={action} noValidate className="mt-5 space-y-4"><input type="hidden" name="draft_id" value={draftId}/><input type="hidden" name="revision" value={revision}/>{resubmit&&existing?<input type="hidden" name="previous_id" value={existing.id}/>:null}{state.error?<p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-900">{state.error}</p>:null}<fieldset disabled={disabled||unchanged||missing.length>0||pending} className="space-y-4"><legend className="sr-only">Persetujuan berbagi salinan simulasi</legend><label className="flex items-start gap-3 text-sm leading-7"><input type="checkbox" name="acknowledged" checked={acknowledged} onChange={e=>setAcknowledged(e.target.checked)} className="mt-1 size-5 shrink-0 accent-emerald-900"/><span>Saya memahami ini simulasi DEMO dan menyetujui pembagian salinan tersimpan kepada RT, RW, dan kelurahan berwenang sesuai tahap pemeriksaan.</span></label><button type="submit" disabled={!acknowledged} className={button}>{pending?"Mengirim simulasi…":resubmit?"Kirim salinan revisi ke RT":"Kirim simulasi ke antrean RT"}</button></fieldset></form>
+    </>:null}
   </section>;
 }
 export function RtNoteForm({simulationId,requestId}:{simulationId:string;requestId:string}){
@@ -30,7 +35,7 @@ export function RtNoteForm({simulationId,requestId}:{simulationId:string;request
       <label className="flex items-start gap-3 text-sm leading-7"><input type="checkbox" name="domicile_checked" disabled={conflict==="family"} checked={domicile} onChange={e=>setDomicile(e.target.checked)} className="mt-1 size-5 shrink-0 accent-emerald-900"/><span>Saya telah memeriksa kesesuaian domisili pada salinan ini.</span></label>
       <label className="flex items-start gap-3 text-sm leading-7"><input type="checkbox" name="problem_checked" disabled={conflict==="family"} checked={problem} onChange={e=>setProblem(e.target.checked)} className="mt-1 size-5 shrink-0 accent-emerald-900"/><span>Saya telah meninjau masalah nyata yang dijelaskan.</span></label>
       <div><label htmlFor="note-body" className="mb-2 block text-sm font-semibold">Catatan hasil pemeriksaan atau konflik</label><textarea id="note-body" name="body" value={body} onChange={e=>setBody(e.target.value)} rows={5} minLength={3} maxLength={4000} aria-invalid={Boolean(state.errors?.body)} aria-describedby={state.errors?.body?"note-body-error":undefined} className={input}/>{state.errors?.body?<p id="note-body-error" role="alert" className="mt-2 text-sm text-red-800">{state.errors.body}</p>:null}</div>
-      <p className="text-sm leading-6 text-slate-600">Catatan terlihat oleh pengaju dan petugas RT berwenang. Penyimpanan catatan tidak menyetujui, menolak, atau memindahkan pengajuan ke RW.</p>
+      <p className="text-sm leading-6 text-slate-600">Catatan terlihat oleh pengaju dan petugas berwenang sesuai tahap pemeriksaan. Penyimpanan catatan tidak memindahkan pengajuan ke RW.</p>
       <button type="submit" className={button}>{pending?"Menyimpan…":"Simpan catatan awal RT"}</button>
     </fieldset>
   </form>;

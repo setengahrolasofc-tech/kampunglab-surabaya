@@ -1,50 +1,38 @@
-# Simulasi pengiriman dan catatan awal RT
+# Simulasi dan antrean pemeriksaan
 
-Milestone 31 Oktober 2026 meneruskan prototipe menjadi **simulasi DEMO**: satu salinan draf tersimpan, antrean pembacaan RT sesuai mandat, dan catatan pemeriksaan awal. Ini tidak mengaktifkan pengiriman resmi, keputusan setuju/revisi/tolak, perpindahan ke RW, penilaian panel, lampiran, duplikasi, atau persetujuan dana. Keputusan D-xx yang belum disepakati tetap belum disahkan.
+Pembaruan 31 Oktober 2026. **Tes alur baru dan UAT ditunda atas permintaan pengguna.** Panduan ini merupakan petunjuk penggunaan dan daftar pemeriksaan untuk nanti, bukan laporan lulus. Batas teknis/status ada di [aturan alur DEMO](DEMO_REVIEW_WORKFLOW.md) dan [status proyek](PROJECT_STATUS.md).
 
-## Alur pengaju
+## Menggunakan alur yang dibangun
 
-1. Tarik kode terbaru dan jalankan server. Buka `/pengajuan`, lengkapi data inovasi/tim, PRD, RAB, dan pernyataan karya sendiri.
-2. Gunakan tema DEMO aktif dan hierarki wilayah yang kode kelurahan/RW/RT-nya berawalan DEMO. Pilihan yang disediakan milestone sebelumnya sudah memenuhi syarat latihan ini.
-3. Simpan seluruh langkah. Pada langkah 4, baca penjelasan berbagi salinan kepada petugas RT, centang persetujuan, lalu klik **Kirim simulasi ke antrean RT**. Tombol dinonaktifkan selama ada perubahan belum disimpan, isian pokok belum lengkap, atau pengiriman sedang berjalan. Persetujuan diulang setelah revisi draf berubah.
-4. Halaman `/simulasi/[id]` menampilkan referensi berawalan DEMO, revisi asal, waktu, isi salinan, status menunggu RT, dan catatan petugas. Referensi itu bukan nomor pengajuan resmi.
-5. Edit draf asal lalu simpan. Salinan yang dibagikan tetap versi sebelumnya; draf live tidak dapat dibaca petugas. Simulasi hanya satu salinan per draf pada tahap ini; pengiriman ulang/amendment menunggu desain versi dan keputusan D-07.
-6. Jika belum ada mandat utama RT aktif yang dapat memeriksa, halaman menjelaskan kebutuhan penetapan. Pengaju yang sekaligus pemegang RT tidak dihitung sebagai pemeriksa bagi dirinya sendiri. Proses tidak melewati RT otomatis.
+1. Jalankan kode terbaru. Di `/pengajuan`, lengkapi tema DEMO aktif dan hierarki wilayah dengan kode kelurahan/RW/RT berawalan DEMO, data inovasi/tim, PRD, RAB, dan pernyataan keaslian.
+2. Simpan semua perubahan, buka langkah 4, lalu konfirmasikan pembagian salinan DEMO kepada petugas berwenang sesuai tahap. Kirim simulasi; referensinya berawalan DEMO dan bukan nomor resmi.
+3. Petugas utama RT membuka `/antrean/rt`, membaca salinan, mengisi deklarasi, memilih tindakan, checklist, dan alasan. Rekomendasi meneruskan ke RW; revisi/penolakan wajib alasan. Catatan awal tanpa keputusan juga tetap tersedia.
+4. Sesudah rekomendasi RT, petugas utama RW membuka `/antrean/rw`. Tinjauan kelayakan, duplikasi, dan RAB dilakukan manusia; tidak ada validasi dana atau pencarian duplikasi otomatis. Rekomendasi diteruskan ke kelurahan.
+5. Kelurahan membuka `/antrean/kelurahan` untuk membaca salinan beserta rekomendasi. Keputusan akhir program/panel/dana belum dibuka.
+6. Bila diminta revisi, pengaju membaca alasan, mengubah dan menyimpan draf, lalu kirim salinan revisi dari langkah 4. Isi harus berubah. Referensi/putaran baru dimulai dari RT untuk DEMO; salinan dan riwayat sebelumnya tetap tersimpan. Ini bukan pengesahan aturan operasional D-07.
+7. Pengaju melihat status putaran terbaru di Pengajuan Saya dan dapat mengikuti tautan putaran sebelumnya/berikutnya. Draf live tetap pribadi; perubahan draf tidak mengubah isi salinan yang sedang ditinjau.
 
-## Menyiapkan UAT RT dengan dua akun
+## Menyiapkan akun untuk pemeriksaan nanti
 
-- Gunakan akun pribadi pengaju dan akun pribadi kedua untuk petugas uji. Keduanya mendaftar/mengonfirmasi email sendiri. Admin program tidak otomatis menjadi petugas RT.
-- Admin membuka pengelolaan wilayah/jabatan, membuat jabatan **DEMO** untuk RT DEMO yang sesuai, lalu memberi akun kedua **mandat utama** pada jabatan tersebut. Isi referensi penetapan uji yang jelas berlabel DEMO, verifikasi identitas, dan pilih masa berlaku yang sesuai. Jangan memasukkan pejabat atau SK palsu sebagai penetapan resmi.
-- Akun kedua membuka **Antrean simulasi RT** dari dashboard atau `/antrean/rt`. Hanya salinan pengaju lain dalam RT mandat utamanya yang terlihat. Cadangan/delegasi belum diberi aktivasi otomatis karena kebijakan D-18 belum lengkap.
-- Buka salinan, deklarasikan hubungan keluarga/konflik, catat pemeriksaan domisili dan masalah bila sudah dilakukan, serta tulis catatan. Saat melaporkan konflik, checklist positif tidak diisi. Catatan dapat menjelaskan kebutuhan petugas pengganti; tidak ada eskalasi otomatis atau keputusan substansi.
-- Pengaju membuka kembali salinan untuk membaca catatan. Nama tampilan, jabatan, mandat, aktor, dan waktu dicatat saat penulisan; perubahan pemegang jabatan tidak memindahkan atribusi catatan lama.
-- Cabut/habiskan mandat RT di admin, lalu coba menulis dari halaman lama akun kedua. Permintaan baru harus ditolak. Pengaju tetap dapat membaca catatan historis miliknya.
+- Gunakan akun pribadi terkonfirmasi yang berbeda untuk pengaju dan petugas. Penetapan mandat dilakukan admin yang berwenang pada wilayah/jabatan DEMO yang sesuai, dengan referensi latihan dan masa berlaku yang jelas. Jangan membuat SK atau pejabat palsu sebagai penetapan resmi.
+- Untuk alur lengkap, gunakan pemeriksa RT dan RW yang berbeda. Pengaju tidak memeriksa dirinya sendiri; akun yang sudah merekomendasikan putaran yang sama tidak memutuskan tahap berikutnya. Akun admin program tidak otomatis menjadi pemeriksa.
+- Petugas memerlukan mandat **utama** aktif pada wilayah dan tingkat yang tepat. Cadangan/delegasi belum mendapat aktivasi otomatis. Tautan antrean dashboard mengikuti kemampuan tersebut.
+- Konflik harus dicatat tanpa keputusan substansi. Pengelola menyiapkan petugas pengganti independen melalui pengelolaan mandat; tidak ada pelompatan, pembatalan konflik, atau sanksi otomatis. Kebijakan D-17/D-18 tetap terbuka.
 
-## UAT manusia lain
+## Pemeriksaan yang belum dijalankan untuk fitur keputusan
 
-- Pengiriman tanpa persetujuan, dengan isian kurang, revisi sumber lama, tema non-DEMO/nonaktif, atau wilayah di luar hierarki DEMO harus ditolak.
-- Klik ulang/retry setelah pengiriman harus kembali ke salinan yang sama, bukan membuat salinan ganda.
-- Akun warga lain, admin tanpa mandat RT terkait, petugas RT lain, cadangan/delegasi, serta pengguna tanpa sesi tidak boleh membaca salinan.
-- Pengaju yang juga mempunyai mandat utama RT tetap tidak dapat menulis catatan bagi salinannya sendiri.
-- Periksa judul/isi yang berubah di draf asal; salinan harus mempertahankan isi pada revisi yang dikirim.
-- Periksa catatan: pengiriman ulang request yang sama tidak menggandakan baris. Jika isi berubah tetapi request yang sama sudah diterima, aplikasi memberi konflik dan mempertahankan teks lokal; buka riwayat di tab baru sebelum melanjutkan.
-- Uji mobile 320/768 px, keyboard, checkbox persetujuan, error, status pending, ringkasan panjang, dan catatan multiline. Coding agent tidak mengoperasikan browser/DOM; pengujian HTTP tidak membuktikan hidrasi atau interaksi visual sudah lulus.
+| Area | Yang perlu diperiksa nanti |
+| --- | --- |
+| RT → RW → kelurahan | Satu tahap per rekomendasi, checklist wajib, alasan dan atribusi tersimpan, kelurahan tidak punya aksi final |
+| Revisi/penolakan | Alasan terlihat pengaju; hanya revisi dapat dikirim ulang; isi lama tetap; putaran baru mulai RT |
+| Idempotensi/konkurensi | Retry persis sama tidak menggandakan; request berubah dan versi lama ditolak; dua keputusan tidak saling menimpa |
+| Scope akses | Warga lain/admin tanpa mandat/RT lain/cadangan/delegasi ditolak; RW/kelurahan belum membaca sebelum tahapnya |
+| Waktu dan sesi | Halaman lama setelah mandat dicabut/habis, sesi keluar, atau akun nonaktif tidak membuka akses baru |
+| Konflik/independensi | Laporan tidak memindahkan antrean; pelapor dan pemeriksa tahap sebelumnya tidak memutuskan substansi |
+| Tampilan/interaksi | Login akun terpisah, hidrasi form, input tetap setelah error, status pending, keyboard, layar 320/768 px |
 
-## Model akses dan data
+Tidak ada tes unit/SQL/HTTP untuk keputusan atau kirim ulang revisi yang dijalankan pada milestone ini. Tes milestone sebelumnya (26 unit, SQL rollback, 14 skenario HTTP pengaju) hanya mencakup keadaan sebelum perluasan alur; jangan menafsirkannya sebagai tes alur baru. Script/fixture lama masih disimpan sebagai riwayat dan perlu penyesuaian sebelum regresi penuh.
 
-- `innovation_simulations` berisi mode DEMO, referensi, pemilik, ID/revisi draf, dokumen yang disalin, hierarki wilayah, dan waktu. Status hanya `waiting_rt`; tidak ada operasi persetujuan atau dana.
-- `simulation_rt_notes` hanya menambahkan catatan pemeriksaan awal. Aktor, jabatan, mandat, dan nama tampilan diisi database dari sesi/penugasan terkini, bukan dari field browser.
-- Tabel public memiliki RLS dan hanya diberi SELECT kepada authenticated. INSERT/UPDATE/DELETE langsung ditolak. Pemilik dan RT yang saat ini berwenang dapat membaca salinan/riwayat; admin global tidak mendapat akses isi secara otomatis.
-- Snapshot serta catatan tidak dapat ditimpa melalui aplikasi. Draf tetap pribadi dan terpisah. Pemeliharaan database berwenang tetap diaudit sebagai tindakan koneksi database, tanpa mengatasnamakan pengguna.
-- RPC public adalah SECURITY INVOKER; implementasi definer ada di private dengan search_path kosong, EXECUTE terbatas, validasi sesi/akun, ownership, jenis mandat, jabatan aktif, wilayah, dan waktu berlaku. Penulisan catatan memakai lock transaksi yang sama dengan perubahan akses admin lalu memeriksa ulang kewenangan.
-- Sesi yang tidak berlaku gagal membuka data. Saat akun pengaju dinonaktifkan, salinan serta catatannya tidak dibuka kepada petugas; baris/audit tidak dihapus otomatis. Ini pembatasan privasi prototipe, bukan penetapan retensi operasional D-13.
-- Audit privat hanya merekam aktor, role koneksi, objek, tindakan, dan waktu; isi dokumen/catatan tidak diduplikasi ke audit. Tidak ada wallet, notifikasi email otomatis, atau tanda tangan elektronik resmi.
-- Daftar antrean dipaginasi 20 per halaman. Riwayat catatan ditampilkan seluruhnya pada prototipe; pemuatan bertahap untuk volume besar masih pekerjaan lanjutan.
+Lint, TypeScript, build, serta pembacaan metadata/advisor dilaporkan terpisah. Riwayat keputusan baru tidak dapat dibaca langsung dari tabel oleh authenticated; RPC details memeriksa sesi/scope salinan sebelum mengembalikan riwayat. RLS dan kompilasi bukan bukti pengujian akses dengan akun petugas sudah lulus.
 
-## Verifikasi
-
-- `npm test`: kelengkapan minimum simulasi, format draf, deklarasi konflik, catatan, dan pengabaian field aktor/mandat palsu.
-- `supabase/tests/simulation_workflow.sql`: data sintetis dengan BEGIN/ROLLBACK. Mencakup submit idempoten, revisi stale, snapshot tidak berubah, non-DEMO ditolak, scope RT, admin/cadangan ditolak, self-review, mandat berakhir/dicabut, akun pengaju nonaktif, catatan positif, deklarasi konflik, atribusi, replay request, mutasi langsung dan audit.
-- `scripts/verify-simulation-http.mjs`: hasil build produksi tanpa browser memakai file privat `AUTH_TEST_FIXTURE_FILE` untuk akun sintetis `@example.invalid`. ID katalog DEMO dan kredensial fixture tidak ditaruh di Git. Script menyiapkan draf lengkap, mengirim melalui Server Action, membaca snapshot/list, mengubah draf sumber, serta menguji penolakan dan logout. Bila semua draf fixture sudah memiliki simulasi, script membuat draf latihan baru agar pengujian dapat diulang tanpa menimpa snapshot lama.
-- Jalur positif petugas/catatan telah diuji pada SQL rollback; UAT antarmuka petugas dengan akun kedua tetap perlu dilakukan manusia. Akun HTTP uji tidak diberi mandat RT atau hak admin.
-- Hasil aktual dan pembersihan akun/draf/simulasi QA dicatat di PROJECT_STATUS.md. Lint, typecheck, serta build produksi tetap diwajibkan.
+Mode tetap DEMO. Tidak ada pengajuan resmi, lampiran, panel, persetujuan/realisasi dana, email pengingat, atau tanda tangan elektronik resmi.

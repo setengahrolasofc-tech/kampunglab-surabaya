@@ -21,3 +21,19 @@ export function validateRtNote(form) {
   if(conflict==="family"&&(domicileChecked||problemChecked))errors.conflict="Saat melaporkan konflik, simpan catatan tanpa checklist pemeriksaan.";
   return {errors,payload:{id,request_id:requestId,body,family_conflict:conflict==="family",domicile_checked:domicileChecked,problem_checked:problemChecked}};
 }
+export function validateReview(form) {
+  const get=key=>typeof form.get(key)==="string"?form.get(key).trim():"";
+  /** @type {Record<string,string>} */
+  const errors={};
+  const id=get("id"),requestId=get("request_id"),stage=get("stage"),version=get("version");
+  const outcome=get("outcome"),body=get("body"),conflict=get("conflict");
+  if(!isUuid(id)||!isUuid(requestId)||!["rt","rw"].includes(stage)||!/^(0|[1-9]\d{0,8})$/.test(version))errors.form="Muat ulang halaman sebelum mencatat keputusan simulasi.";
+  if(!["forward","revise","reject","conflict"].includes(outcome))errors.outcome="Pilih tindakan simulasi.";
+  if(body.length<3||body.length>4000||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(body))errors.body="Isi alasan atau catatan yang dapat ditindaklanjuti, 3–4.000 karakter.";
+  if(!["none","reported"].includes(conflict))errors.conflict="Isi deklarasi konflik kepentingan.";
+  if((outcome==="conflict")!==(conflict==="reported"))errors.conflict="Jika ada konflik, pilih tindakan Laporkan konflik. Keputusan substansi memerlukan petugas yang independen.";
+  const keys=stage==="rt"?["domicile","problem"]:["feasibility","duplicates","budget"];
+  const checks=Object.fromEntries(keys.map(key=>[key,outcome!=="conflict"&&get(`check_${key}`)==="on"]));
+  if(outcome==="forward"&&Object.values(checks).some(value=>!value))errors.checks="Lengkapi seluruh pemeriksaan sebelum meneruskan rekomendasi.";
+  return {errors,payload:{id,request_id:requestId,stage,version:Number(version),outcome,body,conflict,checks}};
+}
