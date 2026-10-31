@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Draf inovasi", robots: { index:false
 export default async function DraftEditor({ params }: { params: Promise<{ id: string }> }) {
   const { id }=await params;
   if(!isUuid(id)) notFound();
-  const { draft,territories,themes,simulation }=await getDraftEditor(id);
+  const { draft,territories,themes,simulation,attachmentCount,attachmentsPending }=await getDraftEditor(id);
   if(!draft) notFound();
-  return <main id="konten-utama" tabIndex={-1} className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8"><DraftWizard key={draft.id} draftId={draft.id} initialDocument={validateDraftDocument(draft.document).data} initialVersion={draft.revision} initialStep={draft.current_step} initialSavedAt={draft.updated_at} territories={territories} themes={themes} existingSimulation={simulation} /></main>;
+  return <main id="konten-utama" tabIndex={-1} className="mx-auto w-full max-w-6xl px-5 py-10 sm:px-8"><DraftWizard key={draft.id} draftId={draft.id} initialDocument={validateDraftDocument(draft.document).data} initialVersion={draft.revision} initialStep={draft.current_step} initialSavedAt={draft.updated_at} territories={territories} themes={themes} existingSimulation={simulation} attachmentRevision={draft.attachment_revision} attachmentCount={attachmentCount} attachmentsPending={attachmentsPending} /></main>;
 }

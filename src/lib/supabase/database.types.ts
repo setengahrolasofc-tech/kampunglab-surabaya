@@ -14,8 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      draft_attachments: {
+        Row: {
+          byte_size: number
+          created_at: string
+          draft_id: string
+          id: string
+          mime_type: string
+          object_path: string | null
+          original_name: string
+          owner_id: string
+          removed_at: string | null
+          request_id: string
+          sha256: string
+          storage_state: string
+        }
+        Insert: {
+          byte_size: number
+          created_at?: string
+          draft_id: string
+          id?: string
+          mime_type: string
+          object_path?: string | null
+          original_name: string
+          owner_id: string
+          removed_at?: string | null
+          request_id: string
+          sha256: string
+          storage_state?: string
+        }
+        Update: {
+          byte_size?: number
+          created_at?: string
+          draft_id?: string
+          id?: string
+          mime_type?: string
+          object_path?: string | null
+          original_name?: string
+          owner_id?: string
+          removed_at?: string | null
+          request_id?: string
+          sha256?: string
+          storage_state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "draft_attachments_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "innovation_drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "draft_attachments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       innovation_drafts: {
         Row: {
+          attachment_revision: number
           create_request_id: string
           created_at: string
           current_step: number
@@ -31,6 +92,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_revision?: number
           create_request_id: string
           created_at?: string
           current_step?: number
@@ -46,6 +108,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_revision?: number
           create_request_id?: string
           created_at?: string
           current_step?: number
@@ -86,6 +149,7 @@ export type Database = {
       }
       innovation_simulations: {
         Row: {
+          attachment_revision: number
           attempt: number
           document: Json
           draft_id: string
@@ -106,6 +170,7 @@ export type Database = {
           workflow_version: number
         }
         Insert: {
+          attachment_revision?: number
           attempt?: number
           document: Json
           draft_id: string
@@ -126,6 +191,7 @@ export type Database = {
           workflow_version?: number
         }
         Update: {
+          attachment_revision?: number
           attempt?: number
           document?: Json
           draft_id?: string
@@ -408,6 +474,42 @@ export type Database = {
           },
         ]
       }
+      simulation_attachment_links: {
+        Row: {
+          attachment_id: string
+          created_at: string
+          id: string
+          simulation_id: string
+        }
+        Insert: {
+          attachment_id: string
+          created_at?: string
+          id?: string
+          simulation_id: string
+        }
+        Update: {
+          attachment_id?: string
+          created_at?: string
+          id?: string
+          simulation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_attachment_links_attachment_id_fkey"
+            columns: ["attachment_id"]
+            isOneToOne: false
+            referencedRelation: "draft_attachments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_attachment_links_simulation_id_fkey"
+            columns: ["simulation_id"]
+            isOneToOne: false
+            referencedRelation: "innovation_simulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       simulation_review_events: {
         Row: {
           actor_id: string
@@ -619,6 +721,14 @@ export type Database = {
     Functions: {
       admin_access: {
         Args: { p_operation: string; p_payload?: Json }
+        Returns: Json
+      }
+      attachment_service: {
+        Args: { operation: string; payload?: Json }
+        Returns: Json
+      }
+      attachment_workflow: {
+        Args: { operation: string; payload?: Json }
         Returns: Json
       }
       is_program_admin: { Args: never; Returns: boolean }

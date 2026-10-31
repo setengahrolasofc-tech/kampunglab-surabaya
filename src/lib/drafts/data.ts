@@ -1,6 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { requireUser } from "@/lib/auth/session";
+import type {DraftAttachmentData} from "@/lib/attachments/types";
 import type { createServerSupabaseClient } from "@/lib/supabase/server";
 type Client = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
@@ -32,11 +33,14 @@ export async function getDraftList(page = 0) {
 }
 export async function getDraftEditor(id: string) {
   const { supabase } = await requireUser();
-  const [context, draft, simulation] = await Promise.all([
+  const [context, draft, simulation, attachments] = await Promise.all([
     catalogs(supabase),
-    supabase.from("innovation_drafts").select("id,document,revision,current_step,updated_at").eq("id", id).maybeSingle(),
-    supabase.from("innovation_simulations").select("id,reference,draft_revision,submitted_at,status,attempt").eq("draft_id",id).order("attempt",{ascending:false}).limit(1).maybeSingle(),
+    supabase.from("innovation_drafts").select("id,document,revision,current_step,updated_at,attachment_revision").eq("id", id).maybeSingle(),
+    supabase.from("innovation_simulations").select("id,reference,draft_revision,submitted_at,status,attempt,attachment_revision").eq("draft_id",id).order("attempt",{ascending:false}).limit(1).maybeSingle(),
+    supabase.rpc("attachment_workflow",{operation:"list_draft",payload:{draft_id:id}}),
   ]);
   if (draft.error||simulation.error) throw new Error("Draf belum dapat dimuat.");
-  return { ...context, draft: draft.data, simulation:simulation.data };
+  if(draft.data&&attachments.error)throw new Error("Ringkasan lampiran draf belum dapat dimuat.");
+  const files=(attachments.data as unknown as DraftAttachmentData|null)?.files??[];
+  return { ...context, draft: draft.data, simulation:simulation.data,attachmentCount:files.filter(f=>f.storage_state==="ready").length,attachmentsPending:files.some(f=>f.storage_state==="pending") };
 }

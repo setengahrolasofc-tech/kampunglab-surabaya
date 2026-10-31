@@ -35,7 +35,7 @@ Kelanjutan prototipe menyediakan pengiriman **simulasi DEMO** dan catatan awal R
 - Pembuatan bersifat idempoten per pemilik + request ID. Penyimpanan memeriksa revisi secara atomik. Permintaan dari tab/perangkat lain dengan revisi lama gagal dengan HTTP 409 (`PT409`); tidak ada overwrite otomatis. Kode status mengikuti [dokumentasi PostgREST](https://docs.postgrest.org/en/stable/references/errors.html#raise-errors-with-http-status-codes).
 - Audit privat hanya menyimpan aktor, role koneksi database, ID draf, tindakan, revisi, langkah, dan waktu. Pemeliharaan melalui pengelola database dicatat tanpa mengatasnamakan pengguna. Isi PRD, RAB, anggota tim, serta domisili tidak disalin ke audit. Tabel audit tidak dapat dibaca/diubah melalui aplikasi.
 - Katalog formulir dibatasi 1.000 wilayah pada prototipe; jika lebih, aplikasi menampilkan kesalahan, bukan daftar terpotong tanpa pemberitahuan. Pemuatan bertahap untuk skala seluruh kota masih pekerjaan lanjutan. Daftar draf memiliki pagination 20 per halaman.
-- Google, kolaborasi akun tim, lampiran/Storage, kirim final, konflik kepentingan, rubrik, plafon dan persetujuan anggaran tetap mengikuti keputusan PRD yang belum disahkan.
+- Lampiran privat DEMO sudah dibangun terpisah; lihat ATTACHMENTS_UAT.md. Aktivasi Google, kolaborasi akun tim, kirim resmi, penanganan konflik operasional, rubrik akhir, plafon dan persetujuan anggaran tetap mengikuti keputusan PRD yang belum disahkan.
 
 ## Verifikasi otomatis
 

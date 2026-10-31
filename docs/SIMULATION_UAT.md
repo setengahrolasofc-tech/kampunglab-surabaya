@@ -5,7 +5,7 @@ Pembaruan 31 Oktober 2026. **Tes alur baru dan UAT ditunda atas permintaan pengg
 ## Menggunakan alur yang dibangun
 
 1. Jalankan kode terbaru. Di `/pengajuan`, lengkapi tema DEMO aktif dan hierarki wilayah dengan kode kelurahan/RW/RT berawalan DEMO, data inovasi/tim, PRD, RAB, dan pernyataan keaslian.
-2. Simpan semua perubahan, buka langkah 4, lalu konfirmasikan pembagian salinan DEMO kepada petugas berwenang sesuai tahap. Kirim simulasi; referensinya berawalan DEMO dan bukan nomor resmi.
+2. Simpan semua perubahan, kelola lampiran privat bila diperlukan, selesaikan/lepas unggahan tertunda, lalu buka langkah 4, lalu konfirmasikan pembagian salinan DEMO kepada petugas berwenang sesuai tahap. Kirim simulasi; referensinya berawalan DEMO dan bukan nomor resmi.
 3. Petugas utama RT membuka `/antrean/rt`, membaca salinan, mengisi deklarasi, memilih tindakan, checklist, dan alasan. Rekomendasi meneruskan ke RW; revisi/penolakan wajib alasan. Catatan awal tanpa keputusan juga tetap tersedia.
 4. Sesudah rekomendasi RT, petugas utama RW membuka `/antrean/rw`. Tinjauan kelayakan, duplikasi, dan RAB dilakukan manusia; tidak ada validasi dana atau pencarian duplikasi otomatis. Rekomendasi diteruskan ke kelurahan.
 5. Kelurahan membuka `/antrean/kelurahan`, memeriksa rekomendasi RT/RW dan kelengkapan, lalu memilih tindakan beralasan. Untuk menyiapkan evaluasi, pilih Mikro/Kecil DEMO dan centang deklarasi simulasi; salinan masuk tab **Rencana evaluasi DEMO** (`?view=evaluasi`). Revisi/penolakan/konflik juga tersedia. Keputusan akhir program/panel/dana belum dibuka.
@@ -36,4 +36,4 @@ Tidak ada tes unit/SQL/HTTP untuk keputusan, pemilihan jalur evaluasi, atau kiri
 
 Lint, TypeScript, build, serta pembacaan metadata/advisor dilaporkan terpisah. Riwayat keputusan baru tidak dapat dibaca langsung dari tabel oleh authenticated; RPC details memeriksa sesi/scope salinan sebelum mengembalikan riwayat. RLS dan kompilasi bukan bukti pengujian akses dengan akun petugas sudah lulus.
 
-Mode tetap DEMO. Tidak ada pengajuan resmi, lampiran, panel, persetujuan/realisasi dana, email pengingat, atau tanda tangan elektronik resmi.
+Mode tetap DEMO. Lampiran pendukung tersedia dengan aturan dan tes tertunda pada ATTACHMENTS_UAT.md. Tidak ada pengajuan resmi, panel, persetujuan/realisasi dana, email pengingat, atau tanda tangan elektronik resmi.

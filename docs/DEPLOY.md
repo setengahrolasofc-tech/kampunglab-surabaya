@@ -4,9 +4,9 @@ Panduan ini memakai kondisi proyek terbaru: database Supabase `kampunglab-suraba
 
 ## A. Database (Supabase)
 
-Menurut `docs/PROJECT_STATUS.md`, sembilan migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
+Menurut `docs/PROJECT_STATUS.md`, sebelas migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
 
-- Dashboard Supabase > **Database > Migrations**: harus ada sembilan entri, dari `20261030134536_identity_and_office_mandates` sampai `20261031111312_demo_kelurahan_intake_and_evaluation_paths`.
+- Dashboard Supabase > **Database > Migrations**: harus ada sebelas entri, dari `20261030134536_identity_and_office_mandates` sampai `20261031121110_restore_archived_demo_attachments`.
 - Atau lewat CLI: `npx supabase login`, `npx supabase link --project-ref zxfaotlqldfrlccahebw`, `npx supabase migration list`.
 
 Jika kamu memakai project Supabase baru/kosong, terapkan semua file migrasi berurutan menurut nama file (`npx supabase db push`).
@@ -50,7 +50,7 @@ Dashboard > **Authentication**:
 ## E. Batasan yang perlu diketahui
 
 - **Alur pemeriksaan masih DEMO.** Nomor pengajuan resmi, keputusan akhir kelurahan/panel, dana, uji warga, passport, dan banding belum dibangun (lihat `docs/PROJECT_STATUS.md`). Jangan dipresentasikan sebagai pengajuan resmi.
-- **Belum ada unggah berkas/Storage.** Jalur dokumen fisik 7 hari (keputusan pengguna) belum dibangun karena butuh bucket privat dan perubahan alur keputusan DEMO.
+- **Lampiran privat DEMO tersedia.** Bucket dan Edge Function `private-attachments` sudah dibuat/deploy pada proyek yang dipilih; tidak perlu key backend pada environment Next.js. Untuk proyek lain, migrasi saja belum cukup: fungsi di `supabase/functions/private-attachments` juga perlu dideploy dengan konfigurasi auth `supabase/config.toml`. Ikuti ATTACHMENTS_UAT.md. Jalur dokumen fisik 7 hari tetap belum dibangun; unggah lampiran tidak membuat rekomendasi fisik otomatis.
 - **Email notifikasi dan pengingat belum ada.**
 - **Proyek Supabase gratis dijeda bila tidak aktif sekitar seminggu.** Aktifkan kembali dan buka web sehari sebelum demo/pitch.
 - **Tema dan wilayah DEMO** berlabel DEMO; master resmi harus disiapkan pengelola program.

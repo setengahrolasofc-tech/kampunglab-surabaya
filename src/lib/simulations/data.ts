@@ -3,14 +3,19 @@ import { randomUUID } from "node:crypto";
 import { requireUser } from "@/lib/auth/session";
 import type { SimulationDetails, SimulationCapabilities } from "./types";
 import type { ReviewStage } from "./workflow";
+import type {Attachment} from "@/lib/attachments/types";
 export async function getSimulation(id:string) {
   const { supabase }=await requireUser();
-  const result=await supabase.rpc("simulation_workflow",{operation:"details",payload:{id}}).abortSignal(AbortSignal.timeout(45000));
+  const [result,files]=await Promise.all([
+    supabase.rpc("simulation_workflow",{operation:"details",payload:{id}}).abortSignal(AbortSignal.timeout(45000)),
+    supabase.rpc("attachment_workflow",{operation:"list_simulation",payload:{simulation_id:id}}).abortSignal(AbortSignal.timeout(45000)),
+  ]);
   if(result.error){
     if(result.error.message==="SIMULATION_UNAVAILABLE"||result.error.message==="SESSION_REQUIRED")return null;
     throw new Error("Salinan simulasi belum dapat dimuat.");
   }
-  return {...(result.data as unknown as SimulationDetails),requestId:randomUUID()};
+  if(files.error)throw new Error("Lampiran salinan belum dapat dimuat.");
+  return {...(result.data as unknown as SimulationDetails),files:(files.data as unknown as {files:Attachment[]}).files,requestId:randomUUID()};
 }
 export async function getReviewQueue(stage:ReviewStage,page:number,view:"pending"|"evaluation"="pending") {
   const { supabase,user }=await requireUser();

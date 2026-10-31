@@ -16,7 +16,7 @@ const errors:Record<string,string>={
   NOTE_REQUEST_CONFLICT:"Catatan sebelumnya sudah diterima dengan isi berbeda. Teks ini tetap ada. Muat ulang di tab baru untuk melihat riwayat dan membuat catatan baru.",
   SIMULATION_UNAVAILABLE:"Simulasi tidak tersedia untuk akunmu.",
   RESUBMIT_NOT_AVAILABLE:"Salinan ini tidak sedang meminta revisi. Periksa status terbaru sebelum kirim ulang.",
-  REVISION_REQUIRED:"Ubah dan simpan isi draf terlebih dahulu sebelum mengirim salinan revisi.",
+  REVISION_REQUIRED:"Ubah dan simpan isi draf atau daftar lampiran terlebih dahulu sebelum mengirim salinan revisi.",
   REVIEW_MANDATE_REQUIRED:"Tindakan memerlukan mandat utama aktif pada tingkat dan wilayah yang sesuai. Pengaju tidak dapat memeriksa simulasinya sendiri.",
   REVIEW_CHECKS_REQUIRED:"Lengkapi seluruh pemeriksaan sebelum meneruskan rekomendasi.",
   CONFLICT_REVIEW_ONLY:"Petugas yang memiliki konflik hanya dapat melaporkan konflik, tanpa mengambil keputusan substansi.",
@@ -26,16 +26,18 @@ const errors:Record<string,string>={
   INVALID_REVIEW:"Periksa tindakan, deklarasi, alasan, dan daftar periksa sebelum menyimpan.",
   EVALUATION_PATH_REQUIRED:"Pilih jalur Mikro/Kecil DEMO dan konfirmasikan bahwa ini belum menjadi persetujuan program atau dana.",
   PREVIOUS_RECOMMENDATIONS_REQUIRED:"Rekomendasi RT dan RW pada putaran ini belum lengkap. Pengelola perlu memeriksa riwayat sebelum tindakan kelurahan.",
+  ATTACHMENT_CONFLICT:"Daftar lampiran sudah berubah. Muat ulang setelah menyimpan perubahan draf, lalu tinjau berkas yang akan dikirim.",
+  ATTACHMENTS_PENDING:"Masih ada unggahan yang belum terkonfirmasi. Selesaikan atau lepas reservasinya pada halaman lampiran sebelum mengirim simulasi.",
 };
 const failure=(message:string)=>({error:errors[message]??"Penyimpanan belum dapat dikonfirmasi. Periksa riwayat di tab baru sebelum mencoba kembali."});
 export async function submitSimulation(_state:SimulationFormState,form:FormData):Promise<SimulationFormState>{
   const {supabase}=await requireUser();
-  const id=form.get("draft_id"),revision=String(form.get("revision")??"");
-  if(!isUuid(id)||!/^(0|[1-9]\d{0,8})$/.test(revision))return {error:"Muat ulang draf sebelum mengirim simulasi."};
+  const id=form.get("draft_id"),revision=String(form.get("revision")??""),attachmentRevision=String(form.get("attachment_revision")??"0");
+  if(!isUuid(id)||!/^(0|[1-9]\d{0,8})$/.test(revision)||!/^(0|[1-9]\d{0,8})$/.test(attachmentRevision))return {error:"Muat ulang draf sebelum mengirim simulasi."};
   if(form.get("acknowledged")!=="on")return failure("ACK_REQUIRED");
   const previous=form.get("previous_id");
   if(previous&&!isUuid(previous))return {error:"Muat ulang draf sebelum mengirim revisi."};
-  const result=await supabase.rpc("simulation_workflow",{operation:"submit",payload:{draft_id:String(id),revision:Number(revision),acknowledged:true,previous_id:previous?String(previous):null}}).abortSignal(AbortSignal.timeout(45000));
+  const result=await supabase.rpc("simulation_workflow",{operation:"submit",payload:{draft_id:String(id),revision:Number(revision),attachment_revision:Number(attachmentRevision),acknowledged:true,previous_id:previous?String(previous):null}}).abortSignal(AbortSignal.timeout(45000));
   if(result.error)return failure(result.error.message);
   const simulation=result.data as {id:string};
   if(!isUuid(simulation?.id))return failure("UNKNOWN");

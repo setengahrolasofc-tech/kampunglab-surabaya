@@ -2,7 +2,7 @@
 
 Website tata kelola inovasi warga: pengajuan, verifikasi berjenjang, uji warga, dan Evidence Passport. KampungLab mencatat keputusan dan realisasi dana; transfer uang dilakukan di luar platform oleh pihak berwenang.
 
-**Status saat ini: draf pribadi dan alur pemeriksaan DEMO RT → RW → kelurahan.** Akun, admin/mandat, domisili, editor empat langkah, salinan simulasi, keputusan RT/RW beralasan, serta kirim ulang revisi telah dibangun. Kelurahan dapat memeriksa rekomendasi, meminta revisi/menolak dengan alasan, serta menyiapkan jalur evaluasi Mikro/Kecil DEMO; keputusan akhir program, panel, dana, uji warga, dan deployment Vercel belum tersedia. Kode akun/OTP/Google dari upstream dipertahankan; konfigurasi email/OTP/provider belum diverifikasi pada milestone ini. Lint, tipe, dan build diperiksa; tes alur keputusan baru serta UAT ditunda atas permintaan pengguna. Lihat status proyek untuk batas verifikasi.
+**Status saat ini: draf pribadi dan alur pemeriksaan DEMO RT → RW → kelurahan.** Akun, admin/mandat, domisili, editor empat langkah, salinan simulasi, keputusan RT/RW beralasan, kirim ulang revisi, serta lampiran privat dengan arsip/pemulihan dan daftar berkas terkunci per putaran telah dibangun. Kelurahan dapat memeriksa rekomendasi, meminta revisi/menolak dengan alasan, serta menyiapkan jalur evaluasi Mikro/Kecil DEMO; keputusan akhir program, panel, dana, uji warga, dan deployment Vercel belum tersedia. Kode akun/OTP/Google dari upstream dipertahankan; konfigurasi email/OTP/provider belum diverifikasi pada milestone ini. Backend berkas sudah dideploy di Supabase; Vercel belum diverifikasi. Lint, tipe Next.js/Edge, dan build diperiksa; tes alur keputusan baru serta UAT ditunda atas permintaan pengguna. Lihat status proyek untuk batas verifikasi.
 
 ## Teknologi
 
@@ -73,6 +73,7 @@ Langkah Vercel dan pengaturan Auth Supabase ada di [`docs/DEPLOY.md`](docs/DEPLO
 - [Admin dan akses](docs/ADMIN_UAT.md): penetapan peran/mandat, wilayah/jabatan, pencabutan, audit, dan verifikasi.
 - [Profil wilayah dan draf](docs/DRAFTS_UAT.md): pengisian empat langkah, RAB sementara, simpan/edit, dan batas akses pribadi.
 - [Simulasi dan antrean petugas](docs/SIMULATION_UAT.md): salinan DEMO, keputusan RT/RW, pemeriksaan kelurahan, revisi, jalur evaluasi DEMO, dan pemeriksaan yang masih ditunda.
+- [Lampiran privat](docs/ATTACHMENTS_UAT.md): unggah/unduh, salinan berkas, arsip/pulihkan, batas DEMO, dan tes yang ditunda.
 - [Aturan alur DEMO](docs/DEMO_REVIEW_WORKFLOW.md): status, versi, kewenangan, riwayat, dan batas terhadap kebijakan operasional.
 
 Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijakan. Jangan menampilkannya sebagai ketetapan resmi Pemkot. Keputusan `D-01` sampai `D-24` pada PRD belum otomatis disetujui.
