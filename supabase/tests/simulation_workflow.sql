@@ -39,6 +39,11 @@ begin
  doc:=jsonb_set(doc,'{prd,beneficiary_count}','"10"');
  doc:=jsonb_set(doc,'{budget,items}','[{"id":"fixture","description":"DEMO material","category":"Bahan","unit":"pcs","quantity":"1","unit_price":"1000","usage_stage":"Build"}]');
  doc:=jsonb_set(doc,'{budget,maintenance_months}','"6"');doc:=jsonb_set(doc,'{declaration,own_work}','true');
+ doc:=jsonb_set(doc,'{budget,subtotal}','"1000"');
+ doc:=jsonb_set(doc,'{documents}',jsonb_build_object(
+  'prd',jsonb_build_object('attachment_id','00000000-0000-4000-8000-000000000101','file_name','[PRD] demo.pdf','check',jsonb_build_object('status','lulus','summary','','issues','[]'::jsonb,'checked_title','DEMO original snapshot')),
+  'rab',jsonb_build_object('attachment_id','00000000-0000-4000-8000-000000000102','file_name','[RAB] demo.pdf','check',jsonb_build_object('status','perlu_dicek','summary','','issues','[]'::jsonb,'checked_title','DEMO original snapshot')),
+  'declaration',jsonb_build_object('attachment_id','00000000-0000-4000-8000-000000000103','file_name','[Keaslian] demo.pdf','check',jsonb_build_object('status','tidak_diperiksa','summary','','issues','[]'::jsonb,'checked_title','DEMO original snapshot'))));
  perform public.write_innovation_draft('save',jsonb_build_object('id',draft_id,'revision',0,'step',4,'document',doc));
  begin perform public.simulation_workflow('submit',jsonb_build_object('draft_id',draft_id,'revision',0,'acknowledged',true));raise exception 'FAIL: stale submit';exception when sqlstate 'PT409' then null;end;
  doc:=jsonb_set(doc,'{innovation,theme_id}',to_jsonb(f.real_theme::text));

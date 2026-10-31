@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { isUuid } from "@/lib/admin/validation.mjs";
 import { validateRtNote,validateReview } from "@/lib/simulations/validation.mjs";
+import { validateDraftDocument, documentSlots } from "@/lib/drafts/schema.mjs";
+import type { DraftAttachmentData } from "@/lib/attachments/types";
 import type { SimulationFormState } from "@/lib/simulations/types";
 const errors:Record<string,string>={
   INCOMPLETE_DRAFT:"Lengkapi seluruh isian pokok dan simpan draf sebelum mengirim simulasi.",
@@ -27,6 +29,7 @@ const errors:Record<string,string>={
   EVALUATION_PATH_REQUIRED:"Pilih jalur Mikro/Kecil DEMO dan konfirmasikan bahwa ini belum menjadi persetujuan program atau dana.",
   PREVIOUS_RECOMMENDATIONS_REQUIRED:"Rekomendasi RT dan RW pada putaran ini belum lengkap. Pengelola perlu memeriksa riwayat sebelum tindakan kelurahan.",
   ATTACHMENT_CONFLICT:"Daftar lampiran sudah berubah. Muat ulang setelah menyimpan perubahan draf, lalu tinjau berkas yang akan dikirim.",
+  DOCUMENT_FILE_MISSING:"Salah satu dokumen PRD, RAB, atau surat keaslian sudah dilepas dari draf atau belum siap. Unggah ulang dokumennya pada langkah terkait, simpan, lalu kirim.",
   ATTACHMENTS_PENDING:"Masih ada unggahan yang belum terkonfirmasi. Selesaikan atau lepas reservasinya pada halaman lampiran sebelum mengirim simulasi.",
 };
 const failure=(message:string)=>({error:errors[message]??"Penyimpanan belum dapat dikonfirmasi. Periksa riwayat di tab baru sebelum mencoba kembali."});
@@ -37,6 +40,16 @@ export async function submitSimulation(_state:SimulationFormState,form:FormData)
   if(form.get("acknowledged")!=="on")return failure("ACK_REQUIRED");
   const previous=form.get("previous_id");
   if(previous&&!isUuid(previous))return {error:"Muat ulang draf sebelum mengirim revisi."};
+  // Database memeriksa penunjuk dokumen pada draf; keberadaan berkasnya diperiksa di sini agar dokumen yang dilepas tidak ikut lolos.
+  const [draft,files]=await Promise.all([
+    supabase.from("innovation_drafts").select("document").eq("id",String(id)).maybeSingle(),
+    supabase.rpc("attachment_workflow",{operation:"list_draft",payload:{draft_id:String(id)}}),
+  ]);
+  if(draft.data&&!files.error){
+    const documents=validateDraftDocument(draft.data.document).data.documents;
+    const ready=new Set(((files.data as unknown as DraftAttachmentData|null)?.files??[]).filter(f=>f.purpose==="supporting"&&f.storage_state==="ready").map(f=>f.id));
+    if(documentSlots.some(slot=>documents[slot.key]&&!ready.has(documents[slot.key]!.attachment_id)))return failure("DOCUMENT_FILE_MISSING");
+  }
   const result=await supabase.rpc("simulation_workflow",{operation:"submit",payload:{draft_id:String(id),revision:Number(revision),attachment_revision:Number(attachmentRevision),acknowledged:true,previous_id:previous?String(previous):null}}).abortSignal(AbortSignal.timeout(45000));
   if(result.error)return failure(result.error.message);
   const simulation=result.data as {id:string};

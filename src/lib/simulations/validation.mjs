@@ -1,12 +1,16 @@
-import { validateDraftDocument, draftChecklist } from "../drafts/schema.mjs";
+import { validateDraftDocument, draftChecklist, documentSlotProblem, documentSlots, rupiahInteger } from "../drafts/schema.mjs";
 import { isUuid } from "../admin/validation.mjs";
 export function simulationMissing(document) {
   const result=validateDraftDocument(document);
   if(Object.keys(result.errors).length)return ["Format isian draf perlu diperbaiki"];
-  const ready=draftChecklist(result.data);
-  const labels=["Data inovasi dan tim","PRD inovasi","Rincian RAB dan masa perawatan","Pernyataan keaslian"];
-  const missing=labels.filter((_,index)=>!ready[index]);
-  if(result.data.innovation.team.some(member=>!member.name||!member.role)&&!missing.includes(labels[0]))missing.push(labels[0]);
+  const data=result.data,missing=[];
+  if(!draftChecklist(data)[0]||data.innovation.team.some(member=>!member.name||!member.role))missing.push("Data inovasi dan tim");
+  for(const slot of documentSlots){
+    const problem=documentSlotProblem(data,slot.key);
+    if(problem)missing.push(`${slot.label}: ${problem}`);
+  }
+  if(!((rupiahInteger(data.budget.subtotal)??0n)>0n))missing.push("Isi subtotal kebutuhan RAB");
+  if(!data.budget.maintenance_months)missing.push("Isi rencana masa perawatan (6–12 bulan)");
   return missing;
 }
 export function validateRtNote(form) {

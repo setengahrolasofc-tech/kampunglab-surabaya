@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { emptyDraftDocument, validateDraftDocument, budgetTotals, budgetLineTotal, formatRupiahMilli, draftChecklist } from "../src/lib/drafts/schema.mjs";
+import { emptyDraftDocument, validateDraftDocument, budgetTotals, budgetLineTotal, formatRupiahMilli, draftChecklist, migrateLegacyBudget } from "../src/lib/drafts/schema.mjs";
+import { buildDocumentCheck, uncheckedDocument } from "../src/lib/ai/document-check-result.mjs";
 test("empty draft is saveable without implying submission readiness",()=>{
   const document=emptyDraftDocument();
   assert.deepEqual(validateDraftDocument(document).errors,{});
@@ -39,4 +40,48 @@ test("bounds and declaration types are validated while incomplete rows remain sa
   d.budget.maintenance_months="13";d.innovation.team=Array.from({length:21},()=>({id:"",name:"",role:""}));
   const result=validateDraftDocument(d);
   assert.ok(result.errors["declaration.own_work"]);assert.ok(result.errors["budget.maintenance_months"]);assert.ok(result.errors["innovation.team"]);
+});
+const slotRow=(title,status="lulus")=>({attachment_id:"AAAAAAAA-0000-4000-8000-000000000001",file_name:"[PRD] x.pdf",check:{status,summary:"ok",issues:["a"],checked_title:title,checked_at:"2026-11-01T00:00:00Z",signature:"tidak_perlu",title_match:"ya",ai:true,extracted:{ordinary:10,bogus:5}}});
+test("template document pointers are normalized and unknown slots are dropped",()=>{
+  const d=emptyDraftDocument();d.innovation.title="Pompa";d.documents={prd:slotRow("Pompa"),hack:slotRow("Pompa")};
+  const result=validateDraftDocument(d);assert.deepEqual(result.errors,{});
+  assert.deepEqual(Object.keys(result.data.documents),["prd"]);
+  assert.equal(result.data.documents.prd.attachment_id,"aaaaaaaa-0000-4000-8000-000000000001");
+  assert.deepEqual(result.data.documents.prd.check.extracted,{ordinary:10});
+  d.documents.prd.attachment_id="not-a-uuid";assert.ok(validateDraftDocument(d).errors["documents.prd"]);
+  d.documents.prd=slotRow("Pompa","approved");assert.equal(validateDraftDocument(d).data.documents.prd.check.status,"tidak_diperiksa");
+});
+test("declaration flag follows the uploaded signed letter and checklist tracks documents",()=>{
+  const d=emptyDraftDocument();d.innovation.title="Pompa";d.declaration.own_work=true;
+  assert.equal(validateDraftDocument(d).data.declaration.own_work,false);
+  d.documents={prd:slotRow("Pompa"),declaration:slotRow("Pompa")};
+  const data=validateDraftDocument(d).data;assert.equal(data.declaration.own_work,true);
+  assert.deepEqual(draftChecklist(data).slice(1),[true,false,true]);
+  data.innovation.title="Lain";assert.equal(draftChecklist(data)[1],false);
+  data.innovation.title="Pompa";data.documents.prd.check.status="perlu_perbaikan";assert.equal(draftChecklist(data)[1],false);
+});
+test("subtotal field drives totals unless legacy line items exist, and legacy items migrate once",()=>{
+  const d=emptyDraftDocument();d.budget.subtotal="1000";d.budget.contingency="10";d.budget.honor="20";d.budget.maintenance_cost="5";
+  const t=budgetTotals(validateDraftDocument(d).data.budget);
+  assert.equal(t.subtotal,1000000n);assert.equal(t.total,1030000n);assert.equal(t.maintenance,5000n);
+  d.budget.subtotal="1e3";assert.equal(budgetTotals(d.budget).invalid,true);
+  const legacy=emptyDraftDocument();legacy.budget.items=[{id:"",description:"x",category:"x",unit:"x",quantity:"2",unit_price:"1500",usage_stage:"x"}];
+  const migrated=migrateLegacyBudget(validateDraftDocument(legacy).data);
+  assert.equal(migrated.budget.items.length,0);assert.equal(migrated.budget.subtotal,"3000");
+  assert.equal(budgetTotals(migrated.budget).subtotal,3000000n);
+});
+test("AI report becomes a status where only definite problems block submission",()=>{
+  const now="2026-11-01T00:00:00Z",good={document_type_ok:true,title_match:"ya",signature:"ada",completeness:"lengkap",issues:[],summary:"Baik"};
+  assert.equal(buildDocumentCheck("rab",good,"Pompa",now).status,"lulus");
+  assert.equal(buildDocumentCheck("rab",{...good,signature:"tidak_ada"},"Pompa",now).status,"perlu_perbaikan");
+  assert.equal(buildDocumentCheck("prd",{...good,signature:"tidak_ada"},"Pompa",now).status,"lulus");
+  assert.equal(buildDocumentCheck("prd",{...good,title_match:"tidak"},"Pompa",now).status,"perlu_perbaikan");
+  assert.equal(buildDocumentCheck("prd",{...good,document_type_ok:false},"Pompa",now).status,"perlu_perbaikan");
+  assert.equal(buildDocumentCheck("declaration",{...good,signature:"tidak_jelas"},"Pompa",now).status,"perlu_dicek");
+  assert.equal(buildDocumentCheck("prd",{...good,completeness:"sebagian"},"Pompa",now).status,"perlu_dicek");
+  assert.equal(buildDocumentCheck("prd",{...good,issues:["Angka berbeda"]},"Pompa",now).status,"perlu_dicek");
+  assert.equal(buildDocumentCheck("prd",null,"Pompa",now).status,"perlu_perbaikan");
+  assert.deepEqual(buildDocumentCheck("rab",{...good,extracted:{ordinary:5,honor:-1,contingency:1.5,maintenance:"9"}},"Pompa",now).extracted,{ordinary:5});
+  assert.equal(buildDocumentCheck("prd",{...good,summary:"x"},"  Pompa ",now).checked_title,"Pompa");
+  const skipped=uncheckedDocument("rab","AI mati"," Pompa ",now);assert.equal(skipped.status,"tidak_diperiksa");assert.equal(skipped.checked_title,"Pompa");
 });

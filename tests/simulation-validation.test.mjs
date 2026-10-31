@@ -7,10 +7,19 @@ const form=values=>{const f=new FormData();Object.entries(values).forEach(([k,v]
 test("simulation readiness requires complete rows and declared originality",()=>{
  const doc=completeDemoDocument(id,id);assert.deepEqual(simulationMissing(doc),[]);
  doc.innovation.team.push({id:"another",name:"",role:""});assert.ok(simulationMissing(doc).includes("Data inovasi dan tim"));
- doc.declaration.own_work=false;assert.ok(simulationMissing(doc).includes("Pernyataan keaslian"));
+ doc.innovation.team.pop();delete doc.documents.declaration;assert.ok(simulationMissing(doc).some(item=>item.startsWith("Surat pernyataan keaslian karya")));
+});
+test("simulation readiness requires all templated documents, matching title, and no blocking check",()=>{
+ const doc=completeDemoDocument(id,id);
+ doc.documents.rab.check.status="perlu_perbaikan";assert.ok(simulationMissing(doc).some(item=>item.startsWith("RAB:")));
+ doc.documents.rab.check.status="perlu_dicek";assert.deepEqual(simulationMissing(doc),[]);
+ doc.documents.prd.check.status="tidak_diperiksa";assert.deepEqual(simulationMissing(doc),[]);
+ doc.innovation.title="Judul berubah";assert.equal(simulationMissing(doc).filter(item=>item.includes("judul inovasi")).length,3);
+ const incomplete=completeDemoDocument(id,id);delete incomplete.documents.prd;incomplete.budget.subtotal="";incomplete.budget.maintenance_months="";
+ const missing=simulationMissing(incomplete);assert.ok(missing.some(item=>item.startsWith("PRD inovasi")));assert.ok(missing.includes("Isi subtotal kebutuhan RAB"));assert.ok(missing.includes("Isi rencana masa perawatan (6–12 bulan)"));
 });
 test("invalid draft formats cannot pass simulation readiness",()=>{
- const doc=completeDemoDocument(id,id);doc.budget.items[0].unit_price="1e5";
+ const doc=completeDemoDocument(id,id);doc.budget.subtotal="1e5";
  assert.deepEqual(simulationMissing(doc),["Format isian draf perlu diperbaiki"]);
 });
 test("RT note requires identity, body and explicit conflict declaration",()=>{
