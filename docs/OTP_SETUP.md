@@ -27,7 +27,8 @@ Alamat, kecamatan, kelurahan, RW, dan RT disimpan di metadata akun Auth (`domici
 
 - Ini **klaim warga yang belum diverifikasi**. Tidak dipakai untuk hak akses atau antrean RT/RW.
 - Daftar kecamatan/kelurahan di `src/lib/auth/surabaya-areas.mjs` adalah data contoh yang belum dicocokkan dengan master resmi; RW dan RT diketik manual oleh warga (angka 1–999; nol di depan dibuang otomatis, jadi `03` disimpan sebagai `3`) tanpa dicocokkan ke daftar.
-- Setelah verifikasi OTP daftar (dan setelah form Google), klaim dicocokkan otomatis ke tabel `territories`: kelurahan lewat nama, RW dan RT lewat angka di ujung nama/kode ("RW 03", "DEMO-RW-01" dan "3" sama-sama dibaca 3). Bila tepat satu RT cocok, `profiles.domicile_rt_id` diisi; bila tidak ada atau lebih dari satu yang cocok, kolom itu dikosongkan dan `/profil` menampilkan statusnya. Tabel wilayah belum punya tingkat kecamatan, jadi dua kelurahan bernama sama di kecamatan berbeda terbaca ganda. Pengelola perlu menamai wilayah mengikuti pola di atas.
+- Setelah verifikasi OTP daftar (dan setelah form Google), klaim ditautkan lewat fungsi `link_domicile` (migrasi `20261101010000`): kelurahan dicari berdasarkan kecamatan + nama (153 kelurahan contoh di-seed ke `territories`, kodenya memuat kecamatan), lalu RW dan RT dicari lewat angka di ujung nama/kode ("RW 03", "DEMO-RW-01", dan "3" sama-sama dibaca 3). RW/RT yang belum ada dibuat otomatis sebagai satuan wilayah (tanpa hak akses). Kelurahan di luar daftar membuat `domicile_rt_id` kosong.
+- Karena RW/RT dibuat dari klaim warga, isian ngawur (misalnya RW 999) ikut membuat baris wilayah. `getDraftContext` memuat maksimal 1000 baris `territories`; bila jumlahnya melewati itu, halaman pengajuan menolak dimuat dan pemuatan wilayah perlu dibuat bertahap.
 - Domisili diubah dari `/profil` dengan form yang sama; `/profil/wilayah` mengarah ke sana.
 
 ## 5. Masuk dengan Google (opsional)

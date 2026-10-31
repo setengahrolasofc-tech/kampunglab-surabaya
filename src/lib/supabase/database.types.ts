@@ -1250,6 +1250,10 @@ export type Database = {
         Args: { operation: string; payload?: Json }
         Returns: Json
       }
+      link_domicile: {
+        Args: { p_kecamatan: string; p_kelurahan: string; p_rt: number; p_rw: number }
+        Returns: Json
+      }
       set_profile_domicile: { Args: { rt: string | null }; Returns: Json }
       simulation_workflow: {
         Args: { operation: string; payload?: Json }
