@@ -66,6 +66,6 @@ export function DocumentSlot({ draftId, slotKey, value, title, context, blockedR
         <button type="button" onClick={submit} disabled={pending || Boolean(blockedReason)} className="min-h-11 rounded-xl border border-emerald-900 px-4 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-50 disabled:cursor-wait disabled:opacity-50">{pending ? "Mengunggah dan memeriksa…" : value ? "Unggah ulang dan periksa" : "Unggah dan periksa"}</button>
       </div>
     </div>
-    <p className="text-xs leading-5 text-slate-600">Saat diunggah, isi berkas dikirim ke layanan AI (Anthropic) untuk memeriksa jenis dokumen, kecocokan nama inovasi, tanda tangan, dan kelengkapan. Hasilnya hanya bantuan: bukan persetujuan, dan petugas tetap memeriksa dokumenmu. Jangan unggah data nyata selama prototipe DEMO.</p>
+    <p className="text-xs leading-5 text-slate-600">Saat diunggah, isi berkas dikirim ke layanan AI (Anthropic) untuk memeriksa jenis dokumen, kecocokan nama inovasi, tanda tangan, dan kelengkapan. Hasilnya hanya bantuan: bukan persetujuan, dan petugas tetap memeriksa dokumenmu.</p>
   </div>;
 }

@@ -12,7 +12,7 @@ async function catalogs(supabase: Client) {
     supabase.from("innovation_themes").select("id,name,is_demo,active").order("code"),
   ]);
   if (profile.error || territories.error || themes.error || !profile.data) throw new Error("Data profil dan pilihan pengajuan belum dapat dimuat.");
-  if ((territories.count ?? 0) > 1000) throw new Error("Daftar wilayah melampaui kapasitas prototipe. Hubungi pengelola untuk pemuatan wilayah bertahap.");
+  if ((territories.count ?? 0) > 1000) throw new Error("Daftar wilayah melampaui kapasitas saat ini. Hubungi pengelola untuk pemuatan wilayah bertahap.");
   return { profile: profile.data, territories: territories.data ?? [], themes: themes.data ?? [] };
 }
 export async function getDraftContext() {

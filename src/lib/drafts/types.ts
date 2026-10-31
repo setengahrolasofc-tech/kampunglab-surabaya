@@ -1,6 +1,6 @@
 import type { Database } from "@/lib/supabase/database.types";
 export type DraftDocument = {
-  innovation: { title: string; theme_id: string; form: string; maturity: string; rt_id: string; summary: string; team: { id: string; name: string; role: string }[] };
+  innovation: { title: string; theme_id: string; form: string; rt_id: string; summary: string; team: { id: string; name: string; role: string }[] };
   prd: Record<string, string>;
   budget: { items: { id: string; description: string; category: string; unit: string; quantity: string; unit_price: string; usage_stage: string }[]; subtotal: string; contingency: string; honor: string; maintenance_cost: string; maintenance_months: string };
   declaration: { own_work: boolean; notes: string };

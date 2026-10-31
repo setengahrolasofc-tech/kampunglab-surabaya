@@ -13,8 +13,8 @@ export function areaSlug(value) {
   return String(value).replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase();
 }
 
-/** Kelurahan yang kodenya bukan hasil seed kecamatan (misalnya data latihan DEMO) dikelompokkan di sini. */
-export const OTHER_KECAMATAN = "Wilayah latihan (DEMO)";
+/** Kelurahan yang kodenya bukan hasil seed kecamatan dikelompokkan di sini. */
+export const OTHER_KECAMATAN = "Wilayah lainnya";
 
 /** @type {Map<string, string>} */
 const kecamatanByCode = new Map();

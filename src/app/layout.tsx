@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s | KampungLab Surabaya",
   },
   description:
-    "Konsep platform inovasi warga melalui pengajuan berjenjang, uji di kampung, dan Evidence Passport. Saat ini dalam tahap prototipe.",
+    "Konsep platform inovasi warga melalui pengajuan berjenjang, uji di kampung, dan Evidence Passport.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

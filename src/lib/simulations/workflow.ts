@@ -1,13 +1,13 @@
 export type ReviewStage = "rt" | "rw" | "kelurahan";
 export type DecisionStage = ReviewStage;
 export type EvaluationPath = "demo_micro" | "demo_small";
-export const evaluationPathLabels: Record<EvaluationPath, string> = {demo_micro:"Mikro — DEMO",demo_small:"Kecil — DEMO"};
+export const evaluationPathLabels: Record<EvaluationPath, string> = {demo_micro:"Mikro",demo_small:"Kecil"};
 export const evaluationPathLabel = (path:string|null) => path==="demo_micro"?evaluationPathLabels.demo_micro:path==="demo_small"?evaluationPathLabels.demo_small:"Jalur belum dipilih";
 export const stageLabels: Record<ReviewStage, string> = { rt: "RT", rw: "RW", kelurahan: "Kelurahan" };
 export const statusLabels: Record<string, string> = {
   waiting_rt: "Menunggu pemeriksaan RT", waiting_rw: "Menunggu pemeriksaan RW",
   waiting_kelurahan: "Menunggu tinjauan kelurahan", revision_requested: "Perlu revisi", rejected: "Ditolak dalam simulasi",
-  waiting_evaluation: "Menunggu evaluasi DEMO",
+  waiting_evaluation: "Menunggu evaluasi",
 };
 export const outcomeLabels: Record<string, string> = {
   forward: "Rekomendasi diteruskan", revise: "Meminta revisi", reject: "Menolak simulasi", conflict: "Melaporkan konflik",

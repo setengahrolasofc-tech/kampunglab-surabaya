@@ -9,8 +9,8 @@ import type { DraftAttachmentData } from "@/lib/attachments/types";
 import type { SimulationFormState } from "@/lib/simulations/types";
 const errors:Record<string,string>={
   INCOMPLETE_DRAFT:"Lengkapi seluruh isian pokok dan simpan draf sebelum mengirim simulasi.",
-  DEMO_ONLY:"Simulasi hanya tersedia untuk tema DEMO aktif dan hierarki wilayah berkode DEMO.",
-  ACK_REQUIRED:"Konfirmasikan pembagian salinan DEMO kepada petugas berwenang sesuai tahap pemeriksaan.",
+  DEMO_ONLY:"Simulasi hanya tersedia untuk tema dan wilayah yang sudah disiapkan pengelola.",
+  ACK_REQUIRED:"Konfirmasikan pembagian salinan kepada petugas berwenang sesuai tahap pemeriksaan.",
   DRAFT_CONFLICT:"Draf sudah berubah. Muat ulang setelah menyimpan salinan perubahanmu, lalu periksa versi yang akan dikirim.",
   SESSION_REQUIRED:"Sesi sudah tidak berlaku. Masuk kembali sebelum melanjutkan.",
   RT_MANDATE_REQUIRED:"Catatan memerlukan mandat utama RT yang aktif pada wilayah ini. Pengaju tidak dapat memeriksa simulasinya sendiri.",
@@ -26,7 +26,7 @@ const errors:Record<string,string>={
   WORKFLOW_CONFLICT:"Tahap atau versi alur sudah berubah. Input tetap ada; buka riwayat di tab baru sebelum mencoba kembali.",
   REVIEW_REQUEST_CONFLICT:"Tindakan sebelumnya sudah diterima dengan isi berbeda. Buka riwayat di tab baru untuk melihat hasil dan memulai tindakan baru.",
   INVALID_REVIEW:"Periksa tindakan, deklarasi, alasan, dan daftar periksa sebelum menyimpan.",
-  EVALUATION_PATH_REQUIRED:"Pilih jalur Mikro/Kecil DEMO dan konfirmasikan bahwa ini belum menjadi persetujuan program atau dana.",
+  EVALUATION_PATH_REQUIRED:"Pilih jalur Mikro/Kecil dan konfirmasikan bahwa ini belum menjadi persetujuan program atau dana.",
   PREVIOUS_RECOMMENDATIONS_REQUIRED:"Rekomendasi RT dan RW pada putaran ini belum lengkap. Pengelola perlu memeriksa riwayat sebelum tindakan kelurahan.",
   ATTACHMENT_CONFLICT:"Daftar lampiran sudah berubah. Muat ulang setelah menyimpan perubahan draf, lalu tinjau berkas yang akan dikirim.",
   DOCUMENT_FILE_MISSING:"Salah satu dokumen PRD, RAB, atau surat keaslian sudah dilepas dari draf atau belum siap. Unggah ulang dokumennya pada langkah terkait, simpan, lalu kirim.",

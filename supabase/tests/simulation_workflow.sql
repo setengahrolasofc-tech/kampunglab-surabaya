@@ -32,7 +32,7 @@ begin
  begin perform public.simulation_workflow('submit',jsonb_build_object('draft_id',draft_id,'revision',0,'acknowledged',false));raise exception 'FAIL: missing acknowledgement';exception when invalid_parameter_value then null;end;
  begin perform public.simulation_workflow('submit',jsonb_build_object('draft_id',draft_id,'revision',0,'acknowledged',true));raise exception 'FAIL: incomplete snapshot';exception when invalid_parameter_value then if sqlerrm<>'INCOMPLETE_DRAFT' then raise;end if;end;
  select document into doc from public.innovation_drafts x where x.id=draft_id;
- doc:=jsonb_set(doc,'{innovation}',jsonb_build_object('title','DEMO original snapshot','theme_id',f.theme,'rt_id',f.rt,'form','produk','maturity','inisiatif','summary','DEMO summary','team','[{"id":"fixture","name":"DEMO member","role":"Inovator"}]'::jsonb));
+ doc:=jsonb_set(doc,'{innovation}',jsonb_build_object('title','DEMO original snapshot','theme_id',f.theme,'rt_id',f.rt,'form','produk','summary','DEMO summary','team','[{"id":"fixture","name":"DEMO member","role":"Inovator"}]'::jsonb));
  foreach key_name in array array['problem','problem_evidence','beneficiaries','solution','features','success_indicator','success_threshold','test_method','test_plan','risks','mitigation'] loop
   doc:=jsonb_set(doc,array['prd',key_name],to_jsonb('DEMO plan'::text));
  end loop;

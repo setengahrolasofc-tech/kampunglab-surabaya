@@ -20,8 +20,9 @@ export function DomicileForm({ territories, initialRt }: { territories: Territor
     <fieldset disabled={pending} className="space-y-5"><legend className="sr-only">Wilayah domisili</legend><TerritorySelect prefix="domicile" territories={territories} value={rt} onChange={setRt} error={state.errors?.rt_id} /><button type="submit" className={button}>{pending ? "Menyimpan…" : "Simpan wilayah domisili"}</button></fieldset>
   </form>;
 }
-export function CreateDraftForm({ requestId, hasDomicile }: { requestId: string; hasDomicile: boolean }) {
+export function CreateDraftForm({ requestId, hasDomicile, limitReached = false }: { requestId: string; hasDomicile: boolean; limitReached?: boolean }) {
   const [state, action, pending] = useActionState<DraftFormState,FormData>(createDraft, {});
   if (!hasDomicile) return <div className="rounded-xl bg-amber-50 p-5 text-amber-950"><p>Lengkapi kelurahan, RW, dan RT domisilimu sebelum membuat draf.</p><Link href="/profil/wilayah" className="mt-3 inline-block font-semibold underline underline-offset-4">Lengkapi wilayah domisili</Link></div>;
+  if (limitReached) return <div className="rounded-xl bg-amber-50 p-5 text-amber-950"><p>Batas tercapai: satu akun maksimal memiliki 3 pengajuan. Lanjutkan salah satu draf di bawah.</p></div>;
   return <form action={action} className="space-y-4"><input type="hidden" name="request_id" value={requestId} />{state.error ? <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-900">{state.error}</p> : null}<button type="submit" disabled={pending} className={button}>{pending ? "Membuat draf…" : "Buat draf pengajuan"}</button></form>;
 }

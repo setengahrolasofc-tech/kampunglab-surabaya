@@ -19,7 +19,7 @@ export default function HomePage() {
       <section aria-labelledby="judul-utama" className="mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.25fr_1fr] lg:items-center">
         <div>
           <p className="mb-7 inline-flex rounded-full border border-emerald-900/15 bg-emerald-50 px-4 py-2 text-xs font-bold tracking-wider text-emerald-900">
-            PROTOTIPE KAMPUNGLAB
+            KAMPUNGLAB SURABAYA
           </p>
           <h1 id="judul-utama" className="max-w-2xl text-5xl font-bold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
             Dari ide warga,<br />

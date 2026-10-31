@@ -36,7 +36,7 @@ export function validatePhysical(form,operation){
     if(payload.decision==="conflict"&&[payload.signature_checked,payload.contact_checked,payload.content_checked].some(Boolean))errors.checks="Laporan konflik disimpan tanpa checklist substansi.";
   }
   if(operation==="save_settings"){
-    const days=form.get("delay_days");if(!integer(days)||Number(days)<1||Number(days)>30)errors.delay_days="Gunakan 1–30 hari untuk konfigurasi DEMO.";
+    const days=form.get("delay_days");if(!integer(days)||Number(days)<1||Number(days)>30)errors.delay_days="Gunakan 1–30 hari untuk konfigurasi.";
     payload.delay_days=Number(days);
   }
   return {errors,payload};

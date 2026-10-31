@@ -13,7 +13,7 @@ export default function DocumentsPage() {
       <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Template dokumen program</h1>
       <p className="mt-4 text-lg leading-8 text-slate-600">
         Format Word yang bisa diisi, dicetak, dan ditandatangani. Isinya masih usulan dan perlu disesuaikan dengan ketentuan BRIDA/OPD sebelum dipakai resmi.
-        Aplikasi saat ini baru menyediakan draf dan alur pemeriksaan DEMO; unggah berkas belum tersedia.
+        Aplikasi saat ini baru menyediakan draf dan alur pemeriksaan; unggah berkas belum tersedia.
       </p>
       <ul className="mt-8 space-y-3">
         {TEMPLATES.map(([file, title, who, when]) => (

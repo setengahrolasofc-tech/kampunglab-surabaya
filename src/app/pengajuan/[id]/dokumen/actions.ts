@@ -16,7 +16,7 @@ function parseContext(raw: FormDataEntryValue | null): CheckContext {
   let data: Record<string, unknown> = {};
   try { if (typeof raw === "string" && raw.length < 8000) data = JSON.parse(raw); } catch { /* konteks opsional */ }
   const team = Array.isArray(data.team) ? data.team.slice(0, 20).map(item => short(item, 160)).filter(Boolean) : [];
-  return { title: short(data.title, 160), form: short(data.form, 24), maturity: short(data.maturity, 24), team, area: short(data.area, 300) };
+  return { title: short(data.title, 160), form: short(data.form, 24), team, area: short(data.area, 300) };
 }
 
 /**

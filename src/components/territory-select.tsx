@@ -44,6 +44,5 @@ export function TerritorySelect({ territories, value, onChange, prefix, error }:
         invalid={Boolean(error)} describedBy={error ? `${prefix}-error` : undefined} onChange={onChange} />
     </div>
     {error ? <p id={`${prefix}-error`} className="text-sm text-red-800">{error}</p> : null}
-    <p className="text-sm leading-6 text-slate-600">Nama berawalan DEMO adalah data latihan, bukan wilayah resmi program.</p>
   </div>;
 }

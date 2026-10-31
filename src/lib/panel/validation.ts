@@ -32,7 +32,7 @@ export function validatePanel(form:FormData,operation:PanelOperation){
     payload.kind=score?"score":"conflict";payload.conflict=conflict;payload.rubric_version="demo-panel-v1";
     payload.acknowledged=score&&form.get("acknowledged")==="on";payload.vote=score?str(form,"vote"):null;
     for(const field of panelRubric){const value=str(form,field.key);payload[field.key]=score?Number(value):null;if(score&&(!integer(value)||Number(value)>field.max))errors[field.key]=`${field.label}: gunakan bilangan bulat 0–${field.max}.`;}
-    if(score&&!payload.acknowledged)errors.acknowledged="Konfirmasikan pengiriman nilai individual DEMO yang terkunci.";
+    if(score&&!payload.acknowledged)errors.acknowledged="Konfirmasikan pengiriman nilai individual yang terkunci.";
     if(score&&!["agree","disagree"].includes(String(payload.vote)))errors.vote="Pilih suara secara manual.";
   }
   return {errors,payload};

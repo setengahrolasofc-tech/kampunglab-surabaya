@@ -27,7 +27,7 @@ export default function GuidePage() {
       <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight sm:text-5xl">Dari usulan sampai manfaat yang bisa diperiksa.</h1>
       <p className="mt-6 text-lg leading-8 text-slate-600">KampungLab adalah lapisan pengajuan, pembuktian, dan tata kelola inovasi warga. Keputusan tetap di tangan pihak berwenang, dan uang tidak melewati platform.</p>
       <aside aria-label="Status program" className="mt-8 rounded-2xl border border-amber-900/15 bg-amber-50 p-6 text-sm leading-7 text-amber-950">
-        Website ini masih berupa prototipe. Akun pribadi mulai tersedia; pengajuan dan uji warga belum dibuka. Angka plafon, durasi, serta mekanisme dana dalam handbook masih berupa usulan yang perlu divalidasi pengelola program.
+        Akun pribadi mulai tersedia; pengajuan dan uji warga belum dibuka. Angka plafon, durasi, serta mekanisme dana dalam handbook masih berupa usulan yang perlu divalidasi pengelola program.
       </aside>
       <section id="sepuluh-tahap" aria-labelledby="judul-tahap" className="mt-16">
         <h2 id="judul-tahap" className="text-2xl font-bold tracking-tight sm:text-3xl">Sepuluh tahap KampungLab</h2>

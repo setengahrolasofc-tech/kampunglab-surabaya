@@ -10,6 +10,7 @@ import type { Json } from "@/lib/supabase/database.types";
 const failure = (message: string) => ({ error: message });
 const databaseError = (message: string) => ({ error: ({
   SESSION_REQUIRED: "Sesi tidak lagi berlaku. Masuk kembali sebelum menyimpan.",
+  DRAFT_LIMIT: "Satu akun maksimal memiliki 3 pengajuan. Selesaikan atau gunakan salah satu pengajuan yang sudah ada.",
   DOMICILE_REQUIRED: "Lengkapi wilayah domisilimu terlebih dahulu.",
   INVALID_TERRITORY: "Pilih RT yang tersedia di bawah RW dan kelurahan yang sesuai.",
   INVALID_THEME: "Pengaturan tema program belum sesuai. Hubungi pengelola.",
@@ -46,8 +47,8 @@ export async function saveDraft(_state: DraftFormState, form: FormData): Promise
   try { parsed = JSON.parse(raw); } catch { return failure("Data draf tidak valid."); }
   const validated = validateDraftDocument(parsed);
   if (Object.keys(validated.errors).length) return { errors: validated.errors };
-  // Warga tidak memilih tema. Database tetap mewajibkan tema aktif (dan DEMO pada prototipe) untuk lampiran dan simulasi,
-  // jadi tema yang sudah ada dipertahankan bila masih aktif, selain itu dipakai tema DEMO aktif pertama.
+  // Warga tidak memilih tema. Database tetap mewajibkan tema aktif untuk lampiran dan simulasi,
+  // jadi tema yang sudah ada dipertahankan bila masih aktif, selain itu dipakai tema bawaan aktif pertama.
   const themes = await supabase.from("innovation_themes").select("id,is_demo").eq("active", true).order("code");
   if (themes.error) return failure("Pengaturan program belum dapat dimuat. Isianmu tetap ada; coba simpan lagi.");
   const current = validated.data.innovation.theme_id;

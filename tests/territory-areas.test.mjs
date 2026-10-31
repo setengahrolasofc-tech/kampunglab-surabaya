@@ -40,7 +40,7 @@ test("ringkasan wilayah rapi, tanpa kode internal, dan kosong bila belum lengkap
 
 test("checklist data inovasi tidak lagi menunggu tema yang dipilih warga", () => {
   const doc = emptyDraftDocument("00000000-0000-4000-8000-000000000001");
-  Object.assign(doc.innovation, { title: "Judul", form: "produk", maturity: "inisiatif", summary: "Ringkasan", team: [{ id: "x", name: "Ani", role: "Ketua" }] });
+  Object.assign(doc.innovation, { title: "Judul", form: "produk", summary: "Ringkasan", team: [{ id: "x", name: "Ani", role: "Ketua" }] });
   assert.equal(doc.innovation.theme_id, "");
   assert.equal(draftChecklist(doc)[0], true);
 });

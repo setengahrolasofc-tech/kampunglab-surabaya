@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { emptyDraftDocument, validateDraftDocument, budgetTotals, budgetLineTotal, formatRupiahMilli, draftChecklist, migrateLegacyBudget } from "../src/lib/drafts/schema.mjs";
+import { emptyDraftDocument, validateDraftDocument, budgetTotals, budgetLineTotal, formatRupiahMilli, draftChecklist, migrateLegacyBudget, MAX_DRAFTS } from "../src/lib/drafts/schema.mjs";
 import { buildDocumentCheck, uncheckedDocument } from "../src/lib/ai/document-check-result.mjs";
 test("empty draft is saveable without implying submission readiness",()=>{
   const document=emptyDraftDocument();
@@ -84,4 +84,14 @@ test("AI report becomes a status where only definite problems block submission",
   assert.deepEqual(buildDocumentCheck("rab",{...good,extracted:{ordinary:5,honor:-1,contingency:1.5,maintenance:"9"}},"Pompa",now).extracted,{ordinary:5});
   assert.equal(buildDocumentCheck("prd",{...good,summary:"x"},"  Pompa ",now).checked_title,"Pompa");
   const skipped=uncheckedDocument("rab","AI mati"," Pompa ",now);assert.equal(skipped.status,"tidak_diperiksa");assert.equal(skipped.checked_title,"Pompa");
+});
+
+test("draf tidak lagi memuat tahap inovasi dan draf lama tetap terbaca", () => {
+  assert.equal("maturity" in emptyDraftDocument("x").innovation, false);
+  const legacy = emptyDraftDocument("");
+  legacy.innovation.maturity = "inisiatif";
+  const result = validateDraftDocument(legacy);
+  assert.deepEqual(result.errors, {});
+  assert.equal("maturity" in result.data.innovation, false);
+  assert.equal(MAX_DRAFTS, 3);
 });

@@ -1,5 +1,4 @@
 export const innovationForms = ["gagasan", "produk", "prototipe", "program", "teknologi"];
-export const maturityStages = ["inisiatif", "uji coba", "penerapan"];
 export const prdFields = [
   ["problem", "Masalah yang ingin diselesaikan"],
   ["problem_evidence", "Bukti atau pengamatan masalah"],
@@ -23,12 +22,13 @@ export const documentSlots = [
 ];
 export const checkStatuses = ["lulus", "perlu_dicek", "perlu_perbaikan", "tidak_diperiksa"];
 const signatureValues = ["ada", "tidak_ada", "tidak_jelas", "tidak_perlu"];
+export const MAX_DRAFTS = 3;
 const titleMatchValues = ["ya", "tidak", "tidak_terbaca"];
 export const extractedKeys = ["ordinary", "contingency", "honor", "maintenance"];
 /** @returns {import("./types").DraftDocument} */
 export function emptyDraftDocument(rtId = "") {
   return {
-    innovation: { title: "", theme_id: "", form: "", maturity: "", rt_id: rtId, summary: "", team: [] },
+    innovation: { title: "", theme_id: "", form: "", rt_id: rtId, summary: "", team: [] },
     prd: Object.fromEntries(prdFields.map(([key]) => [key, ""])),
     budget: { items: [], subtotal: "", contingency: "", honor: "", maintenance_cost: "", maintenance_months: "" },
     declaration: { own_work: false, notes: "" },
@@ -132,10 +132,9 @@ export function validateDraftDocument(raw) {
     return value.trim();
   };
   const info = section("innovation");
-  for (const [key, max] of [["title",160],["theme_id",36],["form",24],["maturity",24],["rt_id",36],["summary",3000]]) data.innovation[key] = text(info,key,max,`innovation.${key}`);
+  for (const [key, max] of [["title",160],["theme_id",36],["form",24],["rt_id",36],["summary",3000]]) data.innovation[key] = text(info,key,max,`innovation.${key}`);
   for (const key of ["theme_id","rt_id"]) if (data.innovation[key] && !uuid.test(data.innovation[key])) errors[`innovation.${key}`] = "Pilih data yang tersedia.";
   if (data.innovation.form && !innovationForms.includes(data.innovation.form)) errors["innovation.form"] = "Pilih bentuk inovasi yang tersedia.";
-  if (data.innovation.maturity && !maturityStages.includes(data.innovation.maturity)) errors["innovation.maturity"] = "Pilih tahap inovasi yang tersedia.";
   const rows = (value, max, path, fields) => {
     if (value === undefined) return [];
     if (!Array.isArray(value) || value.length > max) { errors[path] = `Maksimal ${max} baris.`; return []; }
@@ -171,7 +170,7 @@ export function validateDraftDocument(raw) {
 export function draftChecklist(data) {
   const i = data.innovation, b = data.budget;
   return [
-    Boolean(i.title && i.form && i.maturity && i.rt_id && i.summary && i.team.some(member => member.name && member.role)),
+    Boolean(i.title && i.form && i.rt_id && i.summary && i.team.some(member => member.name && member.role)),
     documentSlotProblem(data, "prd") === null,
     documentSlotProblem(data, "rab") === null && (rupiahInteger(b.subtotal) ?? 0n) > 0n && Boolean(b.maintenance_months),
     documentSlotProblem(data, "declaration") === null && data.declaration.own_work,
