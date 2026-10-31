@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { validateAuthForm, validateDomicile, validateOtp, isStrongPassword, PASSWORD_RULES, OTP_LENGTH, safeAuthDestination, getAppOrigin, isCurrentGrant } from "../src/lib/auth/validation.mjs";
 import { KECAMATAN_KELURAHAN } from "../src/lib/auth/surabaya-areas.mjs";
+import { needsDomicileCompletion } from "../src/lib/auth/completion.mjs";
 
 function form(values) { const data = new FormData(); Object.entries(values).forEach(([key, value]) => data.set(key, value)); return data; }
 
@@ -105,4 +106,14 @@ test("kode OTP harus tepat sesuai panjang dan email valid", () => {
   assert.ok(validateOtp(form({ email: "a@example.org", token: "12345a" })).errors.token);
   assert.ok(validateOtp(form({ email: "broken", token: good })).errors.email);
   assert.equal(validateOtp(form({ email: "a@example.org", token: `${good.slice(0, 3)} ${good.slice(3)}` })).errors.token, undefined);
+});
+
+test("akun Google tanpa domisili diminta melengkapi data sebelum dashboard", () => {
+  const complete = { domicile_address: "Jl. Contoh 5", domicile_kecamatan: "Wonokromo", domicile_kelurahan: "Darmo", domicile_rw: "3", domicile_rt: "7" };
+  assert.equal(needsDomicileCompletion({ app_metadata: { provider: "google", providers: ["google"] }, user_metadata: { full_name: "Budi" } }), true);
+  assert.equal(needsDomicileCompletion({ app_metadata: { provider: "google" }, user_metadata: complete }), false);
+  assert.equal(needsDomicileCompletion({ app_metadata: { provider: "google" }, user_metadata: { ...complete, domicile_rt: "  " } }), true);
+  assert.equal(needsDomicileCompletion({ app_metadata: { provider: "email" }, user_metadata: {} }), false);
+  assert.equal(needsDomicileCompletion({ app_metadata: { provider: "email" }, identities: [{ provider: "email" }, { provider: "google" }], user_metadata: {} }), true);
+  assert.equal(needsDomicileCompletion({}), false);
 });

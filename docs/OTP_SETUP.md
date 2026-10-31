@@ -31,7 +31,7 @@ Alamat, kecamatan, kelurahan, RW, dan RT disimpan di metadata akun Auth (`domici
 
 ## 5. Masuk dengan Google (opsional)
 
-Tombol memanggil `signInWithOAuth` dengan tujuan `/auth/callback`. Aktifkan provider Google di Authentication → Providers, isi Client ID/Secret dari Google Cloud, dan pastikan `NEXT_PUBLIC_APP_URL` serta daftar Redirect URL Supabase memuat origin aplikasi. Bila provider belum aktif, pengguna melihat pesan "belum dapat diproses". Akun Google tidak mengisi domisili saat masuk; pengguna mengisinya di `/profil/wilayah`.
+Tombol memanggil `signInWithOAuth` dengan tujuan `/auth/callback`. Aktifkan provider Google di Authentication → Providers, isi Client ID/Secret dari Google Cloud, dan pastikan `NEXT_PUBLIC_APP_URL` serta daftar Redirect URL Supabase memuat origin aplikasi. Bila provider belum aktif, pengguna melihat pesan "belum dapat diproses". Akun Google yang belum punya data domisili otomatis diarahkan ke `/lengkapi-profil` setelah masuk, mengisi nama lengkap, alamat, kecamatan, kelurahan, RW, dan RT (disimpan di metadata Auth seperti pendaftar email), baru bisa membuka dashboard dan halaman lain. Gerbang ini berlaku untuk akun yang punya identitas Google; pendaftar email lama tidak terpengaruh. Ini pengumpulan data, bukan kontrol keamanan, karena metadata bisa diubah pengguna sendiri dan domisili tetap klaim yang belum diverifikasi.
 
 ## 6. Verifikasi
 

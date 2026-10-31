@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { login, signup, requestPasswordReset, updatePassword, updateProfile } from "@/app/auth/actions";
+import { completeProfile, login, signup, requestPasswordReset, updatePassword, updateProfile } from "@/app/auth/actions";
 import { OtpForm } from "@/components/otp-form";
 import { PasswordInput, PasswordRules } from "@/components/password-field";
 import { DomicileFields, emptyDomicile, type Domicile } from "@/components/signup-domicile";
@@ -154,8 +154,26 @@ function SimpleForm({ mode, initialName }: { mode: "password" | "profile"; initi
   );
 }
 
+function CompleteForm({ initialName }: { initialName: string }) {
+  const [state, action, pending] = useActionState<AuthActionState, FormData>(completeProfile, initial);
+  const [name, setName] = useState(initialName);
+  const [domicile, setDomicile] = useState<Domicile>(emptyDomicile);
+  return (
+    <form action={action} noValidate className="space-y-5">
+      <Banner state={state} />
+      <fieldset disabled={pending} className="space-y-5 disabled:opacity-70">
+        <legend className="sr-only">Lengkapi data diri</legend>
+        <TextField id="complete-display_name" name="display_name" label="Nama lengkap" autoComplete="name" maxLength={80} value={name} onChange={setName} error={state.errors?.display_name} />
+        <DomicileFields prefix="complete" value={domicile} onChange={setDomicile} errors={state.errors} />
+        <button type="submit" className={buttonClass}>{pending ? "Menyimpan…" : "Simpan dan lanjut ke dashboard"}</button>
+      </fieldset>
+    </form>
+  );
+}
+
 export function AuthForm({ mode, initialName = "" }: { mode: AuthMode; initialName?: string }) {
   if (mode === "login") return <LoginForm />;
+  if (mode === "complete") return <CompleteForm initialName={initialName} />;
   if (mode === "signup") return <SignupForm />;
   if (mode === "reset") return <ResetForm />;
   return <SimpleForm mode={mode} initialName={initialName} />;

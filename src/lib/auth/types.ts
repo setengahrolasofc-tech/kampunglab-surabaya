@@ -1,4 +1,4 @@
-export type AuthMode = "login" | "signup" | "reset" | "password" | "profile";
+export type AuthMode = "login" | "signup" | "reset" | "password" | "profile" | "complete";
 export type AuthActionState = {
   error?: string;
   message?: string;

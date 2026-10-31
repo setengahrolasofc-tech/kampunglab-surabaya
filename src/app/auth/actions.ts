@@ -148,6 +148,32 @@ export async function updateProfile(_state: AuthActionState, form: FormData): Pr
   redirect("/dashboard?status=profil-disimpan");
 }
 
+/** Akun Google baru: simpan nama dan domisili (metadata Auth, sama seperti pendaftar email), lalu masuk ke dashboard. */
+export async function completeProfile(_state: AuthActionState, form: FormData): Promise<AuthActionState> {
+  const input = validateAuthForm(form, "profile");
+  const domicile = validateDomicile(form);
+  const errors = { ...input.errors, ...domicile.errors };
+  if (Object.keys(errors).length) return { errors };
+  const { supabase, user } = await requireUser({ allowIncomplete: true });
+  try {
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        display_name: input.displayName,
+        domicile_address: domicile.value.address,
+        domicile_kecamatan: domicile.value.kecamatan,
+        domicile_kelurahan: domicile.value.kelurahan,
+        domicile_rw: domicile.value.rw,
+        domicile_rt: domicile.value.rt,
+      },
+    });
+    if (error) return { error: "Data belum tersimpan. Muat ulang halaman dan coba lagi." };
+    // Samakan nama di tabel profil; bila gagal, nama masih tersimpan di metadata dan bisa diubah di dashboard.
+    await supabase.from("profiles").update({ display_name: input.displayName }).eq("id", user.id);
+  } catch { return unavailable; }
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
+}
+
 export async function logout() {
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase.auth.signOut({ scope: "local" });
