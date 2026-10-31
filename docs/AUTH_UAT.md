@@ -6,7 +6,9 @@
 2. Pertahankan `.env.local` yang berisi URL dan publishable key proyek. Opsional untuk port standar: `NEXT_PUBLIC_APP_URL=http://localhost:3000`.
 3. Jalankan `npm run dev` dan buka `/masuk`. Jika memakai port lain, sesuaikan APP_URL dan redirect allowlist Supabase.
 
-## UAT manusia yang masih perlu dilakukan
+## UAT manusia
+
+Pemilik telah mengonfirmasi email masuk dan memperlihatkan dashboard berisi profil akun sendiri. Screenshot itu membuktikan sesi dashboard berhasil, bukan seluruh skenario di bawah. Pengguna memilih lanjut ke admin sebelum mengonfirmasi tes edit nama, keluar/masuk ulang, dan recovery.
 
 - Buka `/daftar`, isi nama, email milik sendiri, kata sandi minimal 8 karakter, dan konfirmasi.
 - Buka email konfirmasi di browser yang sama dengan browser pendaftaran. Periksa folder spam. Jika email tidak datang, periksa konfigurasi pengiriman dan batas provider; keberhasilan response signup bukan bukti email terkirim.
@@ -31,8 +33,8 @@ Pada pemeriksaan 30 Oktober 2026, semua 11 skenario HTTP lulus. Akun fixture kem
 
 ## Catatan sebelum pilot nyata
 
-- Belum ada admin pertama yang ditetapkan. Pemilik perlu memverifikasi akun tujuan sebelum bootstrap admin; pengguna pertama tidak otomatis admin.
-- Belum ada UI pemberian mandat, unggah SK, wilayah resmi, Google OAuth, SMTP khusus, atau deployment Vercel yang disiapkan dalam milestone ini.
+- Admin pertama sudah ditetapkan setelah pencocokan akun dan instruksi pemilik; pendaftar pertama tetap tidak otomatis admin.
+- UI pemberian/pencabutan peran/mandat, wilayah/jabatan, dan audit tersedia pada `/admin`. Lihat ADMIN_UAT.md. Unggah SK, wilayah resmi, Google OAuth, SMTP khusus, dan deployment Vercel belum tersedia.
 - Security advisor melaporkan **Leaked Password Protection Disabled**. Periksa opsi dan ketersediaannya pada [panduan password Supabase](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) sebelum pilot nyata. Tidak ada perubahan plan berbayar dilakukan otomatis.
 - Index FK tertentu belum dipakai karena belum ada trafik/modul penugasan. Index dipertahankan untuk relasi FK; tinjau lagi setelah beban nyata, sesuai [panduan unused indexes](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
-- Fungsi definer untuk trigger berada di schema private, search_path dikunci, dan EXECUTE tidak diberikan ke pengguna aplikasi. Grant mandat/role tidak dapat ditulis oleh authenticated, termasuk orang yang sudah punya label admin; UI/RPC pengelolaan berwenang harus dibuat sebagai milestone tersendiri.
+- Fungsi definer trigger berada di schema private, search_path dikunci, dan EXECUTE tidak diberikan ke pengguna aplikasi. Tabel mandat/role tetap tidak dapat ditulis langsung oleh authenticated. RPC admin memeriksa akun, sesi, dan penetapan aktif sebelum setiap akses; implementasi privileged-nya ada di private dengan guard internal, wrapper public memakai invoker.

@@ -234,7 +234,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      admin_access: {
+        Args: { p_operation: string; p_payload?: Json }
+        Returns: Json
+      }
+      is_program_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

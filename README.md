@@ -66,6 +66,7 @@ AGENTS.md            Petunjuk pengembangan untuk AI
 - [Konfigurasi Supabase](docs/SUPABASE_SETUP.md): proyek yang dipilih, environment lokal, dan pemeriksaan hanya-baca `npm run check:supabase`.
 - [Desain identitas/mandat](docs/IDENTITY_ACCESS_DESIGN.md): keputusan D-18 yang disetujui, hak akses, dan batas milestone.
 - [UAT akun](docs/AUTH_UAT.md): langkah pengujian email, sesi, profil, dan batas verifikasi.
+- [Admin dan akses](docs/ADMIN_UAT.md): penetapan peran/mandat, wilayah/jabatan, pencabutan, audit, dan verifikasi.
 
 Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijakan. Jangan menampilkannya sebagai ketetapan resmi Pemkot. Keputusan `D-01` sampai `D-24` pada PRD belum otomatis disetujui.
 
@@ -73,7 +74,7 @@ Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijaka
 
 1. Gunakan proyek Supabase yang sudah dipilih dan tercatat pada panduan konfigurasi; jangan membuat proyek duplikat.
 2. Uji daftar/masuk lewat email pribadi dan pastikan callback tetap sesuai origin aplikasi.
-3. Tentukan identitas admin pertama setelah pemilik memverifikasinya, lalu bangun UI penugasan dan data wilayah. Tidak ada admin yang ditetapkan otomatis.
+3. Admin pertama sudah ditetapkan atas instruksi pemilik setelah akun terverifikasi. Buka `/admin` dari dashboard untuk pengelolaan akses; data wilayah resmi dan dokumen mandat tetap perlu disiapkan pemilik. Tidak ada pendaftar yang mendapat admin otomatis.
 4. Siapkan project Vercel dan environment; verifikasi akses repository untuk build/deploy.
 5. Implementasikan fitur bertahap dan laporkan verifikasi yang benar-benar dilakukan.
 

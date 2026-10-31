@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "node --test tests/*.test.mjs",
     "check:supabase": "node scripts/check-supabase.mjs",
-    "test:auth:http": "node scripts/verify-auth-http.mjs"
+    "test:auth:http": "node scripts/verify-auth-http.mjs",
+    "test:admin:http": "node scripts/verify-admin-http.mjs"
   },
   "dependencies": {
     "@next/env": "16.4.3",

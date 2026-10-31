@@ -10,7 +10,7 @@ const mandateLabels: Record<string, string> = { primary: "Utama", backup: "Cadan
 const roleLabels: Record<string, string> = { program_admin: "Admin program", reviewer: "Reviewer", facilitator: "Fasilitator" };
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
-  const { user, profile, currentMandates, currentRoles, error } = await getAccountSnapshot();
+  const { user, profile, currentMandates, currentRoles, isAdmin, error } = await getAccountSnapshot();
   const status = (await searchParams).status;
 
   return <main id="konten-utama" tabIndex={-1} className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
@@ -19,6 +19,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       <form action={logout}><button type="submit" className="min-h-11 rounded-full border border-emerald-900 px-5 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-50">Keluar akun</button></form>
     </div>
     {status === "keluar-gagal" ? <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-900">Belum berhasil keluar. Coba kembali.</p> : null}
+    {status === "akses-ditolak" ? <p role="alert" className="mt-6 rounded-xl bg-amber-50 p-4 text-amber-950">Halaman pengelola memerlukan akses admin yang masih berlaku.</p> : null}
+    {isAdmin ? <Link href="/admin" className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white hover:bg-emerald-800">Buka pengelolaan admin</Link> : null}
     {status === "profil-disimpan" ? <p role="status" className="mt-6 rounded-xl bg-emerald-50 p-4 text-emerald-950">Nama tampilan berhasil disimpan.</p> : null}
     {error ? <p role="alert" className="mt-6 rounded-xl bg-amber-50 p-4 leading-7 text-amber-950">Sebagian data akun belum dapat dimuat. Muat ulang halaman; hubungi pengelola jika tetap bermasalah. Tidak ada hak petugas yang diberikan secara otomatis.</p> : null}
     <div className="mt-10 grid gap-7 lg:grid-cols-2">
