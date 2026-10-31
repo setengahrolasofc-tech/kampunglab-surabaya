@@ -4,9 +4,9 @@ Panduan ini memakai kondisi proyek terbaru: database Supabase `kampunglab-suraba
 
 ## A. Database (Supabase)
 
-Menurut `docs/PROJECT_STATUS.md`, sebelas migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
+Menurut `docs/PROJECT_STATUS.md`, dua belas migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
 
-- Dashboard Supabase > **Database > Migrations**: harus ada sebelas entri, dari `20261030134536_identity_and_office_mandates` sampai `20261031121110_restore_archived_demo_attachments`.
+- Dashboard Supabase > **Database > Migrations**: harus ada dua belas entri, dari `20261030134536_identity_and_office_mandates` sampai `20261031124904_demo_physical_recommendation_workflow`.
 - Atau lewat CLI: `npx supabase login`, `npx supabase link --project-ref zxfaotlqldfrlccahebw`, `npx supabase migration list`.
 
 Jika kamu memakai project Supabase baru/kosong, terapkan semua file migrasi berurutan menurut nama file (`npx supabase db push`).
@@ -45,12 +45,12 @@ Dashboard > **Authentication**:
 1. Daftar akun baru, buka email konfirmasi (tautannya harus menuju alamat Vercel, bukan localhost), masuk.
 2. Dari dashboard: isi domisili di `/profil/wilayah`, buat draf di `/pengajuan`, isi empat langkah, kirim salinan simulasi DEMO.
 3. Beri mandat RT/RW/kelurahan ke akun uji lewat `/admin`, masuk dengan akun itu, dan periksa `/antrean/rt`.
-4. Dari komputer lokal (dengan `.env.local`): `npm run check:supabase`, lalu skenario HTTP di `docs/AUTH_UAT.md`, `ADMIN_UAT.md`, `DRAFTS_UAT.md`, dan `SIMULATION_UAT.md`.
+4. Dari komputer lokal (dengan `.env.local`): `npm run check:supabase`, lalu skenario HTTP di `docs/AUTH_UAT.md`, `ADMIN_UAT.md`, `DRAFTS_UAT.md`, dan `SIMULATION_UAT.md`, serta `PHYSICAL_UAT.md`. Tes alur tetap ditunda sampai pengguna memintanya; daftar ini panduan tahap verifikasi nanti.
 
 ## E. Batasan yang perlu diketahui
 
 - **Alur pemeriksaan masih DEMO.** Nomor pengajuan resmi, keputusan akhir kelurahan/panel, dana, uji warga, passport, dan banding belum dibangun (lihat `docs/PROJECT_STATUS.md`). Jangan dipresentasikan sebagai pengajuan resmi.
-- **Lampiran privat DEMO tersedia.** Bucket dan Edge Function `private-attachments` sudah dibuat/deploy pada proyek yang dipilih; tidak perlu key backend pada environment Next.js. Untuk proyek lain, migrasi saja belum cukup: fungsi di `supabase/functions/private-attachments` juga perlu dideploy dengan konfigurasi auth `supabase/config.toml`. Ikuti ATTACHMENTS_UAT.md. Jalur dokumen fisik 7 hari tetap belum dibangun; unggah lampiran tidak membuat rekomendasi fisik otomatis.
+- **Lampiran privat DEMO tersedia.** Bucket dan Edge Function `private-attachments` sudah dibuat/deploy pada proyek yang dipilih; tidak perlu key backend pada environment Next.js. Untuk proyek lain, migrasi saja belum cukup: fungsi di `supabase/functions/private-attachments` juga perlu dideploy dengan konfigurasi auth `supabase/config.toml`. Ikuti ATTACHMENTS_UAT.md. Jalur dokumen fisik DEMO dibangun dengan batas awal 7 hari per tingkat, permintaan berkas terpisah, dan konfirmasi manual. Edge saat ini versi 3 ACTIVE; lihat PHYSICAL_UAT.md. Tidak perlu menjalankan ulang migrasi atau mengubah batas hari untuk membukanya lebih awal.
 - **Email notifikasi dan pengingat belum ada.**
 - **Proyek Supabase gratis dijeda bila tidak aktif sekitar seminggu.** Aktifkan kembali dan buka web sehari sebelum demo/pitch.
 - **Tema dan wilayah DEMO** berlabel DEMO; master resmi harus disiapkan pengelola program.

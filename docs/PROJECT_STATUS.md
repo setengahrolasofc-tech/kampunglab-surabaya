@@ -2,7 +2,7 @@
 
 Tanggal pembaruan: 31 Oktober 2026.
 
-## Milestone saat ini: lampiran privat dan daftar berkas terkunci per putaran
+## Milestone saat ini: jalur rekomendasi fisik DEMO setelah batas hari
 
 Tersedia:
 
@@ -17,7 +17,7 @@ Tersedia:
 - Model akun pribadi + mandat jabatan disetujui pengguna (bagian D-18).
 - Daftar/masuk email-password, callback PKCE, permintaan reset password, ubah password, dan keluar akun. Perubahan upstream menambahkan UI OTP daftar/pemulihan, aturan password, klaim domisili saat daftar, dan pemicu OAuth Google. Integrasi sumber dipertahankan; template email/panjang OTP/provider Google belum diubah atau diverifikasi pada milestone kelurahan. Klaim domisili Auth tidak dipakai sebagai hak akses atau pengganti `profiles.domicile_rt_id`.
 - Dashboard terlindungi, profil sendiri, nama tampilan dapat diubah, serta daftar mandat/peran aktif dari database.
-- Dua belas tabel public dengan RLS (profiles, territories, offices, office_mandates, platform_role_grants, innovation_themes, innovation_drafts, innovation_simulations, simulation_rt_notes, simulation_review_events, draft_attachments, simulation_attachment_links), audit privat, dan sebelas migrasi yang sudah diterapkan. Tipe TypeScript dihasilkan dari schema nyata.
+- Lima belas tabel public dengan RLS (profiles, territories, offices, office_mandates, platform_role_grants, innovation_themes, innovation_drafts, innovation_simulations, simulation_rt_notes, simulation_review_events, draft_attachments, simulation_attachment_links, physical_route_settings, physical_recommendation_requests, physical_recommendation_actions), audit privat, dan dua belas migrasi yang sudah diterapkan. Tipe TypeScript dihasilkan dari schema nyata.
 - Pembatasan penulisan kolom profil, audit privat, dan exclusion constraints untuk periode mandat.
 - Admin pertama ditetapkan atas instruksi eksplisit pemilik setelah identitas akun dicocokkan dengan dashboard dan email terkonfirmasi di Auth. Tidak ada bootstrap otomatis dari pendaftar pertama atau user_metadata.
 - Halaman `/admin`: cari akun terkonfirmasi lewat email lengkap, tetapkan/cabut peran program dan mandat jabatan, buat wilayah/jabatan, lihat riwayat akun dan 30 audit perubahan akses terbaru.
@@ -46,6 +46,13 @@ Tersedia:
 - Daftar lampiran siap disalin atomik saat simulasi dikirim, dengan versi lampiran terpisah dari JSON draf. Pending memblokir kirim; perubahan daftar yang bersamaan menghasilkan konflik. Lampiran pada putaran lama tetap tersimpan setelah draf berubah, termasuk saat berkas dilepas atau dipulihkan.
 - Unduhan melalui rute aplikasi memeriksa scope salinan/mandat terkini sebelum dan sesudah baca, memverifikasi digest/format, lalu mengirim sebagai attachment private/no-store. Tidak menggunakan URL publik atau signed URL jangka panjang. Tidak ada klaim antivirus atau pengesahan dokumen.
 - Pelepasan hanya mengarsipkan. Berkas pending/ditinggalkan juga tetap privat; belum ada penghapusan fisik otomatis atau kebijakan retensi D-13. Rincian serta batas verifikasi ada di ATTACHMENTS_UAT.md.
+- Jalur dokumen fisik DEMO pada `/simulasi/[id]/dokumen-fisik`: jam antrean per tingkat RT/RW, batas awal 7 × 24 jam, daftar surat fisik sesuai putaran/tahap/waktu masuk antrean, persetujuan membagikan salinan lengkap dan berkas, satu permintaan pending per tahap, serta riwayat dengan pagination 20 per halaman. Batas DEMO 5 permintaan baru/salinan/24 jam.
+- `/antrean/dokumen-fisik` dan `/dokumen-fisik/[id]` untuk pemegang mandat utama kelurahan yang aktif sesuai wilayah. Akses khusus ini hanya muncul melalui permintaan pengaju; scope global salinan tidak diperluas. Konfirmasi membutuhkan pemeriksaan tanda tangan/stempel, konfirmasi ke RT/RW, kesesuaian isi dan pemeriksaan substansi tahap terkait, alasan, serta deklarasi konflik. Kewenangan kelurahan untuk operasional masih belum final; penerapan ini hanya DEMO.
+- Konfirmasi fisik mencatat rekomendasi RT/RW bermetode fisik atas akun/jabatan kelurahan pemeriksa yang sebenarnya dan memindahkan satu tahap. Penolakan hanya menutup permintaan; status/jam antrean tetap. Laporan konflik tidak memutuskan; pemeriksa yang pernah merekomendasikan atau melaporkan konflik pada putaran sama tidak dapat mengambil keputusan substansi berikutnya. Tidak ada pelompatan/kenaikan otomatis.
+- Pemilik dapat menarik permintaan pending. Perubahan tahap digital menutup pending menjadi obsolete. Akses khusus pemeriksa ke permintaan ditarik/obsolete dicabut; pemilik tetap membaca riwayatnya. Permintaan dikonfirmasi/ditolak tetap tersedia bagi mandat kelurahan terkini pada wilayah yang sama selama akun pengaju aktif.
+- Surat fisik memiliki klasifikasi dan konteks tersendiri; tidak membekukan lampiran pendukung, tidak menaikkan versi lampiran pendukung, dan pending surat fisik tidak memblokir pengiriman biasa. Lampiran pendukung pada permintaan memakai snapshot putaran yang sudah terkunci, bukan berkas draf terbaru. Dokumen fisik dan isi permintaan tetap privat.
+- `/admin/jalur-fisik`: batas hari DEMO 1–30 dengan alasan, atribusi, riwayat versi, perlindungan konflik dua tab dan retry. Perubahan berlaku bagi kelayakan permintaan baru tanpa mengubah jam masuk antrean; batas/versi permintaan yang sudah terkirim tetap. Default 7 hari tidak diubah untuk melewati waktu saat pembangunan.
+- Migrasi `20261031124904_demo_physical_recommendation_workflow.sql` diterapkan; tipe dari schema nyata dan Edge `private-attachments` versi 3 ACTIVE. Rincian perilaku, batas kebijakan, serta daftar pemeriksaan yang belum dijalankan ada di PHYSICAL_UAT.md.
 - Halaman `/dokumen` dengan 14 template dokumen Word (`public/templates`) dan panduan deploy `docs/DEPLOY.md`. Template berstatus usulan, belum divalidasi BRIDA/OPD.
 
 Belum diimplementasikan:
@@ -56,20 +63,20 @@ Belum diimplementasikan:
 - Pencatatan dana, checkpoint, misi, consent, serta bukti uji.
 - Passport/QR, LPJ, distribusi, etalase data, minat pilot, dan banding.
 - Scheduler, email, dan audit operasional.
-- Jalur dokumen fisik: keputusan pengguna 31 Okt 2026 bahwa setelah 7 hari tanpa keputusan RT/RW inovator dapat memakai dokumen bertanda tangan yang dikonfirmasi kelurahan, tanpa kenaikan otomatis (PRD FR-04/FR-17/D-22). Belum dibangun pada alur DEMO; fondasi bucket/lampiran privat tersedia, tetapi timer, permintaan jalur fisik, konfirmasi, dan transisi khususnya belum tersedia.
+- Penetapan kewenangan konfirmasi dokumen fisik operasional, template terisi otomatis, reminder/email/scheduler. Timer dan konfirmasi fisik yang tersedia hanya DEMO; kewenangan operasional belum disahkan.
 - Hosting/deployment Vercel.
 
 Tidak ada angka statistik, transaksi, akun jabatan, atau hasil uji fiktif yang disajikan sebagai data nyata.
 
 ## Verifikasi
 
-Pengguna meminta tes alur ditunda pada 31 Oktober 2026. Untuk milestone lampiran ini, hanya lint, TypeScript Next.js/Edge, kompilasi produksi, deployment fungsi, serta metadata schema/advisor yang diperiksa. Tes unit, SQL skenario, HTTP, dan UAT unggah/unduh, retry, arsip/pulihkan, snapshot, dan izin berkas **belum dijalankan**. Tes alur keputusan/revisi/pemilihan jalur sebelumnya juga tetap ditunda. Tidak ada akun atau mandat QA yang diaktifkan kembali. Keberadaan kode/script dan keberhasilan migrasi tidak membuktikan alur fungsional lulus.
+Pengguna meminta tes alur ditunda pada 31 Oktober 2026. Untuk milestone jalur fisik ini, hanya lint, TypeScript Next.js/Edge, kompilasi produksi, deployment fungsi, serta metadata schema/advisor yang diperiksa. Tes unit, SQL skenario, HTTP, dan UAT timer, konfigurasi, permintaan/konfirmasi/konflik/penarikan jalur fisik, unggah/unduh, retry, arsip/pulihkan, snapshot, dan izin berkas **belum dijalankan**. Tes alur keputusan/revisi/pemilihan jalur sebelumnya juga tetap ditunda. Tidak ada akun atau mandat QA yang diaktifkan kembali. Keberadaan kode/script dan keberhasilan migrasi tidak membuktikan alur fungsional lulus.
 
 - Lint: lulus (`npm run lint`).
 - Typecheck: lulus (`npm run typecheck`).
 - Build produksi: lulus (`npm run build`), halaman informasi berhasil diprerender.
-- Edge Function: deployment versi 2 berstatus ACTIVE; bukan bukti uji permintaan pengguna sudah lulus.
-- Metadata/advisor database: RLS aktif pada 12 tabel public, tabel berkas/tautan tanpa SELECT authenticated, dan peringatan lama proteksi password bocor tetap ada. Ini pembacaan metadata, bukan tes skenario akses petugas.
+- Edge Function: deployment versi 3 berstatus ACTIVE; bukan bukti uji permintaan pengguna sudah lulus.
+- Metadata/advisor database: RLS aktif pada 15 tabel public; tiga tabel baru jalur fisik dan tabel berkas/tautan tanpa CRUD authenticated, dan peringatan lama proteksi password bocor tetap ada. Ini pembacaan metadata, bukan tes skenario akses petugas.
 
 ### Catatan historis milestone sebelumnya
 
@@ -90,7 +97,7 @@ Hasil berikut berasal dari fondasi akun/admin/draf/salinan awal sebelum fitur ke
 - Browser/UAT manusia: pengguna mengonfirmasi beranda, email konfirmasi masuk, dan memperlihatkan dashboard pribadinya. Edit profil/keluar-masuk/recovery secara manual belum dikonfirmasi; pengguna meminta langsung lanjut admin. UAT admin, responsif, keyboard, dan alur bisnis masih perlu dilakukan manusia.
 - UAT visual/interaksi profil wilayah dan empat langkah draf masih perlu dilakukan manusia; pengujian HTTP tidak membuktikan perilaku klik/hidrasi, dialog perubahan belum disimpan, atau aksesibilitas keyboard sudah lulus.
 - UAT simulasi dan catatan RT dengan dua akun, hidrasi, persetujuan berbagi, serta aksesibilitas keyboard masih perlu dilakukan manusia melalui SIMULATION_UAT.md.
-- Database kini memiliki dua belas tabel public aplikasi dengan RLS aktif. Pembacaan metadata milestone keputusan memastikan grant SELECT authenticated untuk tabel riwayat tindakan baru tidak tersedia; bukan tes RLS dengan login petugas. Root metadata Data API tetap membutuhkan privilege tambahan; query tabel menggunakan sesi pengguna telah diuji tanpa secret key.
+- Database kini memiliki lima belas tabel public aplikasi dengan RLS aktif. Pembacaan metadata milestone keputusan memastikan grant SELECT authenticated untuk tabel riwayat tindakan baru tidak tersedia; bukan tes RLS dengan login petugas. Root metadata Data API tetap membutuhkan privilege tambahan; query tabel menggunakan sesi pengguna telah diuji tanpa secret key.
 - Security advisors setelah migrasi kelurahan: hanya peringatan proteksi password bocor belum aktif. Performance advisors terakhir pada milestone catatan awal: 12 index belum digunakan; tidak diperiksa ulang pada milestone keputusan. Tautan remediasi ada di AUTH_UAT.md.
 - Email konfirmasi nyata diterima dan sesi dashboard pemilik terlihat pada screenshot; detail pembukaan callback tidak diperiksa langsung. Recovery nyata, Google, refresh token dalam browser setelah kedaluwarsa, serta UAT admin belum diverifikasi.
 - Deployment Vercel: belum dilakukan.
@@ -116,3 +123,5 @@ Milestone kelurahan menambahkan kode/schema pemeriksaan administrasi, revisi/pen
 Saat integrasi ditemukan tiga commit upstream berisi template dokumen, pembaruan kebijakan jalur fisik 7 hari, dan alur akun/OTP. Seluruh perubahan dipertahankan dan digabung sebelum lint/typecheck/build hasil akhir. Tes fungsional tetap ditunda; fitur unggah/jalur fisik 7 hari tidak ikut dibangun dalam milestone kelurahan.
 
 Milestone lampiran menerapkan dua migrasi tambahan dan deployment Edge tanpa unggahan fixture atau skenario fungsional. Metadata memperlihatkan 0 objek berkas/0 catatan lampiran/0 tautan salinan pada saat pemeriksaan. Tidak ada akun atau mandat QA yang diaktifkan. Jumlah tabel/migrasi pada bagian terkini sudah diperbarui; hasil tes lama tetap catatan historis.
+
+Milestone jalur fisik hanya menerapkan schema/kode dan deployment Edge. Tidak menjalankan tes unit, SQL skenario, HTTP, browser, atau UAT; tidak mengubah clock/batas hari untuk mencoba alur dan tidak membuat permintaan/keputusan/unggahan QA. Metadata setelah migrasi: 15 tabel public dengan RLS, 12 migrasi, konfigurasi versi 0 = 7 hari, 0 permintaan fisik, 0 tindakan fisik, 0 metadata berkas. Tiga tabel baru menolak CRUD langsung anon/authenticated; RPC publik hanya dapat dieksekusi authenticated dan tetap memeriksa sesi/hak di dalam fungsi. Security advisor hanya melaporkan peringatan lama proteksi password bocor belum aktif; performance advisor tidak dijalankan ulang pada milestone ini.

@@ -41,6 +41,6 @@ export async function getDraftEditor(id: string) {
   ]);
   if (draft.error||simulation.error) throw new Error("Draf belum dapat dimuat.");
   if(draft.data&&attachments.error)throw new Error("Ringkasan lampiran draf belum dapat dimuat.");
-  const files=(attachments.data as unknown as DraftAttachmentData|null)?.files??[];
+  const files=(attachments.data as unknown as DraftAttachmentData|null)?.files.filter(f=>f.purpose==="supporting")??[];
   return { ...context, draft: draft.data, simulation:simulation.data,attachmentCount:files.filter(f=>f.storage_state==="ready").length,attachmentsPending:files.some(f=>f.storage_state==="pending") };
 }

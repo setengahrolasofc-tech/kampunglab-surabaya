@@ -5,7 +5,7 @@ const MAX_FILE = 3 * 1024 * 1024;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const knownErrors = new Set([
   "SESSION_REQUIRED", "ATTACHMENT_UNAVAILABLE", "DEMO_ONLY", "INVALID_FILE", "ATTACHMENT_LIMIT",
-  "UPLOAD_RATE_LIMIT", "UPLOAD_REQUEST_CONFLICT", "ATTACHMENT_ARCHIVED", "UPLOAD_NOT_CONFIRMED",
+  "PHYSICAL_UPLOAD_NOT_AVAILABLE", "UPLOAD_RATE_LIMIT", "UPLOAD_REQUEST_CONFLICT", "ATTACHMENT_ARCHIVED", "UPLOAD_NOT_CONFIRMED",
 ]);
 class FileError extends Error {
   constructor(public code: string, public status = 400) { super(code); }
@@ -91,11 +91,14 @@ Deno.serve(async (req: Request) => {
       const form = await new Response(body, { headers: { "Content-Type": contentType } }).formData();
       const file = form.get("file"), draftId = String(form.get("draft_id") ?? ""), requestId = String(form.get("request_id") ?? "");
       if (form.get("operation") !== "upload" || !(file instanceof File) || !UUID.test(draftId) || !UUID.test(requestId)) throw new FileError("INVALID_FILE");
+      const purpose = String(form.get("purpose") ?? "supporting"), physicalSimulationId = form.get("physical_simulation_id");
+      if (!["supporting", "physical_rt", "physical_rw"].includes(purpose)
+        || (purpose === "supporting" ? physicalSimulationId !== null : typeof physicalSimulationId !== "string" || !UUID.test(physicalSimulationId))) throw new FileError("INVALID_FILE");
       const name = file.name.normalize("NFC").trim();
       if (!name || name.length > 160 || /[\u0000-\u001f\u007f/\\]/.test(name) || file.size === 0) throw new FileError("INVALID_FILE");
       if (file.size > MAX_FILE) throw new FileError("FILE_TOO_LARGE", 413);
       const bytes = new Uint8Array(await file.arrayBuffer()), mime = fileMime(bytes, name), digest = await hash(bytes);
-      const reservation = await userClient.rpc("attachment_workflow", { operation: "reserve", payload: { draft_id: draftId, request_id: requestId, name, mime_type: mime, byte_size: bytes.length, sha256: digest } });
+      const reservation = await userClient.rpc("attachment_workflow", { operation: "reserve", payload: { purpose, physical_simulation_id: physicalSimulationId, draft_id: draftId, request_id: requestId, name, mime_type: mime, byte_size: bytes.length, sha256: digest } });
       if (reservation.error) rpcError(reservation.error);
       const record = reservation.data as FileRecord;
       if (!record || !UUID.test(record.id) || record.owner_id !== actorId || record.object_path !== `${actorId}/${record.id}/blob`) throw new FileError("FILE_SERVICE_UNAVAILABLE", 503);
@@ -114,8 +117,9 @@ Deno.serve(async (req: Request) => {
     if (!contentType.startsWith("application/json")) throw new FileError("INVALID_FILE");
     const input = JSON.parse(new TextDecoder().decode(await boundedBody(req, 16384)));
     if (!input || typeof input !== "object" || input.operation !== "download" || !UUID.test(String(input.id ?? ""))
-      || (input.simulation_id != null && !UUID.test(String(input.simulation_id)))) throw new FileError("INVALID_FILE");
-    const payload = { id: input.id, simulation_id: input.simulation_id ?? null };
+      || (input.simulation_id != null && !UUID.test(String(input.simulation_id)))
+      || (input.physical_request_id != null && !UUID.test(String(input.physical_request_id)))) throw new FileError("INVALID_FILE");
+    const payload = { id: input.id, simulation_id: input.simulation_id ?? null, physical_request_id: input.physical_request_id ?? null };
     const authorization = await userClient.rpc("attachment_workflow", { operation: "read", payload });
     if (authorization.error) rpcError(authorization.error);
     const record = authorization.data as FileRecord;

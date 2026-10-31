@@ -24,6 +24,9 @@ export type Database = {
           object_path: string | null
           original_name: string
           owner_id: string
+          physical_queue_entered_at: string | null
+          physical_simulation_id: string | null
+          purpose: string
           removed_at: string | null
           request_id: string
           sha256: string
@@ -38,6 +41,9 @@ export type Database = {
           object_path?: string | null
           original_name: string
           owner_id: string
+          physical_queue_entered_at?: string | null
+          physical_simulation_id?: string | null
+          purpose?: string
           removed_at?: string | null
           request_id: string
           sha256: string
@@ -52,6 +58,9 @@ export type Database = {
           object_path?: string | null
           original_name?: string
           owner_id?: string
+          physical_queue_entered_at?: string | null
+          physical_simulation_id?: string | null
+          purpose?: string
           removed_at?: string | null
           request_id?: string
           sha256?: string
@@ -70,6 +79,13 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "draft_attachments_physical_simulation_id_fkey"
+            columns: ["physical_simulation_id"]
+            isOneToOne: false
+            referencedRelation: "innovation_simulations"
             referencedColumns: ["id"]
           },
         ]
@@ -160,6 +176,7 @@ export type Database = {
           mode: string
           owner_id: string
           previous_simulation_id: string | null
+          queue_entered_at: string
           reached_stage: number
           reference: string | null
           rt_id: string
@@ -181,6 +198,7 @@ export type Database = {
           mode?: string
           owner_id: string
           previous_simulation_id?: string | null
+          queue_entered_at?: string
           reached_stage?: number
           reference?: string | null
           rt_id: string
@@ -202,6 +220,7 @@ export type Database = {
           mode?: string
           owner_id?: string
           previous_simulation_id?: string | null
+          queue_entered_at?: string
           reached_stage?: number
           reference?: string | null
           rt_id?: string
@@ -382,6 +401,229 @@ export type Database = {
           },
         ]
       }
+      physical_recommendation_actions: {
+        Row: {
+          action: string
+          actor_id: string
+          actor_name: string
+          body: string
+          contact_checked: boolean
+          content_checked: boolean
+          created_at: string
+          id: string
+          mandate_id: string | null
+          office_id: string | null
+          office_name: string | null
+          physical_request_id: string
+          request_id: string
+          signature_checked: boolean
+          workflow_version: number
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          actor_name: string
+          body: string
+          contact_checked?: boolean
+          content_checked?: boolean
+          created_at?: string
+          id?: string
+          mandate_id?: string | null
+          office_id?: string | null
+          office_name?: string | null
+          physical_request_id: string
+          request_id: string
+          signature_checked?: boolean
+          workflow_version: number
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          actor_name?: string
+          body?: string
+          contact_checked?: boolean
+          content_checked?: boolean
+          created_at?: string
+          id?: string
+          mandate_id?: string | null
+          office_id?: string | null
+          office_name?: string | null
+          physical_request_id?: string
+          request_id?: string
+          signature_checked?: boolean
+          workflow_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "physical_recommendation_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "physical_recommendation_actions_mandate_id_fkey"
+            columns: ["mandate_id"]
+            isOneToOne: false
+            referencedRelation: "office_mandates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "physical_recommendation_actions_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "physical_recommendation_actions_physical_request_id_fkey"
+            columns: ["physical_request_id"]
+            isOneToOne: false
+            referencedRelation: "physical_recommendation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      physical_recommendation_requests: {
+        Row: {
+          acknowledged: boolean
+          attachment_id: string
+          body: string
+          closed_at: string | null
+          created_at: string
+          delay_days: number
+          eligible_at: string
+          id: string
+          kelurahan_id: string
+          owner_id: string
+          queue_entered_at: string
+          request_id: string
+          settings_version: number
+          simulation_id: string
+          stage: string
+          status: string
+          submitted_workflow_version: number
+        }
+        Insert: {
+          acknowledged: boolean
+          attachment_id: string
+          body: string
+          closed_at?: string | null
+          created_at?: string
+          delay_days: number
+          eligible_at: string
+          id?: string
+          kelurahan_id: string
+          owner_id: string
+          queue_entered_at: string
+          request_id: string
+          settings_version: number
+          simulation_id: string
+          stage: string
+          status?: string
+          submitted_workflow_version: number
+        }
+        Update: {
+          acknowledged?: boolean
+          attachment_id?: string
+          body?: string
+          closed_at?: string | null
+          created_at?: string
+          delay_days?: number
+          eligible_at?: string
+          id?: string
+          kelurahan_id?: string
+          owner_id?: string
+          queue_entered_at?: string
+          request_id?: string
+          settings_version?: number
+          simulation_id?: string
+          stage?: string
+          status?: string
+          submitted_workflow_version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "physical_recommendation_requests_attachment_id_fkey"
+            columns: ["attachment_id"]
+            isOneToOne: false
+            referencedRelation: "draft_attachments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "physical_recommendation_requests_kelurahan_id_fkey"
+            columns: ["kelurahan_id"]
+            isOneToOne: false
+            referencedRelation: "territories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "physical_recommendation_requests_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "physical_recommendation_requests_settings_version_fkey"
+            columns: ["settings_version"]
+            isOneToOne: false
+            referencedRelation: "physical_route_settings"
+            referencedColumns: ["version"]
+          },
+          {
+            foreignKeyName: "physical_recommendation_requests_simulation_id_fkey"
+            columns: ["simulation_id"]
+            isOneToOne: false
+            referencedRelation: "innovation_simulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      physical_route_settings: {
+        Row: {
+          actor_id: string | null
+          actor_name: string
+          base_version: number
+          created_at: string
+          delay_days: number
+          id: string
+          reason: string
+          request_id: string | null
+          version: number
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_name: string
+          base_version: number
+          created_at?: string
+          delay_days: number
+          id?: string
+          reason: string
+          request_id?: string | null
+          version: number
+        }
+        Update: {
+          actor_id?: string | null
+          actor_name?: string
+          base_version?: number
+          created_at?: string
+          delay_days?: number
+          id?: string
+          reason?: string
+          request_id?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "physical_route_settings_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_role_grants: {
         Row: {
           appointment_reference: string
@@ -517,6 +759,7 @@ export type Database = {
           body: string
           checks: Json
           created_at: string
+          decision_method: string
           evaluation_acknowledged: boolean
           evaluation_path: string | null
           expected_version: number
@@ -526,6 +769,7 @@ export type Database = {
           office_id: string
           office_name: string
           outcome: string
+          physical_request_id: string | null
           request_id: string
           simulation_id: string
           stage: string
@@ -537,6 +781,7 @@ export type Database = {
           body: string
           checks: Json
           created_at?: string
+          decision_method?: string
           evaluation_acknowledged?: boolean
           evaluation_path?: string | null
           expected_version: number
@@ -546,6 +791,7 @@ export type Database = {
           office_id: string
           office_name: string
           outcome: string
+          physical_request_id?: string | null
           request_id: string
           simulation_id: string
           stage: string
@@ -557,6 +803,7 @@ export type Database = {
           body?: string
           checks?: Json
           created_at?: string
+          decision_method?: string
           evaluation_acknowledged?: boolean
           evaluation_path?: string | null
           expected_version?: number
@@ -566,6 +813,7 @@ export type Database = {
           office_id?: string
           office_name?: string
           outcome?: string
+          physical_request_id?: string | null
           request_id?: string
           simulation_id?: string
           stage?: string
@@ -591,6 +839,13 @@ export type Database = {
             columns: ["office_id"]
             isOneToOne: false
             referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_review_events_physical_request_id_fkey"
+            columns: ["physical_request_id"]
+            isOneToOne: true
+            referencedRelation: "physical_recommendation_requests"
             referencedColumns: ["id"]
           },
           {
@@ -732,6 +987,10 @@ export type Database = {
         Returns: Json
       }
       is_program_admin: { Args: never; Returns: boolean }
+      physical_workflow: {
+        Args: { operation: string; payload?: Json }
+        Returns: Json
+      }
       simulation_workflow: {
         Args: { operation: string; payload?: Json }
         Returns: Json

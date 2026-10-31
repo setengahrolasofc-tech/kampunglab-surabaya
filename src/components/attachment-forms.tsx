@@ -2,11 +2,11 @@
 import Link from "next/link";
 import {useActionState} from "react";
 import {uploadAttachment,archiveAttachment,restoreAttachment} from "@/app/pengajuan/[id]/lampiran/actions";
-import type {FileActionState} from "@/lib/attachments/types";
-export function AttachmentUploadForm({draftId,requestId,disabled=false,retryName}:{draftId:string;requestId:string;disabled?:boolean;retryName?:string}){
+import type {AttachmentPurpose,FileActionState} from "@/lib/attachments/types";
+export function AttachmentUploadForm({draftId,requestId,disabled=false,retryName,purpose="supporting",simulationId}:{draftId:string;requestId:string;disabled?:boolean;retryName?:string;purpose?:AttachmentPurpose;simulationId?:string}){
   const [state,action,pending]=useActionState<FileActionState,FormData>(uploadAttachment,{});
   return <form action={action} noValidate className="space-y-4">
-    <input type="hidden" name="draft_id" value={draftId}/><input type="hidden" name="request_id" value={state.nextRequestId??requestId}/>
+    <input type="hidden" name="purpose" value={purpose}/>{simulationId?<input type="hidden" name="physical_simulation_id" value={simulationId}/>:null}<input type="hidden" name="draft_id" value={draftId}/><input type="hidden" name="request_id" value={state.nextRequestId??requestId}/>
     {state.error?<p role="alert" className="rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-900">{state.error} <Link href={`/pengajuan/${draftId}/lampiran`} target="_blank" rel="noopener noreferrer" className="font-semibold underline">Periksa daftar di tab baru</Link></p>:null}
     {state.message?<p role="status" className="rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-950">{state.message}</p>:null}
     <fieldset disabled={pending||disabled} className="space-y-4"><legend className="sr-only">{retryName?"Ulangi unggahan tertunda":"Unggah lampiran draf"}</legend>

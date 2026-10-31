@@ -12,11 +12,13 @@ export async function uploadAttachment(_state:FileActionState,form:FormData):Pro
   const draftId=form.get("draft_id"),requestId=form.get("request_id"),file=form.get("file");
   if(!isUuid(draftId)||!isUuid(requestId)||!(file instanceof File)||file.size===0)return {error:"Pilih berkas dan muat ulang halaman bila isian tidak tersedia."};
   if(file.size>3*1024*1024)return {error:fileErrorMessage("FILE_TOO_LARGE")};
-  const body=new FormData();body.set("operation","upload");body.set("draft_id",String(draftId));body.set("request_id",String(requestId));body.set("file",file);
+  const purpose=String(form.get("purpose")??"supporting"),physicalId=form.get("physical_simulation_id");
+  if(!["supporting","physical_rt","physical_rw"].includes(purpose)||(purpose!=="supporting"&&!isUuid(physicalId))||(purpose==="supporting"&&physicalId))return {error:"Konteks surat fisik tidak sesuai. Buka jalur dokumen fisik dari salinan simulasi."};
+  const body=new FormData();body.set("purpose",purpose);if(physicalId)body.set("physical_simulation_id",String(physicalId));body.set("operation","upload");body.set("draft_id",String(draftId));body.set("request_id",String(requestId));body.set("file",file);
   const result=await supabase.functions.invoke<{id:string}>("private-attachments",{body,timeout:60000});
   if(result.error)return {error:fileErrorMessage(await edgeFileError(result.error))};
   if(!isUuid(result.data?.id))return {error:fileErrorMessage("UNKNOWN")};
-  refresh(String(draftId));
+  refresh(String(draftId));if(physicalId)revalidatePath(`/simulasi/${physicalId}/dokumen-fisik`);
   return {message:"Lampiran berhasil diunggah dan dicatat pada draf. Salinan yang sudah dikirim tetap memakai lampiran sebelumnya.",nextRequestId:randomUUID()};
 }
 export async function archiveAttachment(_state:FileActionState,form:FormData):Promise<FileActionState>{

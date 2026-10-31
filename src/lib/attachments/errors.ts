@@ -1,5 +1,6 @@
 import "server-only";
 const messages:Record<string,string>={
+  PHYSICAL_UPLOAD_NOT_AVAILABLE:"Unggah surat fisik hanya tersedia setelah batas hari pada antrean RT/RW yang sesuai. Periksa tahap terbaru dari salinan simulasi.",
   SESSION_REQUIRED:"Sesi sudah tidak berlaku. Masuk kembali sebelum melanjutkan.",
   ATTACHMENT_UNAVAILABLE:"Lampiran tidak tersedia untuk akunmu.",
   DEMO_ONLY:"Simpan pilihan tema DEMO aktif dan hierarki wilayah DEMO pada draf sebelum mengunggah.",

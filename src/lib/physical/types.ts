@@ -1,0 +1,16 @@
+import type {Database} from "@/lib/supabase/database.types";
+import type {Attachment} from "@/lib/attachments/types";
+import type {Simulation} from "@/lib/simulations/types";
+export type PhysicalStage="rt"|"rw";
+export type PhysicalStatus="pending"|"accepted"|"rejected"|"withdrawn"|"obsolete";
+export type PhysicalBrief={id:string;stage:PhysicalStage;status:PhysicalStatus;created_at:string;delay_days:number};
+export type PhysicalContext={is_owner:boolean;stage:PhysicalStage|null;queue_entered_at:string;delay_days:number;settings_version:number;eligible_at:string;server_now:string;eligible:boolean;pending_id:string|null;simulation:Pick<Simulation,"id"|"draft_id"|"reference"|"title"|"workflow_version">;files:Attachment[];request_count:number;requests:PhysicalBrief[]};
+export type PhysicalRequest=Database["public"]["Tables"]["physical_recommendation_requests"]["Row"];
+export type PhysicalDetails={request:PhysicalRequest;simulation:Simulation;is_owner:boolean;can_review:boolean;can_decide:boolean;decision_blocked:boolean;file:Attachment;supporting_files:Attachment[];
+  actions:{id:string;actor_name:string;office_name:string|null;action:string;body:string;signature_checked:boolean;contact_checked:boolean;content_checked:boolean;created_at:string}[];
+  notes:{id:string;actor_name:string;office_name:string;body:string;family_conflict:boolean;created_at:string}[];
+  events:{id:string;actor_name:string;office_name:string;stage:PhysicalStage|"kelurahan";outcome:string;body:string;decision_method:string;created_at:string}[];
+};
+export type PhysicalQueue={can_review:boolean;count:number;rows:(PhysicalBrief&{title:string;reference:string})[]};
+export type PhysicalSettings={current:{version:number;delay_days:number};history:{version:number;delay_days:number;reason:string;actor_name:string;created_at:string}[]};
+export type PhysicalFormState={error?:string;errors?:Record<string,string>};
