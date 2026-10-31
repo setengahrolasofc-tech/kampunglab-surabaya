@@ -118,8 +118,9 @@ Deno.serve(async (req: Request) => {
     const input = JSON.parse(new TextDecoder().decode(await boundedBody(req, 16384)));
     if (!input || typeof input !== "object" || input.operation !== "download" || !UUID.test(String(input.id ?? ""))
       || (input.simulation_id != null && !UUID.test(String(input.simulation_id)))
-      || (input.physical_request_id != null && !UUID.test(String(input.physical_request_id)))) throw new FileError("INVALID_FILE");
-    const payload = { id: input.id, simulation_id: input.simulation_id ?? null, physical_request_id: input.physical_request_id ?? null };
+      || (input.physical_request_id != null && !UUID.test(String(input.physical_request_id)))
+      || (input.panel_assignment_id != null && !UUID.test(String(input.panel_assignment_id)))) throw new FileError("INVALID_FILE");
+    const payload = { id: input.id, simulation_id: input.simulation_id ?? null, physical_request_id: input.physical_request_id ?? null, panel_assignment_id: input.panel_assignment_id ?? null };
     const authorization = await userClient.rpc("attachment_workflow", { operation: "read", payload });
     if (authorization.error) rpcError(authorization.error);
     const record = authorization.data as FileRecord;

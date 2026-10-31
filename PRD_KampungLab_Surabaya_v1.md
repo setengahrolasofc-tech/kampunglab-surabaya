@@ -365,6 +365,8 @@ PRD dan RAB adalah dokumen wajib, tetapi handbook tidak memastikan apakah semuan
 - Mikro tidak melewati panel tetapi handbook tetap menyebut syarat skor 70 untuk pengajuan yang lolos; evaluator Mikro perlu diputuskan. D-02.
 - Untuk Menengah, persetujuan OPD merupakan gerbang tambahan; jangan mengaktifkannya pada pilot tanpa alur dan mandatnya.
 
+**Implementasi 31 Oktober 2026 [U, hanya DEMO]:** panel Kecil kini menyediakan pembagian eksplisit oleh pengaju (aktif/jeda), tiga kursi terpisah, penetapan/pencabutan beralasan oleh admin program, peran reviewer aktif + penugasan khusus objek, rubrik individual 25/25/20/15/15, suara manual, alasan, dan laporan konflik yang menutup penugasan. Satu orang hanya boleh pernah ditugaskan sekali per panel/putaran; pengganti memakai orang independen lain. Nilai terkirim terkunci; penugasan dicabut menyisakan nilai sebagai riwayat, tanpa menggantikannya diam-diam. Reviewer hanya membaca nilai sendiri, termasuk bila merangkap mandat kelurahan pada panel yang sama. Admin koordinasi tidak otomatis membaca proposal/berkas/nilai; pengaju dan kelurahan berwenang membaca hasil tersimpan. Tidak menghitung skor gabungan, menerapkan aturan skor-suara, atau mengubah status kelulusan. D-02/D-03/D-17/D-18 tetap terbuka untuk operasional. Rincian dan UAT yang masih ditunda ada di `docs/PANEL_UAT.md`.
+
 ### FR-06. Rencana dana, persetujuan, dan realisasi - P0
 
 **Sumber:** [H, hlm. 6-9].

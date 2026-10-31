@@ -35,7 +35,7 @@ Rentang konfigurasi admin 1–30 hari dan batas 5 permintaan baru/salinan/24 jam
 - Unduhan surat/pengganti konteks pendukung melalui `/lampiran/[id]?fisik=[request-id]`; backend memeriksa sesi, scope wilayah, status permintaan, akun pengaju dan relasi berkas sebelum/sesudah membaca blob. Pemilik tetap membaca arsip sendiri. Tidak ada URL publik/signed URL berumur panjang.
 - Riwayat salinan menampilkan label rekomendasi manual dan aktor/jabatan sebenarnya. RT/RW tidak otomatis memperoleh scan surat fisik. Dokumen/isi permintaan tidak masuk etalase/passport. Etalase/passport sendiri belum dibangun.
 - Lepas/pulihkan berkas tidak menulis ulang blob atau mengganti surat yang telah dirujuk permintaan. Penarikan mencabut akses khusus, bukan menghapus data atau akses biasa ke salinan yang sudah dicapai. Belum ada penghapusan fisik otomatis; retensi D-13 tetap terbuka.
-- Edge `private-attachments` versi 3 ACTIVE, `verify_jwt=false` dengan verifikasi pengguna Auth.getUser dan sesi database di handler/RPC seperti milestone berkas sebelumnya. Tidak ada key backend baru pada Next.js/laptop atau repository.
+- Edge `private-attachments` saat ini versi 4 ACTIVE setelah penambahan konteks panel, `verify_jwt=false` dengan verifikasi pengguna Auth.getUser dan sesi database di handler/RPC seperti milestone berkas sebelumnya. Tidak ada key backend baru pada Next.js/laptop atau repository.
 
 ## Skenario pemeriksaan untuk nanti
 

@@ -752,6 +752,260 @@ export type Database = {
           },
         ]
       }
+      simulation_panel_assignments: {
+        Row: {
+          appointment_reference: string
+          assigned_by: string
+          assigned_by_name: string
+          case_id: string
+          closed_at: string | null
+          created_at: string
+          id: string
+          reason: string
+          reviewer_id: string
+          reviewer_name: string
+          seat: string
+          status: string
+        }
+        Insert: {
+          appointment_reference: string
+          assigned_by: string
+          assigned_by_name: string
+          case_id: string
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          reason: string
+          reviewer_id: string
+          reviewer_name: string
+          seat: string
+          status?: string
+        }
+        Update: {
+          appointment_reference?: string
+          assigned_by?: string
+          assigned_by_name?: string
+          case_id?: string
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          reason?: string
+          reviewer_id?: string
+          reviewer_name?: string
+          seat?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_panel_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_panel_assignments_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "simulation_panel_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_panel_assignments_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulation_panel_cases: {
+        Row: {
+          consent_version: string
+          created_at: string
+          id: string
+          owner_id: string
+          shared_at: string
+          simulation_id: string
+          state: string
+          version: number
+        }
+        Insert: {
+          consent_version?: string
+          created_at?: string
+          id?: string
+          owner_id: string
+          shared_at?: string
+          simulation_id: string
+          state: string
+          version?: number
+        }
+        Update: {
+          consent_version?: string
+          created_at?: string
+          id?: string
+          owner_id?: string
+          shared_at?: string
+          simulation_id?: string
+          state?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_panel_cases_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_panel_cases_simulation_id_fkey"
+            columns: ["simulation_id"]
+            isOneToOne: true
+            referencedRelation: "innovation_simulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulation_panel_entries: {
+        Row: {
+          acknowledged: boolean
+          actor_id: string
+          actor_name: string
+          assignment_id: string
+          beneficiaries_score: number | null
+          body: string
+          budget_score: number | null
+          created_at: string
+          evidence_score: number | null
+          expected_workflow_version: number
+          feasibility_score: number | null
+          id: string
+          kind: string
+          problem_score: number | null
+          request_id: string
+          rubric_version: string
+          total: number | null
+          vote: string | null
+        }
+        Insert: {
+          acknowledged: boolean
+          actor_id: string
+          actor_name: string
+          assignment_id: string
+          beneficiaries_score?: number | null
+          body: string
+          budget_score?: number | null
+          created_at?: string
+          evidence_score?: number | null
+          expected_workflow_version: number
+          feasibility_score?: number | null
+          id?: string
+          kind: string
+          problem_score?: number | null
+          request_id: string
+          rubric_version?: string
+          total?: number | null
+          vote?: string | null
+        }
+        Update: {
+          acknowledged?: boolean
+          actor_id?: string
+          actor_name?: string
+          assignment_id?: string
+          beneficiaries_score?: number | null
+          body?: string
+          budget_score?: number | null
+          created_at?: string
+          evidence_score?: number | null
+          expected_workflow_version?: number
+          feasibility_score?: number | null
+          id?: string
+          kind?: string
+          problem_score?: number | null
+          request_id?: string
+          rubric_version?: string
+          total?: number | null
+          vote?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_panel_entries_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_panel_entries_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: true
+            referencedRelation: "simulation_panel_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulation_panel_events: {
+        Row: {
+          action: string
+          actor_id: string
+          actor_name: string
+          assignment_id: string | null
+          case_id: string
+          created_at: string
+          data: Json
+          expected_version: number
+          id: string
+          request_id: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          actor_name: string
+          assignment_id?: string | null
+          case_id: string
+          created_at?: string
+          data: Json
+          expected_version: number
+          id?: string
+          request_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          actor_name?: string
+          assignment_id?: string | null
+          case_id?: string
+          created_at?: string
+          data?: Json
+          expected_version?: number
+          id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_panel_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_panel_events_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "simulation_panel_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_panel_events_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "simulation_panel_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       simulation_review_events: {
         Row: {
           actor_id: string
@@ -987,6 +1241,10 @@ export type Database = {
         Returns: Json
       }
       is_program_admin: { Args: never; Returns: boolean }
+      panel_workflow: {
+        Args: { operation: string; payload?: Json }
+        Returns: Json
+      }
       physical_workflow: {
         Args: { operation: string; payload?: Json }
         Returns: Json

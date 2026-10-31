@@ -1,0 +1,15 @@
+import type {Database} from "@/lib/supabase/database.types";
+import type {Simulation} from "@/lib/simulations/types";
+import type {Attachment} from "@/lib/attachments/types";
+type Tables=Database["public"]["Tables"];
+export type PanelCase=Tables["simulation_panel_cases"]["Row"];
+export type PanelEntry=Tables["simulation_panel_entries"]["Row"];
+export type PanelSeat="brida_opd"|"academic"|"practitioner";
+export type PanelAssignment={id:string;seat:PanelSeat;reviewer_name:string;status:string;appointment_reference:string;reason:string;assigned_by_name:string;created_at:string;closed_at:string|null;role_current:boolean;submitted:boolean};
+export type PanelEvent={id:string;actor_name:string;action:string;data:{reason:string;reference?:string;seat?:PanelSeat};created_at:string};
+export type PanelDetails={is_owner:boolean;simulation:Pick<Simulation,"id"|"reference"|"title">;case:PanelCase|null;assignments:PanelAssignment[];assignment_history:PanelAssignment[];assignment_history_count:number;entries:(PanelEntry&{seat:PanelSeat;assignment_status:string;reviewer_name:string})[];entry_count:number;events:PanelEvent[];event_count:number};
+export type PanelAssignedCase={assignment:Pick<PanelAssignment,"id"|"seat"|"status"|"reviewer_name"|"appointment_reference">;case_state:string;reference:string;can_read:boolean;can_score:boolean;simulation:Simulation|null;entry:PanelEntry|null;files:Attachment[];events:{id:string;actor_name:string;office_name:string;stage:"rt"|"rw"|"kelurahan";outcome:string;body:string;decision_method:string;created_at:string}[]};
+export type PanelAdminList={count:number;rows:{id:string;state:string;version:number;created_at:string;reference:string;territory_name:string;assigned:number}[]};
+export type PanelQueue={can_review:boolean;count:number;rows:{id:string;seat:PanelSeat;status:string;created_at:string;state:string;reference:string;submitted:boolean}[]};
+export type PanelCandidate={user:{id:string;display_name:string;email:string}|null;reviewer_active?:boolean;independent?:boolean;previously_assigned?:boolean};
+export type PanelFormState={error?:string;errors?:Record<string,string>;candidate?:PanelCandidate};
