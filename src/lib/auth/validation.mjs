@@ -1,3 +1,23 @@
+import { KECAMATAN_KELURAHAN, RT_MAX, RW_MAX } from "./surabaya-areas.mjs";
+
+/** Panjang kode OTP email. Samakan dengan pengaturan "Email OTP Length" di Supabase (lihat docs/OTP_SETUP.md). */
+export const OTP_LENGTH = 6;
+
+/** Aturan kekuatan password untuk daftar dan ubah password. */
+export const PASSWORD_RULES = [
+  { id: "length", label: "Minimal 8 karakter", test: (/** @type {string} */ v) => v.length >= 8 },
+  { id: "upper", label: "Mengandung huruf besar", test: (/** @type {string} */ v) => /[A-Z]/.test(v) },
+  { id: "lower", label: "Mengandung huruf kecil", test: (/** @type {string} */ v) => /[a-z]/.test(v) },
+  { id: "digit", label: "Mengandung angka", test: (/** @type {string} */ v) => /\d/.test(v) },
+  { id: "special", label: "Mengandung karakter khusus", test: (/** @type {string} */ v) => /[^A-Za-z0-9]/.test(v) },
+];
+
+/** @param {string} value */
+export const isStrongPassword = (value) => PASSWORD_RULES.every((rule) => rule.test(value));
+
+/** @param {string} value */
+export const isValidEmail = (value) => value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
 /** @param {FormData} form @param {'login'|'signup'|'reset'|'password'|'profile'} mode */
 export function validateAuthForm(form, mode) {
   /** @type {Record<string, string>} */
@@ -8,22 +28,57 @@ export function validateAuthForm(form, mode) {
   const displayName = String(form.get("display_name") ?? "").trim();
 
   if (["login", "signup", "reset"].includes(mode)) {
-    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = "Masukkan alamat email yang valid.";
-    }
+    if (!isValidEmail(email)) errors.email = "Masukkan alamat email yang valid.";
   }
   if (["login", "signup", "password"].includes(mode)) {
-    if (!password) errors.password = "Isi kata sandi.";
-    else if (new TextEncoder().encode(password).length > 72) errors.password = "Kata sandi terlalu panjang. Gunakan kata sandi yang lebih pendek.";
-    else if (mode !== "login" && password.length < 8) errors.password = "Gunakan minimal 8 karakter.";
-    if (mode !== "login" && password !== confirmation) errors.confirmation = "Konfirmasi kata sandi belum sama.";
+    if (!password) errors.password = "Isi password.";
+    else if (new TextEncoder().encode(password).length > 72) errors.password = "Password terlalu panjang. Gunakan password yang lebih pendek.";
+    else if (mode !== "login" && !isStrongPassword(password)) errors.password = "Password belum memenuhi semua aturan di atas.";
+    if (mode !== "login" && password !== confirmation) errors.confirmation = "Konfirmasi password belum sama.";
   }
   if (["signup", "profile"].includes(mode)) {
     if (displayName.length < 2 || displayName.length > 80 || /[\u0000-\u001f\u007f]/.test(displayName)) {
-      errors.display_name = "Isi nama tampilan sepanjang 2–80 karakter.";
+      errors.display_name = "Isi nama sepanjang 2–80 karakter.";
     }
   }
   return { errors, email, password, displayName };
+}
+
+/**
+ * Domisili saat daftar: alamat, kecamatan, kelurahan, RW, RT. Nilai harus ada di daftar contoh
+ * (surabaya-areas.mjs). Ini klaim warga yang belum diverifikasi, bukan dasar hak akses.
+ * @param {FormData} form
+ */
+export function validateDomicile(form) {
+  /** @type {Record<string, string>} */
+  const errors = {};
+  const address = String(form.get("address") ?? "").trim().replace(/\s+/g, " ");
+  const kecamatan = String(form.get("kecamatan") ?? "");
+  const kelurahan = String(form.get("kelurahan") ?? "");
+  const rw = String(form.get("rw") ?? "");
+  const rt = String(form.get("rt") ?? "");
+
+  if (address.length < 5 || address.length > 160 || /[\u0000-\u001f\u007f]/.test(address)) {
+    errors.address = "Isi nama jalan dan nomor rumah (5–160 karakter).";
+  }
+  const kelurahanList = Object.hasOwn(KECAMATAN_KELURAHAN, kecamatan) ? KECAMATAN_KELURAHAN[kecamatan] : null;
+  if (!kelurahanList) errors.kecamatan = "Pilih kecamatan.";
+  else if (!kelurahanList.includes(kelurahan)) errors.kelurahan = "Pilih kelurahan sesuai kecamatan.";
+  const inRange = (/** @type {string} */ v, /** @type {number} */ max) => /^\d{2}$/.test(v) && Number(v) >= 1 && Number(v) <= max;
+  if (!inRange(rw, RW_MAX)) errors.rw = "Pilih RW.";
+  if (!inRange(rt, RT_MAX)) errors.rt = "Pilih RT.";
+  return { errors, value: { address, kecamatan, kelurahan, rw, rt } };
+}
+
+/** Kode OTP email untuk verifikasi daftar atau pemulihan. @param {FormData} form */
+export function validateOtp(form) {
+  /** @type {Record<string, string>} */
+  const errors = {};
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  const token = String(form.get("token") ?? "").replace(/\s/g, "");
+  if (!isValidEmail(email)) errors.email = "Alamat email tidak valid.";
+  if (!new RegExp(`^\\d{${OTP_LENGTH}}$`).test(token)) errors.token = `Masukkan ${OTP_LENGTH} digit kode OTP.`;
+  return { errors, email, token };
 }
 
 /** Only fixed destinations are accepted; never use a visitor-provided URL. @param {string | null} value */
