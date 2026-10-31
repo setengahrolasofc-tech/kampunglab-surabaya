@@ -7,8 +7,8 @@ import type {SimulationRef} from "@/lib/simulations/types";
 import { saveDraft } from "@/app/pengajuan/actions";
 import { TerritorySelect } from "./territory-select";
 import { innovationForms, maturityStages, prdFields, budgetTotals, budgetLineTotal, formatRupiahMilli, draftChecklist } from "@/lib/drafts/schema.mjs";
-import { makeTerritoryLabels } from "@/lib/admin/validation.mjs";
-import type { DraftDocument, DraftFormState, Territory, Theme } from "@/lib/drafts/types";
+import { formatTerritoryPath } from "@/lib/drafts/territory-areas.mjs";
+import type { DraftDocument, DraftFormState, Territory } from "@/lib/drafts/types";
 
 const steps = ["Data inovasi", "PRD inovasi", "RAB", "Keaslian dan ringkasan"];
 const inputClass = "min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-base aria-invalid:border-red-600";
@@ -27,8 +27,8 @@ function SelectField({ path, label, value, onChange, options, error }: { path: s
 }
 const date = (value: string) => new Intl.DateTimeFormat("id-ID", {dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Jakarta"}).format(new Date(value))+" WIB";
 
-export function DraftWizard({ draftId, initialDocument, initialVersion, initialStep, initialSavedAt, territories, themes, existingSimulation, attachmentRevision, attachmentCount, attachmentsPending }: {
-  draftId: string; initialDocument: DraftDocument; initialVersion: number; initialStep: number; initialSavedAt: string; territories: Territory[]; themes: Theme[]; existingSimulation: SimulationRef|null; attachmentRevision:number;attachmentCount:number;attachmentsPending:boolean;
+export function DraftWizard({ draftId, initialDocument, initialVersion, initialStep, initialSavedAt, territories, existingSimulation, attachmentRevision, attachmentCount, attachmentsPending }: {
+  draftId: string; initialDocument: DraftDocument; initialVersion: number; initialStep: number; initialSavedAt: string; territories: Territory[]; existingSimulation: SimulationRef|null; attachmentRevision:number;attachmentCount:number;attachmentsPending:boolean;
 }) {
   const [documentData,setDocument] = useState(initialDocument);
   const [version,setVersion] = useState(initialVersion);
@@ -53,13 +53,12 @@ export function DraftWizard({ draftId, initialDocument, initialVersion, initialS
   const info=documentData.innovation, prd=documentData.prd, budget=documentData.budget, declaration=documentData.declaration;
   const errors=state.errors??{};
   const totals=budgetTotals(budget), checklist=draftChecklist(documentData);
-  const territoryLabels=makeTerritoryLabels(territories);
   const infoField=(key:keyof Omit<DraftDocument["innovation"],"team">,value:string)=>setSection("innovation",{...info,[key]:value});
   const budgetField=(key:"contingency"|"honor"|"maintenance_cost"|"maintenance_months",value:string)=>setSection("budget",{...budget,[key]:value});
   const summary = <div className="space-y-5">
     <details open className={sectionClass}><summary className="cursor-pointer text-lg font-bold">Data inovasi</summary><dl className="mt-5 space-y-3 text-sm leading-6">{[
-      ["Nama",info.title],["Tema",themes.find(t=>t.id===info.theme_id)?.name],["Bentuk",info.form],["Tahap inovasi",info.maturity],
-      ["Wilayah",territoryLabels.get(info.rt_id)],["Ringkasan",info.summary],
+      ["Nama",info.title],["Bentuk",info.form],["Tahap inovasi",info.maturity],
+      ["Wilayah",formatTerritoryPath(territories,info.rt_id)],["Ringkasan",info.summary],
     ].map(([label,value])=><div key={String(label)}><dt className="font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-slate-600">{value||"Belum diisi"}</dd></div>)}</dl><h3 className="mt-5 font-semibold">Tim inovasi</h3>{info.team.length?<ul className="mt-2 space-y-2 text-sm">{info.team.map((member,index)=><li key={`${member.id}-${index}`}>{member.name||"Nama belum diisi"} · {member.role||"Peran belum diisi"}</li>)}</ul>:<p className="mt-2 text-sm text-slate-600">Belum diisi.</p>}</details>
     <details className={sectionClass}><summary className="cursor-pointer text-lg font-bold">PRD inovasi</summary><dl className="mt-5 space-y-4 text-sm leading-6">{prdFields.map(([key,label])=><div key={key}><dt className="font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-slate-600">{prd[key]||"Belum diisi"}</dd></div>)}</dl></details>
     <details className={sectionClass}><summary className="cursor-pointer text-lg font-bold">Rencana anggaran</summary><ul className="mt-5 space-y-3 text-sm leading-6">{budget.items.map((item,index)=><li key={`${item.id}-${index}`} className="rounded-xl bg-slate-50 p-3"><p className="font-semibold">{item.description||"Uraian belum diisi"}</p><p>{item.category||"Kategori belum diisi"} · {item.quantity||"—"} {item.unit||"satuan"} × Rp{item.unit_price||"—"} · {item.usage_stage||"Tahap belum diisi"}</p></li>)}</ul><p className="mt-5 font-semibold">{totals.invalid?"Perbaiki angka RAB untuk melihat total.":`Total rencana biaya: ${formatRupiahMilli(totals.total)}`}</p><p className="mt-2 text-sm text-slate-600">Dana tak terduga: Rp{budget.contingency||"0"}; honor inovator: Rp{budget.honor||"0"}.</p><p className="mt-2 text-sm text-slate-600">Estimasi perawatan terpisah: {totals.invalid?"—":formatRupiahMilli(totals.maintenance)} / {budget.maintenance_months||"—"} bulan.</p></details>
@@ -68,7 +67,7 @@ export function DraftWizard({ draftId, initialDocument, initialVersion, initialS
     <Link href="/pengajuan" onClick={event=>{if(dirty){event.preventDefault();window.alert("Masih ada perubahan yang belum disimpan. Simpan draf terlebih dahulu, lalu kembali ke daftar.");}}} className="text-sm font-semibold text-emerald-900 underline">Pengajuan Saya</Link>
     <Link href={`/pengajuan/${draftId}/lampiran`} onClick={event=>{if(dirty||pending){event.preventDefault();window.alert("Simpan perubahan draf sebelum membuka halaman lampiran.");}}} className="ml-5 text-sm font-semibold text-emerald-900 underline">Kelola berkas privat ({attachmentCount} pendukung siap)</Link>
     <div className="mt-6 flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold tracking-widest text-emerald-800">DRAF PRIBADI</p><h1 className="mt-3 text-3xl font-bold sm:text-4xl">Susun inovasimu</h1><p className="mt-3 max-w-3xl leading-7 text-slate-600">Isi bertahap, simpan, lalu lanjutkan kapan saja. Bagian yang belum lengkap boleh tetap disimpan sebagai draf.</p></div><span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-950">Langkah {step} dari 4</span></div>
-    <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-950">Formulir prototipe memakai tema dan wilayah DEMO untuk latihan. Lampiran privat tersedia pada halaman Kelola lampiran. Pengiriman resmi dan pemeriksaan duplikasi otomatis belum diaktifkan. Draf belum menjadi pengajuan terkirim.</p>
+    <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-950">Formulir prototipe memakai data DEMO untuk latihan. Lampiran privat tersedia pada halaman Kelola lampiran. Pengiriman resmi dan pemeriksaan duplikasi otomatis belum diaktifkan. Draf belum menjadi pengajuan terkirim.</p>
     <nav aria-label="Langkah pengajuan" className="mt-7"><ol className="grid grid-cols-2 gap-3 lg:grid-cols-4">{steps.map((label,index)=><li key={label}><button type="button" disabled={pending} aria-current={step===index+1?"step":undefined} onClick={()=>setStep(index+1)} className={`min-h-14 w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold ${step===index+1?"border-emerald-900 bg-emerald-900 text-white":"border-slate-200 bg-white text-slate-700"}`}>{index+1}. {label}{checklist[index]?<span className="ml-2" aria-label="Isian pokok terisi">✓</span>:null}</button></li>)}</ol></nav>
     <p role="status" className={`mt-5 text-sm font-semibold ${dirty?"text-amber-800":"text-emerald-900"}`}>{dirty?"Ada perubahan belum disimpan. Tombol simpan menyimpan seluruh langkah.":`Tersimpan ${date(savedAt)}`}</p>
     <form action={action} noValidate className="mt-5 space-y-6">
@@ -77,7 +76,6 @@ export function DraftWizard({ draftId, initialDocument, initialVersion, initialS
       <fieldset disabled={pending} className="space-y-6 disabled:opacity-60"><legend className="sr-only">{steps[step-1]}</legend>
       {step===1?<section className={`${sectionClass} space-y-5`} aria-labelledby="innovation-title"><h2 id="innovation-title" className="text-xl font-bold">1. Data inovasi</h2>
         <Field path="innovation.title" label="Nama inovasi" value={info.title} maxLength={160} onChange={v=>infoField("title",v)} error={errors["innovation.title"]}/>
-        <SelectField path="innovation.theme_id" label="Tema inovasi" value={info.theme_id} onChange={v=>infoField("theme_id",v)} error={errors["innovation.theme_id"]} options={themes.filter(t=>t.active||t.id===info.theme_id).map(t=>({value:t.id,label:`${t.name}${t.active?"":" (nonaktif)"}`}))}/>
         <div className="grid gap-5 sm:grid-cols-2"><SelectField path="innovation.form" label="Bentuk inovasi" value={info.form} onChange={v=>infoField("form",v)} options={innovationForms.map(value=>({value,label:value}))} error={errors["innovation.form"]}/><SelectField path="innovation.maturity" label="Tahap inovasi" value={info.maturity} onChange={v=>infoField("maturity",v)} options={maturityStages.map(value=>({value,label:value}))} error={errors["innovation.maturity"]}/></div>
         <p className="text-sm text-slate-600">Tahap inisiatif, uji coba, atau penerapan menjelaskan kematangan inovasi, bukan keputusan persetujuan program.</p>
         <div><h3 className="mb-3 text-sm font-semibold">Wilayah rencana inovasi</h3><TerritorySelect territories={territories} value={info.rt_id} onChange={v=>infoField("rt_id",v)} prefix="innovation-territory" error={errors["innovation.rt_id"]}/></div>

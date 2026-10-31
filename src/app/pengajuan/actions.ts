@@ -12,7 +12,7 @@ const databaseError = (message: string) => ({ error: ({
   SESSION_REQUIRED: "Sesi tidak lagi berlaku. Masuk kembali sebelum menyimpan.",
   DOMICILE_REQUIRED: "Lengkapi wilayah domisilimu terlebih dahulu.",
   INVALID_TERRITORY: "Pilih RT yang tersedia di bawah RW dan kelurahan yang sesuai.",
-  INVALID_THEME: "Tema tersebut tidak tersedia atau sudah dinonaktifkan. Pilih tema aktif.",
+  INVALID_THEME: "Pengaturan tema program belum sesuai. Hubungi pengelola.",
   DRAFT_CONFLICT: "Draf sudah berubah sejak halaman ini dibuka. Isianmu di sini tetap ada. Simpan salinan perubahanmu, lalu muat ulang draf sebelum menyimpan kembali.",
   DRAFT_UNAVAILABLE: "Draf tidak ditemukan atau tidak dapat diakses oleh akunmu.",
 } as Record<string,string>)[message] ?? "Penyimpanan belum dapat dikonfirmasi. Isianmu tetap ada. Periksa draf tersimpan di tab baru sebelum mencoba lagi." });
@@ -46,6 +46,17 @@ export async function saveDraft(_state: DraftFormState, form: FormData): Promise
   try { parsed = JSON.parse(raw); } catch { return failure("Data draf tidak valid."); }
   const validated = validateDraftDocument(parsed);
   if (Object.keys(validated.errors).length) return { errors: validated.errors };
+  // Warga tidak memilih tema. Database tetap mewajibkan tema aktif (dan DEMO pada prototipe) untuk lampiran dan simulasi,
+  // jadi tema yang sudah ada dipertahankan bila masih aktif, selain itu dipakai tema DEMO aktif pertama.
+  const themes = await supabase.from("innovation_themes").select("id,is_demo").eq("active", true).order("code");
+  if (themes.error) return failure("Pengaturan program belum dapat dimuat. Isianmu tetap ada; coba simpan lagi.");
+  const current = validated.data.innovation.theme_id;
+  const activeThemes = themes.data ?? [];
+  if (!activeThemes.some(theme => theme.id === current)) {
+    const fallback = activeThemes.find(theme => theme.is_demo);
+    if (!fallback) return failure("Tema bawaan program belum tersedia, jadi draf belum dapat disimpan. Hubungi pengelola.");
+    validated.data.innovation.theme_id = fallback.id;
+  }
   const { data, error } = await supabase.rpc("write_innovation_draft", { operation: "save", payload: {
     id: String(id), revision: Number(revision), step: form.get("intent")==="continue" ? Math.min(4,Number(step)+1) : Number(step), document: validated.data as unknown as Json,
   } }).abortSignal(AbortSignal.timeout(45000));

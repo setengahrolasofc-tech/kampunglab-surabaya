@@ -107,7 +107,7 @@ export function validateDraftDocument(raw) {
 export function draftChecklist(data) {
   const i = data.innovation, p = data.prd, b = data.budget;
   return [
-    Boolean(i.title && i.theme_id && i.form && i.maturity && i.rt_id && i.summary && i.team.some(member => member.name && member.role)),
+    Boolean(i.title && i.form && i.maturity && i.rt_id && i.summary && i.team.some(member => member.name && member.role)),
     prdFields.every(([key]) => Boolean(p[key])),
     b.items.length > 0 && b.items.every(row => row.description && row.category && row.unit && row.usage_stage && (quantityMilli(row.quantity) ?? 0n) > 0n && (rupiahInteger(row.unit_price) ?? 0n) > 0n) && Boolean(b.maintenance_months),
     data.declaration.own_work,
