@@ -84,6 +84,90 @@ export type Database = {
           },
         ]
       }
+      innovation_simulations: {
+        Row: {
+          document: Json
+          draft_id: string
+          draft_revision: number
+          id: string
+          kelurahan_id: string
+          mode: string
+          owner_id: string
+          reference: string | null
+          rt_id: string
+          rw_id: string
+          status: string
+          submitted_at: string
+          title: string | null
+        }
+        Insert: {
+          document: Json
+          draft_id: string
+          draft_revision: number
+          id?: string
+          kelurahan_id: string
+          mode?: string
+          owner_id: string
+          reference?: string | null
+          rt_id: string
+          rw_id: string
+          status?: string
+          submitted_at?: string
+          title?: string | null
+        }
+        Update: {
+          document?: Json
+          draft_id?: string
+          draft_revision?: number
+          id?: string
+          kelurahan_id?: string
+          mode?: string
+          owner_id?: string
+          reference?: string | null
+          rt_id?: string
+          rw_id?: string
+          status?: string
+          submitted_at?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "innovation_simulations_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: true
+            referencedRelation: "innovation_drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "innovation_simulations_kelurahan_id_fkey"
+            columns: ["kelurahan_id"]
+            isOneToOne: false
+            referencedRelation: "territories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "innovation_simulations_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "innovation_simulations_rt_id_fkey"
+            columns: ["rt_id"]
+            isOneToOne: false
+            referencedRelation: "territories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "innovation_simulations_rw_id_fkey"
+            columns: ["rw_id"]
+            isOneToOne: false
+            referencedRelation: "territories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       innovation_themes: {
         Row: {
           active: boolean
@@ -302,6 +386,83 @@ export type Database = {
           },
         ]
       }
+      simulation_rt_notes: {
+        Row: {
+          actor_id: string
+          actor_name: string
+          body: string
+          created_at: string
+          domicile_checked: boolean
+          family_conflict: boolean
+          id: string
+          mandate_id: string
+          office_id: string
+          office_name: string
+          problem_checked: boolean
+          request_id: string
+          simulation_id: string
+        }
+        Insert: {
+          actor_id: string
+          actor_name: string
+          body: string
+          created_at?: string
+          domicile_checked: boolean
+          family_conflict: boolean
+          id?: string
+          mandate_id: string
+          office_id: string
+          office_name: string
+          problem_checked: boolean
+          request_id: string
+          simulation_id: string
+        }
+        Update: {
+          actor_id?: string
+          actor_name?: string
+          body?: string
+          created_at?: string
+          domicile_checked?: boolean
+          family_conflict?: boolean
+          id?: string
+          mandate_id?: string
+          office_id?: string
+          office_name?: string
+          problem_checked?: boolean
+          request_id?: string
+          simulation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_rt_notes_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_rt_notes_mandate_id_fkey"
+            columns: ["mandate_id"]
+            isOneToOne: false
+            referencedRelation: "office_mandates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_rt_notes_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "offices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulation_rt_notes_simulation_id_fkey"
+            columns: ["simulation_id"]
+            isOneToOne: false
+            referencedRelation: "innovation_simulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       territories: {
         Row: {
           code: string
@@ -347,6 +508,10 @@ export type Database = {
         Returns: Json
       }
       is_program_admin: { Args: never; Returns: boolean }
+      simulation_workflow: {
+        Args: { operation: string; payload?: Json }
+        Returns: Json
+      }
       write_innovation_draft: {
         Args: { operation: string; payload: Json }
         Returns: Json

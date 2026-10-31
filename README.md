@@ -68,6 +68,7 @@ AGENTS.md            Petunjuk pengembangan untuk AI
 - [UAT akun](docs/AUTH_UAT.md): langkah pengujian email, sesi, profil, dan batas verifikasi.
 - [Admin dan akses](docs/ADMIN_UAT.md): penetapan peran/mandat, wilayah/jabatan, pencabutan, audit, dan verifikasi.
 - [Profil wilayah dan draf](docs/DRAFTS_UAT.md): pengisian empat langkah, RAB sementara, simpan/edit, dan batas akses pribadi.
+- [Simulasi dan antrean RT](docs/SIMULATION_UAT.md): pengiriman salinan DEMO, pembacaan sesuai mandat, catatan awal RT, dan persiapan dua akun untuk UAT.
 
 Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijakan. Jangan menampilkannya sebagai ketetapan resmi Pemkot. Keputusan `D-01` sampai `D-24` pada PRD belum otomatis disetujui.
 

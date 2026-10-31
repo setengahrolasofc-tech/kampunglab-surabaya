@@ -26,14 +26,17 @@ export async function getDraftList(page = 0) {
       .order("updated_at", { ascending: false }).order("id").range(page * 20, page * 20 + 19),
   ]);
   if (list.error) throw new Error("Daftar pengajuan belum dapat dimuat.");
-  return { ...context, drafts: list.data ?? [], count: list.count ?? 0, requestId: randomUUID() };
+  const simulations=list.data?.length?await supabase.from("innovation_simulations").select("id,draft_id,reference,draft_revision,submitted_at").in("draft_id",list.data.map(d=>d.id)):null;
+  if(simulations?.error)throw new Error("Daftar simulasi belum dapat dimuat.");
+  return { ...context, drafts: list.data ?? [], simulations:simulations?.data??[], count: list.count ?? 0, requestId: randomUUID() };
 }
 export async function getDraftEditor(id: string) {
   const { supabase } = await requireUser();
-  const [context, draft] = await Promise.all([
+  const [context, draft, simulation] = await Promise.all([
     catalogs(supabase),
     supabase.from("innovation_drafts").select("id,document,revision,current_step,updated_at").eq("id", id).maybeSingle(),
+    supabase.from("innovation_simulations").select("id,reference,draft_revision,submitted_at").eq("draft_id",id).maybeSingle(),
   ]);
-  if (draft.error) throw new Error("Draf belum dapat dimuat.");
-  return { ...context, draft: draft.data };
+  if (draft.error||simulation.error) throw new Error("Draf belum dapat dimuat.");
+  return { ...context, draft: draft.data, simulation:simulation.data };
 }

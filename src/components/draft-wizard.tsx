@@ -1,6 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
+import {SimulationSubmitCard} from "./simulation-forms";
+import {simulationMissing} from "@/lib/simulations/validation.mjs";
+import type {SimulationRef} from "@/lib/simulations/types";
 import { saveDraft } from "@/app/pengajuan/actions";
 import { TerritorySelect } from "./territory-select";
 import { innovationForms, maturityStages, prdFields, budgetTotals, budgetLineTotal, formatRupiahMilli, draftChecklist } from "@/lib/drafts/schema.mjs";
@@ -24,8 +27,8 @@ function SelectField({ path, label, value, onChange, options, error }: { path: s
 }
 const date = (value: string) => new Intl.DateTimeFormat("id-ID", {dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Jakarta"}).format(new Date(value))+" WIB";
 
-export function DraftWizard({ draftId, initialDocument, initialVersion, initialStep, initialSavedAt, territories, themes }: {
-  draftId: string; initialDocument: DraftDocument; initialVersion: number; initialStep: number; initialSavedAt: string; territories: Territory[]; themes: Theme[];
+export function DraftWizard({ draftId, initialDocument, initialVersion, initialStep, initialSavedAt, territories, themes, existingSimulation }: {
+  draftId: string; initialDocument: DraftDocument; initialVersion: number; initialStep: number; initialSavedAt: string; territories: Territory[]; themes: Theme[]; existingSimulation: SimulationRef|null;
 }) {
   const [documentData,setDocument] = useState(initialDocument);
   const [version,setVersion] = useState(initialVersion);
@@ -95,5 +98,6 @@ export function DraftWizard({ draftId, initialDocument, initialVersion, initialS
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-950/10 bg-white p-5"><button type="submit" name="intent" value="save" className="min-h-12 rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white hover:bg-emerald-800">{pending?"Menyimpan…":"Simpan draf"}</button>{step<4?<button type="submit" name="intent" value="continue" className={buttonClass}>Simpan dan lanjut</button>:null}{step>1?<button type="button" className={buttonClass} onClick={()=>setStep(step-1)}>Langkah sebelumnya</button>:null}<p className="text-sm text-slate-600">Seluruh langkah disimpan bersama.</p></div>
       </fieldset>
     </form>
+    {step===4?<SimulationSubmitCard key={`simulation-${version}`} draftId={draftId} revision={version} disabled={dirty||pending} missing={simulationMissing(documentData)} existing={existingSimulation}/>:null}
   </>;
 }

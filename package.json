@@ -12,7 +12,8 @@
     "check:supabase": "node scripts/check-supabase.mjs",
     "test:auth:http": "node scripts/verify-auth-http.mjs",
     "test:admin:http": "node scripts/verify-admin-http.mjs",
-    "test:drafts:http": "node scripts/verify-drafts-http.mjs"
+    "test:drafts:http": "node scripts/verify-drafts-http.mjs",
+    "test:simulation:http": "node scripts/verify-simulation-http.mjs"
   },
   "dependencies": {
     "@next/env": "16.4.3",

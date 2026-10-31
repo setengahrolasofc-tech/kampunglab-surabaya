@@ -2,6 +2,8 @@
 
 Pengguna menyetujui milestone ini pada 31 Oktober 2026: profil wilayah, Pengajuan Saya, formulir empat langkah, simpan/edit draf pribadi, dan placeholder berlabel DEMO. Persetujuan akses layanan tidak mengesahkan seluruh keputusan D-xx. Pengiriman final, unggah berkas, review, duplikasi, plafon, dan pembiayaan operasional tetap belum aktif.
 
+Kelanjutan prototipe menyediakan pengiriman **simulasi DEMO** dan catatan awal RT pada langkah 4. Lihat SIMULATION_UAT.md untuk batas akses dan persiapan dua akun. Pengiriman resmi dan keputusan program tetap belum aktif.
+
 ## Mencoba di laptop
 
 1. Hentikan server lama, `git pull --ff-only`, lalu `npm run dev` pada folder proyek. Environment yang ada tetap digunakan; migrasi sudah diterapkan pada proyek Supabase yang sama.

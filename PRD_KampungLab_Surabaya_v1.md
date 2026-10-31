@@ -305,6 +305,8 @@ PRD dan RAB adalah dokumen wajib, tetapi handbook tidak memastikan apakah semuan
 
 **Perilaku umum [U]:** simpan draf, lanjutkan kemudian, indikator penyimpanan, validasi per langkah, dan tinjau semua kesalahan tanpa kehilangan input. Estimasi pengisian 30-60 menit dari handbook adalah informasi, bukan timer yang membatalkan draf.
 
+**Implementasi prototipe 31 Oktober 2026:** simulasi DEMO dapat mengirim satu salinan draf tersimpan ke antrean pembacaan RT sesuai mandat utama aktif dan menyimpan catatan pemeriksaan awal. Salinan dipisahkan dari draf yang masih bisa diedit. Simulasi ini tidak mengesahkan pengiriman resmi, keputusan setuju/revisi/tolak, kirim ulang, dana, kebijakan D-xx, atau aktivasi cadangan/delegasi. Rincian dan batas UAT ada di `docs/SIMULATION_UAT.md`.
+
 ### FR-03. Validasi dan versi pengajuan - P0
 
 **Sumber:** [H, hlm. 4-5, 7-8].
