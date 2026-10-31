@@ -68,7 +68,7 @@ test("domisili wajib berurutan kecamatan, kelurahan, RW, RT dan berasal dari daf
   const kelurahan = KECAMATAN_KELURAHAN[kecamatan][0];
   const ok = validateDomicile(form({ address: "  Jl. Contoh   No. 5 ", kecamatan, kelurahan, rw: "03", rt: "07" }));
   assert.deepEqual(ok.errors, {});
-  assert.deepEqual(ok.value, { address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "03", rt: "07" });
+  assert.deepEqual(ok.value, { address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "3", rt: "7" });
   const wrongPair = validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan: "Wonokromo", kelurahan: "Pakal", rw: "03", rt: "07" }));
   assert.deepEqual(Object.keys(wrongPair.errors), ["kelurahan"]);
   const empty = validateDomicile(form({}));
@@ -76,11 +76,15 @@ test("domisili wajib berurutan kecamatan, kelurahan, RW, RT dan berasal dari daf
   assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "0", rt: "07" })).errors.rw);
   assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "03", rt: "abcd" })).errors.rt);
   assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "03", rt: "1234" })).errors.rt);
-  // RW/RT diketik manual: angka tanpa nol di depan dirapikan jadi dua digit.
+  // RW/RT diketik manual: nol di depan dibuang.
   const manual = validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: " 3 ", rt: "7" }));
   assert.deepEqual(manual.errors, {});
-  assert.equal(manual.value.rw, "03");
-  assert.equal(manual.value.rt, "07");
+  assert.equal(manual.value.rw, "3");
+  assert.equal(manual.value.rt, "7");
+  const zeros = validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "007", rt: "010" }));
+  assert.equal(zeros.value.rw, "7");
+  assert.equal(zeros.value.rt, "10");
+  assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "00", rt: "7" })).errors.rw);
   assert.equal(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "25", rt: "120" })).value.rt, "120");
   assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan: "__proto__", kelurahan, rw: "03", rt: "07" })).errors.kecamatan);
 });

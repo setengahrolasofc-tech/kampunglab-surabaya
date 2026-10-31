@@ -1,4 +1,4 @@
-import { KECAMATAN_KELURAHAN, twoDigits } from "./surabaya-areas.mjs";
+import { KECAMATAN_KELURAHAN } from "./surabaya-areas.mjs";
 
 /** Panjang kode OTP email. Samakan dengan pengaturan "Email OTP Length" di Supabase (lihat docs/OTP_SETUP.md). */
 export const OTP_LENGTH = 6;
@@ -55,10 +55,10 @@ export function validateDomicile(form) {
   const address = String(form.get("address") ?? "").trim().replace(/\s+/g, " ");
   const kecamatan = String(form.get("kecamatan") ?? "");
   const kelurahan = String(form.get("kelurahan") ?? "");
-  // RW dan RT diketik manual: terima 1–3 digit angka (mis. "3" atau "03"), simpan sebagai "03".
+  // RW dan RT diketik manual: terima 1–3 digit angka. Nol di depan dibuang ("03" disimpan sebagai "3").
   const number = (/** @type {FormDataEntryValue | null} */ raw) => {
     const text = String(raw ?? "").trim();
-    return /^\d{1,3}$/.test(text) && Number(text) >= 1 ? twoDigits(Number(text)) : "";
+    return /^\d{1,3}$/.test(text) && Number(text) >= 1 ? String(Number(text)) : "";
   };
   const rw = number(form.get("rw"));
   const rt = number(form.get("rt"));

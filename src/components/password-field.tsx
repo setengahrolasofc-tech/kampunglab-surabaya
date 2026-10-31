@@ -3,9 +3,9 @@
 import { useState, type ReactNode } from "react";
 import { PASSWORD_RULES } from "@/lib/auth/validation.mjs";
 
-export function PasswordInput({ id, name, label, autoComplete, value, onChange, error, describedBy, aside }: {
+export function PasswordInput({ id, name, label, autoComplete, value, onChange, error, success, describedBy, aside }: {
   id: string; name: string; label: string; autoComplete: "current-password" | "new-password";
-  value: string; onChange: (value: string) => void; error?: string; describedBy?: string; aside?: ReactNode;
+  value: string; onChange: (value: string) => void; error?: string; success?: string; describedBy?: string; aside?: ReactNode;
 }) {
   const [shown, setShown] = useState(false);
   const described = [error ? `${id}-error` : "", describedBy ?? ""].filter(Boolean).join(" ") || undefined;
@@ -30,7 +30,10 @@ export function PasswordInput({ id, name, label, autoComplete, value, onChange, 
           {shown ? "Sembunyikan" : "Lihat"}
         </button>
       </div>
-      {error ? <p id={`${id}-error`} className="mt-2 text-sm text-red-800">{error}</p> : null}
+      <div aria-live="polite">
+        {error ? <p id={`${id}-error`} className="mt-2 text-sm text-red-800">{error}</p> : null}
+        {!error && success ? <p className="mt-2 text-sm text-emerald-800"><span aria-hidden="true">✓ </span>{success}</p> : null}
+      </div>
     </div>
   );
 }

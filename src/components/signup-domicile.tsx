@@ -35,7 +35,7 @@ function NumberField({ id, name, label, value, onChange, error, placeholder }: {
       <label htmlFor={id} className="mb-2 block text-sm font-semibold">{label}</label>
       <input
         id={id} name={name} required inputMode="numeric" autoComplete="off" maxLength={3} placeholder={placeholder}
-        value={value} onChange={(event) => onChange(event.target.value.replace(/\D/g, "").slice(0, 3))}
+        value={value} onChange={(event) => onChange(event.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 3))}
         aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} className={control}
       />
       {error ? <p id={`${id}-error`} className="mt-2 text-sm text-red-800">{error}</p> : null}
@@ -76,7 +76,7 @@ export function DomicileFields({ value, onChange, errors, prefix }: {
         <NumberField id={`${prefix}-rt`} name="rt" label="RT" placeholder="Contoh: 7" value={value.rt} error={errors?.rt} onChange={(rt) => onChange({ ...value, rt })} />
       </div>
       <p className="text-sm leading-6 text-slate-600">
-        Ketik angka RW dan RT saja. Daftar kecamatan dan kelurahan masih contoh dan perlu dicocokkan dengan master resmi. Domisili ini belum diverifikasi RT/RW dan tidak memberi akses petugas.
+        Ketik angka RW dan RT saja; nol di depan dihapus otomatis. Daftar kecamatan dan kelurahan masih contoh dan perlu dicocokkan dengan master resmi. Domisili ini belum diverifikasi RT/RW dan tidak memberi akses petugas.
       </p>
     </div>
   );

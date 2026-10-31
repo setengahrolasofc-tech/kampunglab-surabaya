@@ -64,7 +64,6 @@ export async function AuthScreen({ mode, status }: { mode: keyof typeof content;
       {mode !== "login" ? (
         <nav aria-label="Pilihan akun" className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-emerald-900">
           <Link href="/masuk" className="rounded-sm hover:underline">Sudah punya akun? Masuk</Link>
-          {mode !== "reset" ? <Link href="/lupa-kata-sandi" className="rounded-sm hover:underline">Lupa password?</Link> : null}
         </nav>
       ) : null}
     </main>

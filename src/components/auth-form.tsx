@@ -11,6 +11,12 @@ import type { AuthActionState, AuthMode } from "@/lib/auth/types";
 const initial: AuthActionState = {};
 const inputClass = "min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 aria-invalid:border-red-600";
 const buttonClass = "min-h-12 w-full rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-wait";
+/** Konfirmasi password: langsung memberi tahu saat berbeda, dan mengabaikan error server yang sudah usang. */
+function confirmationError(password: string, confirmation: string, serverError?: string) {
+  if (!confirmation) return serverError;
+  return confirmation === password ? undefined : "Konfirmasi password belum sama dengan password.";
+}
+const confirmationOk = (password: string, confirmation: string) => (confirmation && confirmation === password ? "Password cocok." : undefined);
 const passwordHint = "Gunakan password khusus untuk KampungLab. Demi keamanan, jangan gunakan password yang sama dengan password emailmu.";
 
 function Banner({ state }: { state: AuthActionState }) {
@@ -90,7 +96,7 @@ function SignupForm() {
           <p id="signup-password-hint" className="mt-2 text-sm leading-6 text-slate-600">{passwordHint}</p>
           <PasswordRules id="signup-password-rules" value={password} />
         </div>
-        <PasswordInput id="signup-confirmation" name="confirmation" label="Konfirmasi password" autoComplete="new-password" value={confirmation} onChange={setConfirmation} error={state.errors?.confirmation} />
+        <PasswordInput id="signup-confirmation" name="confirmation" label="Konfirmasi password" autoComplete="new-password" value={confirmation} onChange={setConfirmation} error={confirmationError(password, confirmation, state.errors?.confirmation)} success={confirmationOk(password, confirmation)} />
         <DomicileFields prefix="signup" value={domicile} onChange={setDomicile} errors={state.errors} />
         <button type="submit" className={buttonClass}>{pending ? "Mengirim kode…" : "Kirim kode OTP"}</button>
       </fieldset>
@@ -139,7 +145,7 @@ function SimpleForm({ mode, initialName }: { mode: "password" | "profile"; initi
               <p id="password-password-hint" className="mt-2 text-sm leading-6 text-slate-600">{passwordHint}</p>
               <PasswordRules id="password-password-rules" value={password} />
             </div>
-            <PasswordInput id="password-confirmation" name="confirmation" label="Konfirmasi password" autoComplete="new-password" value={confirmation} onChange={setConfirmation} error={state.errors?.confirmation} />
+            <PasswordInput id="password-confirmation" name="confirmation" label="Konfirmasi password" autoComplete="new-password" value={confirmation} onChange={setConfirmation} error={confirmationError(password, confirmation, state.errors?.confirmation)} success={confirmationOk(password, confirmation)} />
           </>
         )}
         <button type="submit" className={buttonClass}>{pending ? "Memproses…" : mode === "password" ? "Simpan password" : "Simpan nama tampilan"}</button>
