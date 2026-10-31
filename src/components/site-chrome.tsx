@@ -28,7 +28,7 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 text-sm leading-6 text-slate-600 sm:px-8 md:flex-row md:items-start md:justify-between">
         <p className="font-semibold text-emerald-950">KampungLab Surabaya</p>
         <p className="max-w-xl md:text-right">
-          Prototipe konsep. Pengajuan dan uji warga belum dibuka.
+          Prototipe konsep. Draf inovasi tersedia; pengiriman final dan uji warga belum dibuka.
           Kebijakan program masih memerlukan validasi pengelola.
         </p>
       </div>

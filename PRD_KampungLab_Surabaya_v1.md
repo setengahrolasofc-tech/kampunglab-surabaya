@@ -957,11 +957,11 @@ Sebelum pitch/pilot, handbook menyarankan pengujian dengan RT, RW, dan staf kelu
 
 ## 16. Daftar keputusan tertunda
 
-**Status: belum disetujui, kecuali bagian model identitas D-18 yang disetujui pengguna pada 30 Oktober 2026.** Akun pribadi, pendaftaran warga mandiri, penugasan hak petugas oleh pengelola, dan pemisahan jabatan dari pemegang telah disetujui. Rincian D-18 lainnya dan seluruh keputusan lain tetap memerlukan pembahasan. Kolom usulan bukan izin menerapkan kebijakan nyata. Keputusan uang, kelulusan, privasi, dan kewenangan tidak boleh diberi default diam-diam.
+**Status: model identitas D-18 disetujui 30 Oktober 2026; profil wilayah, draf empat langkah, dan penggunaan placeholder DEMO untuk prototipe disetujui 31 Oktober 2026.** Akun pribadi, pendaftaran warga mandiri, penugasan hak petugas oleh pengelola, dan pemisahan jabatan dari pemegang telah disetujui. Draf dapat disimpan/edit oleh pemilik; persetujuan ini tidak mengaktifkan pengiriman final, unggah lampiran, atau seluruh kebijakan D-xx. Kolom usulan bukan izin menerapkan kebijakan nyata. Keputusan uang, kelulusan, privasi, dan kewenangan tidak boleh diberi default diam-diam.
 
 | ID | Keputusan dan alasan | Usulan untuk dibahas | Menghambat |
 |---|---|---|---|
-| D-01 | Empat nama tema dan master wilayah resmi belum lengkap | Minta daftar dari pemilik program; demo memakai placeholder berlabel | Form/master produksi, bukan struktur wizard |
+| D-01 | Empat nama tema dan master wilayah resmi belum lengkap. Pengguna menyetujui placeholder DEMO untuk prototipe pada 31 Oktober 2026 | Empat tema DEMO bernomor dan satu hierarki wilayah DEMO disediakan; nama/data resmi tetap harus berasal dari pemilik program | Form/master produksi, bukan draf prototipe |
 | D-02 | Mikro tidak lewat panel tetapi tetap disyaratkan skor 70 | Kelurahan mengisi rubrik yang sama; validasi pengelola | Persetujuan Mikro nyata |
 | D-03 | Formula skor panel, hubungan skor-suara, jumlah reviewer lengkap, revisi panel | Rata-rata tiga skor final, ambang 70, dan 2/3 setuju; semua reviewer sah selesai; perlu persetujuan | Kelulusan Kecil dan penilaian ulang |
 | D-04 | Basis plafon/RAB, porsi jika awal <30%, batas kategori, biaya perawatan, pembulatan | Gunakan anggaran disetujui sebagai basis, rencana tahap eksplisit, total tidak melebihi anggaran | Validasi finansial dan rencana nominal |

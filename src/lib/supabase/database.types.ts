@@ -14,6 +14,100 @@ export type Database = {
   }
   public: {
     Tables: {
+      innovation_drafts: {
+        Row: {
+          create_request_id: string
+          created_at: string
+          current_step: number
+          document: Json
+          id: string
+          owner_id: string
+          revision: number
+          status: string
+          territory_kind: string | null
+          territory_rt_id: string | null
+          theme_id: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          create_request_id: string
+          created_at?: string
+          current_step?: number
+          document: Json
+          id?: string
+          owner_id: string
+          revision?: number
+          status?: string
+          territory_kind?: string | null
+          territory_rt_id?: string | null
+          theme_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          create_request_id?: string
+          created_at?: string
+          current_step?: number
+          document?: Json
+          id?: string
+          owner_id?: string
+          revision?: number
+          status?: string
+          territory_kind?: string | null
+          territory_rt_id?: string | null
+          theme_id?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "innovation_drafts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "innovation_drafts_territory_rt_id_territory_kind_fkey"
+            columns: ["territory_rt_id", "territory_kind"]
+            isOneToOne: false
+            referencedRelation: "territories"
+            referencedColumns: ["id", "kind"]
+          },
+          {
+            foreignKeyName: "innovation_drafts_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "innovation_themes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      innovation_themes: {
+        Row: {
+          active: boolean
+          code: string
+          id: string
+          is_demo: boolean
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          id?: string
+          is_demo?: boolean
+          name: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          id?: string
+          is_demo?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
       office_mandates: {
         Row: {
           appointment_reference: string
@@ -177,22 +271,36 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string
+          domicile_kind: string | null
+          domicile_rt_id: string | null
           id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           display_name?: string
+          domicile_kind?: string | null
+          domicile_rt_id?: string | null
           id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           display_name?: string
+          domicile_kind?: string | null
+          domicile_rt_id?: string | null
           id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_domicile_rt_fk"
+            columns: ["domicile_rt_id", "domicile_kind"]
+            isOneToOne: false
+            referencedRelation: "territories"
+            referencedColumns: ["id", "kind"]
+          },
+        ]
       }
       territories: {
         Row: {
@@ -239,6 +347,10 @@ export type Database = {
         Returns: Json
       }
       is_program_admin: { Args: never; Returns: boolean }
+      write_innovation_draft: {
+        Args: { operation: string; payload: Json }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

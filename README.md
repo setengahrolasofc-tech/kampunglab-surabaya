@@ -67,6 +67,7 @@ AGENTS.md            Petunjuk pengembangan untuk AI
 - [Desain identitas/mandat](docs/IDENTITY_ACCESS_DESIGN.md): keputusan D-18 yang disetujui, hak akses, dan batas milestone.
 - [UAT akun](docs/AUTH_UAT.md): langkah pengujian email, sesi, profil, dan batas verifikasi.
 - [Admin dan akses](docs/ADMIN_UAT.md): penetapan peran/mandat, wilayah/jabatan, pencabutan, audit, dan verifikasi.
+- [Profil wilayah dan draf](docs/DRAFTS_UAT.md): pengisian empat langkah, RAB sementara, simpan/edit, dan batas akses pribadi.
 
 Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijakan. Jangan menampilkannya sebagai ketetapan resmi Pemkot. Keputusan `D-01` sampai `D-24` pada PRD belum otomatis disetujui.
 
@@ -76,7 +77,7 @@ Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijaka
 2. Uji daftar/masuk lewat email pribadi dan pastikan callback tetap sesuai origin aplikasi.
 3. Admin pertama sudah ditetapkan atas instruksi pemilik setelah akun terverifikasi. Buka `/admin` dari dashboard untuk pengelolaan akses; data wilayah resmi dan dokumen mandat tetap perlu disiapkan pemilik. Tidak ada pendaftar yang mendapat admin otomatis.
 4. Siapkan project Vercel dan environment; verifikasi akses repository untuk build/deploy.
-5. Implementasikan fitur bertahap dan laporkan verifikasi yang benar-benar dilakukan.
+5. Profil wilayah dan draf empat langkah tersedia pada `/profil/wilayah` dan `/pengajuan`. Uji dengan katalog DEMO yang jelas berlabel; master resmi dan pengiriman final tetap perlu disiapkan sebelum operasional.
 
 Jangan commit `.env`, secret key, kredensial, data warga, SK, atau bukti keuangan. Contoh environment nanti hanya memuat nama variabel dan placeholder. Jangan memakai database produksi untuk demo/preview.
 

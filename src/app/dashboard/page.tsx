@@ -21,6 +21,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     {status === "keluar-gagal" ? <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-900">Belum berhasil keluar. Coba kembali.</p> : null}
     {status === "akses-ditolak" ? <p role="alert" className="mt-6 rounded-xl bg-amber-50 p-4 text-amber-950">Halaman pengelola memerlukan akses admin yang masih berlaku.</p> : null}
     {isAdmin ? <Link href="/admin" className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white hover:bg-emerald-800">Buka pengelolaan admin</Link> : null}
+    <nav aria-label="Ruang inovator" className="mt-6 flex flex-wrap gap-4 font-semibold text-emerald-900"><Link href="/pengajuan" className="underline underline-offset-4">Pengajuan Saya</Link><Link href="/profil/wilayah" className="underline underline-offset-4">Wilayah domisili</Link></nav>
     {status === "profil-disimpan" ? <p role="status" className="mt-6 rounded-xl bg-emerald-50 p-4 text-emerald-950">Nama tampilan berhasil disimpan.</p> : null}
     {error ? <p role="alert" className="mt-6 rounded-xl bg-amber-50 p-4 leading-7 text-amber-950">Sebagian data akun belum dapat dimuat. Muat ulang halaman; hubungi pengelola jika tetap bermasalah. Tidak ada hak petugas yang diberikan secara otomatis.</p> : null}
     <div className="mt-10 grid gap-7 lg:grid-cols-2">
@@ -32,6 +33,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         {error ? <p className="mt-2 text-sm text-slate-600">Data peran belum dapat dipastikan.</p> : currentRoles.length ? <ul className="mt-3 space-y-3">{currentRoles.map((item) => <li key={item.id} className="rounded-xl bg-emerald-50 p-3 text-sm">{roleLabels[item.role] ?? item.role}</li>)}</ul> : <p className="mt-2 text-sm text-slate-600">Belum ada penetapan peran tambahan.</p>}
       </section>
     </div>
-    <section aria-labelledby="selanjutnya" className="mt-7 rounded-2xl bg-emerald-950 p-7 text-white"><h2 id="selanjutnya" className="text-xl font-bold">Langkah berikutnya</h2><p className="mt-3 max-w-3xl leading-7 text-emerald-100">Fitur pengajuan inovasi dan uji warga sedang dikembangkan. Kamu sudah dapat mengelola nama tampilan dan keamanan akun pribadimu.</p><Link href="/panduan" className="mt-5 inline-block font-semibold underline underline-offset-4">Pelajari alur program</Link></section>
+    <section aria-labelledby="selanjutnya" className="mt-7 rounded-2xl bg-emerald-950 p-7 text-white"><h2 id="selanjutnya" className="text-xl font-bold">Mulai susun inovasimu</h2><p className="mt-3 max-w-3xl leading-7 text-emerald-100">Lengkapi wilayah domisili, lalu buat draf data inovasi, PRD, dan RAB. Draf dapat disimpan dan dilanjutkan kembali. Pengiriman final dan uji warga belum dibuka.</p><Link href="/pengajuan" className="mt-5 inline-block font-semibold underline underline-offset-4">Buka Pengajuan Saya</Link></section>
   </main>;
 }

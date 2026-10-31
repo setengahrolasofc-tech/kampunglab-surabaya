@@ -1,0 +1,99 @@
+"use client";
+import Link from "next/link";
+import { useActionState, useEffect, useState } from "react";
+import { saveDraft } from "@/app/pengajuan/actions";
+import { TerritorySelect } from "./territory-select";
+import { innovationForms, maturityStages, prdFields, budgetTotals, budgetLineTotal, formatRupiahMilli, draftChecklist } from "@/lib/drafts/schema.mjs";
+import { makeTerritoryLabels } from "@/lib/admin/validation.mjs";
+import type { DraftDocument, DraftFormState, Territory, Theme } from "@/lib/drafts/types";
+
+const steps = ["Data inovasi", "PRD inovasi", "RAB", "Keaslian dan ringkasan"];
+const inputClass = "min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-base aria-invalid:border-red-600";
+const buttonClass = "min-h-11 rounded-xl border border-emerald-900 px-4 py-2 text-sm font-semibold text-emerald-900 disabled:opacity-50";
+const sectionClass = "rounded-2xl border border-emerald-950/10 bg-white p-5 sm:p-7";
+function Field({ path, label, value, onChange, error, multiline = false, maxLength = 4000, numeric = false }: {
+  path: string; label: string; value: string; onChange: (value: string) => void; error?: string; multiline?: boolean; maxLength?: number; numeric?: boolean;
+}) {
+  const id = `draft-${path.replaceAll(".", "-")}`;
+  const common = { id, value, maxLength, "aria-invalid": Boolean(error), "aria-describedby": error ? `${id}-error` : undefined, className: inputClass };
+  return <div><label htmlFor={id} className="mb-2 block text-sm font-semibold">{label}</label>{multiline ? <textarea {...common} rows={4} onChange={e => onChange(e.target.value)} /> : <input {...common} type="text" inputMode={numeric ? "decimal" : undefined} onChange={e => onChange(e.target.value)} />}{error ? <p id={`${id}-error`} className="mt-2 text-sm text-red-800">{error}</p> : null}</div>;
+}
+function SelectField({ path, label, value, onChange, options, error }: { path: string; label: string; value: string; onChange: (value:string) => void; options: {value:string;label:string}[]; error?: string }) {
+  const id=`draft-${path.replaceAll(".","-")}`;
+  return <div><label htmlFor={id} className="mb-2 block text-sm font-semibold">{label}</label><select id={id} value={value} onChange={e=>onChange(e.target.value)} aria-invalid={Boolean(error)} aria-describedby={error?`${id}-error`:undefined} className={inputClass}><option value="">Pilih {label.toLowerCase()}</option>{options.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select>{error?<p id={`${id}-error`} className="mt-2 text-sm text-red-800">{error}</p>:null}</div>;
+}
+const date = (value: string) => new Intl.DateTimeFormat("id-ID", {dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Jakarta"}).format(new Date(value))+" WIB";
+
+export function DraftWizard({ draftId, initialDocument, initialVersion, initialStep, initialSavedAt, territories, themes }: {
+  draftId: string; initialDocument: DraftDocument; initialVersion: number; initialStep: number; initialSavedAt: string; territories: Territory[]; themes: Theme[];
+}) {
+  const [documentData,setDocument] = useState(initialDocument);
+  const [version,setVersion] = useState(initialVersion);
+  const [step,setStep] = useState(initialStep);
+  const [savedAt,setSavedAt] = useState(initialSavedAt);
+  const [dirty,setDirty] = useState(false);
+  const [state,action,pending] = useActionState<DraftFormState,FormData>(async(previous,form)=>{
+    const result=await saveDraft(previous,form);
+    if(result.saved && result.version!==undefined && result.updatedAt && result.document){
+      setVersion(result.version);setSavedAt(result.updatedAt);setDocument(result.document);setDirty(false);
+      if(form.get("intent")==="continue")setStep(Math.min(4,Number(form.get("step"))+1));
+    }
+    return result;
+  },{});
+  useEffect(()=>{
+    if(!dirty)return;
+    const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue="";};
+    window.addEventListener("beforeunload",warn);
+    return ()=>window.removeEventListener("beforeunload",warn);
+  },[dirty]);
+  const setSection = <K extends keyof DraftDocument>(section:K,value:DraftDocument[K])=>{setDocument(previous=>({...previous,[section]:value}));setDirty(true);};
+  const info=documentData.innovation, prd=documentData.prd, budget=documentData.budget, declaration=documentData.declaration;
+  const errors=state.errors??{};
+  const totals=budgetTotals(budget), checklist=draftChecklist(documentData);
+  const territoryLabels=makeTerritoryLabels(territories);
+  const infoField=(key:keyof Omit<DraftDocument["innovation"],"team">,value:string)=>setSection("innovation",{...info,[key]:value});
+  const budgetField=(key:"contingency"|"honor"|"maintenance_cost"|"maintenance_months",value:string)=>setSection("budget",{...budget,[key]:value});
+  const summary = <div className="space-y-5">
+    <details open className={sectionClass}><summary className="cursor-pointer text-lg font-bold">Data inovasi</summary><dl className="mt-5 space-y-3 text-sm leading-6">{[
+      ["Nama",info.title],["Tema",themes.find(t=>t.id===info.theme_id)?.name],["Bentuk",info.form],["Tahap inovasi",info.maturity],
+      ["Wilayah",territoryLabels.get(info.rt_id)],["Ringkasan",info.summary],
+    ].map(([label,value])=><div key={String(label)}><dt className="font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-slate-600">{value||"Belum diisi"}</dd></div>)}</dl><h3 className="mt-5 font-semibold">Tim inovasi</h3>{info.team.length?<ul className="mt-2 space-y-2 text-sm">{info.team.map((member,index)=><li key={`${member.id}-${index}`}>{member.name||"Nama belum diisi"} · {member.role||"Peran belum diisi"}</li>)}</ul>:<p className="mt-2 text-sm text-slate-600">Belum diisi.</p>}</details>
+    <details className={sectionClass}><summary className="cursor-pointer text-lg font-bold">PRD inovasi</summary><dl className="mt-5 space-y-4 text-sm leading-6">{prdFields.map(([key,label])=><div key={key}><dt className="font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-slate-600">{prd[key]||"Belum diisi"}</dd></div>)}</dl></details>
+    <details className={sectionClass}><summary className="cursor-pointer text-lg font-bold">Rencana anggaran</summary><ul className="mt-5 space-y-3 text-sm leading-6">{budget.items.map((item,index)=><li key={`${item.id}-${index}`} className="rounded-xl bg-slate-50 p-3"><p className="font-semibold">{item.description||"Uraian belum diisi"}</p><p>{item.category||"Kategori belum diisi"} · {item.quantity||"—"} {item.unit||"satuan"} × Rp{item.unit_price||"—"} · {item.usage_stage||"Tahap belum diisi"}</p></li>)}</ul><p className="mt-5 font-semibold">{totals.invalid?"Perbaiki angka RAB untuk melihat total.":`Total rencana biaya: ${formatRupiahMilli(totals.total)}`}</p><p className="mt-2 text-sm text-slate-600">Dana tak terduga: Rp{budget.contingency||"0"}; honor inovator: Rp{budget.honor||"0"}.</p><p className="mt-2 text-sm text-slate-600">Estimasi perawatan terpisah: {totals.invalid?"—":formatRupiahMilli(totals.maintenance)} / {budget.maintenance_months||"—"} bulan.</p></details>
+  </div>;
+  return <>
+    <Link href="/pengajuan" onClick={event=>{if(dirty){event.preventDefault();window.alert("Masih ada perubahan yang belum disimpan. Simpan draf terlebih dahulu, lalu kembali ke daftar.");}}} className="text-sm font-semibold text-emerald-900 underline">Pengajuan Saya</Link>
+    <div className="mt-6 flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold tracking-widest text-emerald-800">DRAF PRIBADI</p><h1 className="mt-3 text-3xl font-bold sm:text-4xl">Susun inovasimu</h1><p className="mt-3 max-w-3xl leading-7 text-slate-600">Isi bertahap, simpan, lalu lanjutkan kapan saja. Bagian yang belum lengkap boleh tetap disimpan sebagai draf.</p></div><span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-950">Langkah {step} dari 4</span></div>
+    <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-950">Formulir prototipe memakai tema dan wilayah DEMO untuk latihan. Pengiriman final, lampiran, dan pemeriksaan duplikasi belum diaktifkan. Draf belum menjadi pengajuan terkirim.</p>
+    <nav aria-label="Langkah pengajuan" className="mt-7"><ol className="grid grid-cols-2 gap-3 lg:grid-cols-4">{steps.map((label,index)=><li key={label}><button type="button" disabled={pending} aria-current={step===index+1?"step":undefined} onClick={()=>setStep(index+1)} className={`min-h-14 w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold ${step===index+1?"border-emerald-900 bg-emerald-900 text-white":"border-slate-200 bg-white text-slate-700"}`}>{index+1}. {label}{checklist[index]?<span className="ml-2" aria-label="Isian pokok terisi">✓</span>:null}</button></li>)}</ol></nav>
+    <p role="status" className={`mt-5 text-sm font-semibold ${dirty?"text-amber-800":"text-emerald-900"}`}>{dirty?"Ada perubahan belum disimpan. Tombol simpan menyimpan seluruh langkah.":`Tersimpan ${date(savedAt)}`}</p>
+    <form action={action} noValidate className="mt-5 space-y-6">
+      <input type="hidden" name="id" value={draftId}/><input type="hidden" name="revision" value={version}/><input type="hidden" name="step" value={step}/><input type="hidden" name="document" value={JSON.stringify(documentData)}/>
+      {state.error||Object.keys(errors).length?<div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-900"><p className="font-semibold">{state.error||"Periksa isian yang ditandai. Isianmu tetap tersimpan di formulir ini."}</p>{Object.keys(errors).length?<><ul className="mt-2 list-inside list-disc">{[...new Set(Object.values(errors))].map(error=><li key={error}>{error}</li>)}</ul><p className="mt-2">Kesalahan bisa berada di langkah lain; gunakan tombol langkah di atas untuk memeriksanya.</p></>:null}<Link href="/pengajuan" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block font-semibold underline">Periksa draf tersimpan di tab baru</Link></div>:null}
+      <fieldset disabled={pending} className="space-y-6 disabled:opacity-60"><legend className="sr-only">{steps[step-1]}</legend>
+      {step===1?<section className={`${sectionClass} space-y-5`} aria-labelledby="innovation-title"><h2 id="innovation-title" className="text-xl font-bold">1. Data inovasi</h2>
+        <Field path="innovation.title" label="Nama inovasi" value={info.title} maxLength={160} onChange={v=>infoField("title",v)} error={errors["innovation.title"]}/>
+        <SelectField path="innovation.theme_id" label="Tema inovasi" value={info.theme_id} onChange={v=>infoField("theme_id",v)} error={errors["innovation.theme_id"]} options={themes.filter(t=>t.active||t.id===info.theme_id).map(t=>({value:t.id,label:`${t.name}${t.active?"":" (nonaktif)"}`}))}/>
+        <div className="grid gap-5 sm:grid-cols-2"><SelectField path="innovation.form" label="Bentuk inovasi" value={info.form} onChange={v=>infoField("form",v)} options={innovationForms.map(value=>({value,label:value}))} error={errors["innovation.form"]}/><SelectField path="innovation.maturity" label="Tahap inovasi" value={info.maturity} onChange={v=>infoField("maturity",v)} options={maturityStages.map(value=>({value,label:value}))} error={errors["innovation.maturity"]}/></div>
+        <p className="text-sm text-slate-600">Tahap inisiatif, uji coba, atau penerapan menjelaskan kematangan inovasi, bukan keputusan persetujuan program.</p>
+        <div><h3 className="mb-3 text-sm font-semibold">Wilayah rencana inovasi</h3><TerritorySelect territories={territories} value={info.rt_id} onChange={v=>infoField("rt_id",v)} prefix="innovation-territory" error={errors["innovation.rt_id"]}/></div>
+        <Field path="innovation.summary" label="Ringkasan solusi" value={info.summary} multiline maxLength={3000} onChange={v=>infoField("summary",v)} error={errors["innovation.summary"]}/>
+        <div className="space-y-4"><h3 className="font-bold">Tim inovasi</h3><p className="text-sm leading-6 text-slate-600">Catat nama dan peran. Daftar ini belum memberikan akses edit kepada anggota tim.</p>{errors["innovation.team"]?<p className="text-sm text-red-800">{errors["innovation.team"]}</p>:null}{info.team.map((member,index)=><div key={`${member.id}-${index}`} className="space-y-3 rounded-xl border border-slate-200 p-4"><div className="grid gap-4 sm:grid-cols-2">{(["name","role"] as const).map(key=><Field key={key} path={`innovation.team.${index}.${key}`} label={`${key==="name"?"Nama":"Peran"} anggota ${index+1}`} value={member[key]} maxLength={160} onChange={v=>setSection("innovation",{...info,team:info.team.map((row,i)=>i===index?{...row,[key]:v}:row)})} error={errors[`innovation.team.${index}.${key}`]}/>)}</div><button type="button" className="text-sm font-semibold text-red-800 underline" onClick={()=>setSection("innovation",{...info,team:info.team.filter((_,i)=>i!==index)})}>Hapus anggota {index+1}</button></div>)}<button type="button" disabled={info.team.length>=20} className={buttonClass} onClick={()=>setSection("innovation",{...info,team:[...info.team,{id:crypto.randomUUID(),name:"",role:""}]})}>Tambah anggota tim</button></div>
+      </section>:null}
+      {step===2?<section className={`${sectionClass} space-y-5`} aria-labelledby="prd-title"><h2 id="prd-title" className="text-xl font-bold">2. PRD inovasi</h2><p className="text-sm leading-6 text-slate-600">Jelaskan apa yang akan dibuat, untuk siapa, dan bagaimana manfaatnya diuji. Contoh ukuran keberhasilan: waktu pengerjaan turun dari 30 menjadi 15 menit.</p>{prdFields.map(([key,label])=><Field key={key} path={`prd.${key}`} label={label} value={prd[key]} multiline={key!=="beneficiary_count"} numeric={key==="beneficiary_count"} maxLength={key==="beneficiary_count"?9:4000} onChange={v=>setSection("prd",{...prd,[key]:v})} error={errors[`prd.${key}`]}/>)}</section>:null}
+      {step===3?<section className={`${sectionClass} space-y-6`} aria-labelledby="budget-title"><h2 id="budget-title" className="text-xl font-bold">3. Rencana anggaran biaya</h2><p className="text-sm leading-6 text-slate-600">Harga diisi dalam rupiah bulat tanpa pemisah, misalnya 15000. Volume dapat memakai maksimal 3 angka desimal, misalnya 0,5. Angka ini masih rencana, belum dinilai terhadap plafon dan aturan pembiayaan program.</p>{errors["budget.items"]?<p className="text-sm text-red-800">{errors["budget.items"]}</p>:null}
+        {budget.items.map((item,index)=><div key={`${item.id}-${index}`} className="space-y-4 rounded-xl border border-slate-200 p-4"><h3 className="font-bold">Kebutuhan {index+1}</h3><div className="grid gap-4 sm:grid-cols-2">{([
+          ["description","Uraian kebutuhan",240],["category","Kategori biaya",80],["unit","Satuan",40],["quantity","Volume",16],["unit_price","Harga satuan (Rp)",13],["usage_stage","Tahap penggunaan",80],
+        ] as const).map(([key,label,max])=><Field key={key} path={`budget.items.${index}.${key}`} label={label} value={item[key]} numeric={key==="quantity"||key==="unit_price"} maxLength={max} onChange={v=>setSection("budget",{...budget,items:budget.items.map((row,i)=>i===index?{...row,[key]:v}:row)})} error={errors[`budget.items.${index}.${key}`]}/>)}</div><p className="text-sm font-semibold text-emerald-950">Subtotal kebutuhan: {budgetLineTotal(item)===null?"Periksa angka":formatRupiahMilli(budgetLineTotal(item)??BigInt(0))}</p><button type="button" className="text-sm font-semibold text-red-800 underline" onClick={()=>setSection("budget",{...budget,items:budget.items.filter((_,i)=>i!==index)})}>Hapus kebutuhan {index+1}</button></div>)}
+        <button type="button" disabled={budget.items.length>=50} className={buttonClass} onClick={()=>setSection("budget",{...budget,items:[...budget.items,{id:crypto.randomUUID(),description:"",category:"",unit:"",quantity:"",unit_price:"",usage_stage:""}]})}>Tambah kebutuhan biaya</button>
+        <div className="grid gap-5 sm:grid-cols-2"><Field path="budget.contingency" label="Dana tak terduga (Rp)" value={budget.contingency} numeric maxLength={13} onChange={v=>budgetField("contingency",v)} error={errors["budget.contingency"]}/><Field path="budget.honor" label="Honor inovator (Rp)" value={budget.honor} numeric maxLength={13} onChange={v=>budgetField("honor",v)} error={errors["budget.honor"]}/></div>
+        <p className="text-sm leading-6 text-slate-600">Dana tak terduga dan honor di atas ditambahkan ke subtotal kebutuhan. Pastikan biaya yang sama hanya dicatat satu kali.</p>
+        <div className="rounded-xl bg-emerald-50 p-5 text-emerald-950">{totals.invalid?<p>Perbaiki angka yang tidak valid untuk melihat total.</p>:<><p>Subtotal kebutuhan: {formatRupiahMilli(totals.subtotal)}</p><p className="mt-2 text-lg font-bold">Total rencana biaya: {formatRupiahMilli(totals.total)}</p></>}</div>
+        <div className="grid gap-5 sm:grid-cols-2"><Field path="budget.maintenance_cost" label="Estimasi biaya perawatan (Rp)" value={budget.maintenance_cost} numeric maxLength={13} onChange={v=>budgetField("maintenance_cost",v)} error={errors["budget.maintenance_cost"]}/><Field path="budget.maintenance_months" label="Rencana masa perawatan (6–12 bulan)" value={budget.maintenance_months} numeric maxLength={2} onChange={v=>budgetField("maintenance_months",v)} error={errors["budget.maintenance_months"]}/></div><p className="text-sm leading-6 text-slate-600">Estimasi perawatan dicatat terpisah dari total rencana biaya sampai skema pembiayaannya ditentukan.</p>
+      </section>:null}
+      {step===4?<section className="space-y-6" aria-labelledby="summary-title"><div className={`${sectionClass} space-y-5`}><h2 id="summary-title" className="text-xl font-bold">4. Keaslian dan ringkasan</h2><label className="flex items-start gap-3 text-sm leading-7"><input type="checkbox" checked={declaration.own_work} onChange={e=>setSection("declaration",{...declaration,own_work:e.target.checked})} className="mt-1 size-5 shrink-0 accent-emerald-900"/><span>Saya menyatakan karya yang dijelaskan merupakan karya sendiri atau tim yang berhak mengajukannya, dan keterangan yang diberikan dapat dipertanggungjawabkan.</span></label><Field path="declaration.notes" label="Catatan keaslian, rujukan, atau penjelasan tambahan" value={declaration.notes} multiline maxLength={3000} onChange={v=>setSection("declaration",{...declaration,notes:v})} error={errors["declaration.notes"]}/><ul className="space-y-2 text-sm">{steps.map((label,index)=><li key={label}>{checklist[index]?"✓":"○"} {label}: {checklist[index]?"isian pokok terisi":"masih dapat dilengkapi"}</li>)}</ul><p className="text-sm leading-6 text-slate-600">Checklist membantu meninjau isian, bukan hasil verifikasi program. Lampiran, cek kemiripan, dan pengiriman final akan tersedia pada tahap berikutnya.</p></div>{summary}</section>:null}
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-950/10 bg-white p-5"><button type="submit" name="intent" value="save" className="min-h-12 rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white hover:bg-emerald-800">{pending?"Menyimpan…":"Simpan draf"}</button>{step<4?<button type="submit" name="intent" value="continue" className={buttonClass}>Simpan dan lanjut</button>:null}{step>1?<button type="button" className={buttonClass} onClick={()=>setStep(step-1)}>Langkah sebelumnya</button>:null}<p className="text-sm text-slate-600">Seluruh langkah disimpan bersama.</p></div>
+      </fieldset>
+    </form>
+  </>;
+}
