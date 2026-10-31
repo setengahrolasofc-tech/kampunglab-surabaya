@@ -27,7 +27,8 @@ Alamat, kecamatan, kelurahan, RW, dan RT disimpan di metadata akun Auth (`domici
 
 - Ini **klaim warga yang belum diverifikasi**. Tidak dipakai untuk hak akses atau antrean RT/RW.
 - Daftar kecamatan/kelurahan di `src/lib/auth/surabaya-areas.mjs` adalah data contoh yang belum dicocokkan dengan master resmi; RW dan RT diketik manual oleh warga (angka 1–999; nol di depan dibuang otomatis, jadi `03` disimpan sebagai `3`) tanpa dicocokkan ke daftar.
-- Antrean RT/RW/kelurahan tetap memakai `profiles.domicile_rt_id` dari tabel `territories` (diisi lewat `/profil/wilayah`). Menghubungkan klaim daftar ke wilayah resmi memerlukan master wilayah Surabaya di database dan migrasi tersendiri, belum dibuat di paket ini.
+- Setelah verifikasi OTP daftar (dan setelah form Google), klaim dicocokkan otomatis ke tabel `territories`: kelurahan lewat nama, RW dan RT lewat angka di ujung nama/kode ("RW 03", "DEMO-RW-01" dan "3" sama-sama dibaca 3). Bila tepat satu RT cocok, `profiles.domicile_rt_id` diisi; bila tidak ada atau lebih dari satu yang cocok, kolom itu dikosongkan dan `/profil` menampilkan statusnya. Tabel wilayah belum punya tingkat kecamatan, jadi dua kelurahan bernama sama di kecamatan berbeda terbaca ganda. Pengelola perlu menamai wilayah mengikuti pola di atas.
+- Domisili diubah dari `/profil` dengan form yang sama; `/profil/wilayah` mengarah ke sana.
 
 ## 5. Masuk dengan Google (opsional)
 
@@ -36,3 +37,15 @@ Tombol memanggil `signInWithOAuth` dengan tujuan `/auth/callback`. Aktifkan prov
 ## 6. Verifikasi
 
 Catatan paket upstream menyebut `npm test` (30 tes lulus, termasuk aturan password, domisili, dan OTP). Tes tersebut **tidak dijalankan ulang pada milestone kelurahan**, sesuai permintaan penundaan tes alur. Lint, TypeScript, dan build produksi hasil gabungan sudah lulus. Konfigurasi template/panjang OTP/provider Google, pengiriman email/OTP sungguhan, dan uji browser belum diperiksa atau diubah pada milestone ini. Saat tes dilanjutkan, periksa daftar, penerimaan kode, verifikasi, keluar, pemulihan password, dan kirim ulang dengan akun sendiri.
+
+## 7. Kelola akun di /profil
+
+Jalankan migrasi `20261101000000_profile_account_management.sql` (fungsi `set_profile_domicile` dan `delete_own_account`).
+
+Template email siap pakai ada di `docs/email-templates/` (tiga file HTML, semuanya menampilkan `{{ .Token }}`):
+
+- `confirm-signup.html` → Authentication → Email Templates → **Confirm signup**
+- `reset-password.html` → **Reset password**
+- `magic-link.html` → **Magic Link**: dipakai sebagai kode verifikasi ganti password (`signInWithOtp` tanpa membuat akun baru, lalu `verifyOtp`). Kode selalu diperiksa server; mekanisme `reauthenticate` Supabase sengaja tidak dipakai karena nonce-nya hanya diperiksa bila sesi lebih tua dari 24 jam.
+
+Hapus akun = soft delete: profil dianonimkan, domisili dilepas, identitas dan sesi dihapus, `auth.users` diberi `deleted_at`, email diganti alamat `.invalid`. Draf dan pengajuan tidak dihapus karena kebijakan retensi (D-13) belum diputuskan. Akun dengan mandat/peran aktif ditolak sampai dicabut pengelola. Akun Google tidak bisa ganti password dari halaman ini. Ganti email tidak tersedia. Fungsi SQL dan alur email belum diuji terhadap database/Supabase sungguhan.

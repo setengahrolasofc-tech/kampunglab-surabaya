@@ -14,6 +14,7 @@ const notices: Record<string, string> = {
   "perlu-masuk": "Masuk terlebih dahulu untuk membuka halaman tersebut.",
   keluar: "Kamu sudah keluar dari akun pada browser ini.",
   "tautan-gagal": "Tautan tidak valid, kedaluwarsa, atau dibuka dari browser berbeda. Coba masuk setelah email terkonfirmasi, atau minta kode pemulihan baru.",
+  "akun-dihapus": "Akunmu sudah dihapus. Kamu bisa mendaftar lagi kapan saja dengan email atau akun Google.",
   "google-gagal": "Masuk dengan Google belum dapat diproses. Gunakan email dan password, atau coba lagi nanti.",
 };
 

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
+import { linkDomicile, linkDomicileFromSession } from "@/lib/auth/domicile-sync";
 import { getAppOrigin, isValidEmail, validateAuthForm, validateDomicile, validateOtp } from "@/lib/auth/validation.mjs";
 import type { AuthActionState } from "@/lib/auth/types";
 
@@ -77,6 +78,8 @@ export async function verifySignupOtp(_state: AuthActionState, form: FormData): 
     const supabase = await createServerSupabaseClient();
     const { error } = await supabase.auth.verifyOtp({ email: input.email, token: input.token, type: "email" });
     if (error) return badOtp;
+    // Cocokkan klaim domisili dari form daftar ke wilayah program; gagal tidak menghalangi masuk.
+    await linkDomicileFromSession(supabase);
   } catch { return unavailable; }
   revalidatePath("/", "layout");
   redirect("/dashboard");
@@ -169,6 +172,7 @@ export async function completeProfile(_state: AuthActionState, form: FormData): 
     if (error) return { error: "Data belum tersimpan. Muat ulang halaman dan coba lagi." };
     // Samakan nama di tabel profil; bila gagal, nama masih tersimpan di metadata dan bisa diubah di dashboard.
     await supabase.from("profiles").update({ display_name: input.displayName }).eq("id", user.id);
+    await linkDomicile(supabase, domicile.value);
   } catch { return unavailable; }
   revalidatePath("/", "layout");
   redirect("/dashboard");

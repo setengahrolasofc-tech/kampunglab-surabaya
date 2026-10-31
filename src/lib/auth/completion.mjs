@@ -16,3 +16,13 @@ export function needsDomicileCompletion(user) {
   const meta = user.user_metadata ?? {};
   return !REQUIRED.every((key) => typeof meta[key] === "string" && meta[key].trim() !== "");
 }
+
+/** Akun punya login email+password (bukan hanya Google). Hanya akun ini yang bisa ganti email/password dari /profil. @param {{ app_metadata?: any, identities?: Array<{ provider?: string }> | null }} user */
+export function hasEmailIdentity(user) {
+  const providers = new Set([
+    user.app_metadata?.provider,
+    ...(Array.isArray(user.app_metadata?.providers) ? user.app_metadata.providers : []),
+    ...(user.identities ?? []).map((identity) => identity?.provider),
+  ]);
+  return providers.has("email");
+}

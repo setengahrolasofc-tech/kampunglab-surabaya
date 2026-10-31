@@ -1240,6 +1240,7 @@ export type Database = {
         Args: { operation: string; payload?: Json }
         Returns: Json
       }
+      delete_own_account: { Args: never; Returns: Json }
       is_program_admin: { Args: never; Returns: boolean }
       panel_workflow: {
         Args: { operation: string; payload?: Json }
@@ -1249,6 +1250,7 @@ export type Database = {
         Args: { operation: string; payload?: Json }
         Returns: Json
       }
+      set_profile_domicile: { Args: { rt: string | null }; Returns: Json }
       simulation_workflow: {
         Args: { operation: string; payload?: Json }
         Returns: Json
