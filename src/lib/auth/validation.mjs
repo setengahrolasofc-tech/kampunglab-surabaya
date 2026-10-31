@@ -1,4 +1,4 @@
-import { KECAMATAN_KELURAHAN, RT_MAX, RW_MAX } from "./surabaya-areas.mjs";
+import { KECAMATAN_KELURAHAN, twoDigits } from "./surabaya-areas.mjs";
 
 /** Panjang kode OTP email. Samakan dengan pengaturan "Email OTP Length" di Supabase (lihat docs/OTP_SETUP.md). */
 export const OTP_LENGTH = 6;
@@ -45,8 +45,8 @@ export function validateAuthForm(form, mode) {
 }
 
 /**
- * Domisili saat daftar: alamat, kecamatan, kelurahan, RW, RT. Nilai harus ada di daftar contoh
- * (surabaya-areas.mjs). Ini klaim warga yang belum diverifikasi, bukan dasar hak akses.
+ * Domisili saat daftar: alamat, kecamatan, kelurahan (dari daftar contoh di surabaya-areas.mjs),
+ * serta RW dan RT yang diketik manual. Ini klaim warga yang belum diverifikasi, bukan dasar hak akses.
  * @param {FormData} form
  */
 export function validateDomicile(form) {
@@ -55,8 +55,13 @@ export function validateDomicile(form) {
   const address = String(form.get("address") ?? "").trim().replace(/\s+/g, " ");
   const kecamatan = String(form.get("kecamatan") ?? "");
   const kelurahan = String(form.get("kelurahan") ?? "");
-  const rw = String(form.get("rw") ?? "");
-  const rt = String(form.get("rt") ?? "");
+  // RW dan RT diketik manual: terima 1–3 digit angka (mis. "3" atau "03"), simpan sebagai "03".
+  const number = (/** @type {FormDataEntryValue | null} */ raw) => {
+    const text = String(raw ?? "").trim();
+    return /^\d{1,3}$/.test(text) && Number(text) >= 1 ? twoDigits(Number(text)) : "";
+  };
+  const rw = number(form.get("rw"));
+  const rt = number(form.get("rt"));
 
   if (address.length < 5 || address.length > 160 || /[\u0000-\u001f\u007f]/.test(address)) {
     errors.address = "Isi nama jalan dan nomor rumah (5–160 karakter).";
@@ -64,9 +69,8 @@ export function validateDomicile(form) {
   const kelurahanList = Object.hasOwn(KECAMATAN_KELURAHAN, kecamatan) ? KECAMATAN_KELURAHAN[kecamatan] : null;
   if (!kelurahanList) errors.kecamatan = "Pilih kecamatan.";
   else if (!kelurahanList.includes(kelurahan)) errors.kelurahan = "Pilih kelurahan sesuai kecamatan.";
-  const inRange = (/** @type {string} */ v, /** @type {number} */ max) => /^\d{2}$/.test(v) && Number(v) >= 1 && Number(v) <= max;
-  if (!inRange(rw, RW_MAX)) errors.rw = "Pilih RW.";
-  if (!inRange(rt, RT_MAX)) errors.rt = "Pilih RT.";
+  if (!rw) errors.rw = "Ketik nomor RW berupa angka, misalnya 3.";
+  if (!rt) errors.rt = "Ketik nomor RT berupa angka, misalnya 7.";
   return { errors, value: { address, kecamatan, kelurahan, rw, rt } };
 }
 

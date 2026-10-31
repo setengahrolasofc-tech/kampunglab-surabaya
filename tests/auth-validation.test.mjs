@@ -73,8 +73,15 @@ test("domisili wajib berurutan kecamatan, kelurahan, RW, RT dan berasal dari daf
   assert.deepEqual(Object.keys(wrongPair.errors), ["kelurahan"]);
   const empty = validateDomicile(form({}));
   assert.deepEqual(Object.keys(empty.errors).sort(), ["address", "kecamatan", "rt", "rw"]);
-  assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "99", rt: "07" })).errors.rw);
-  assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "03", rt: "16" })).errors.rt);
+  assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "0", rt: "07" })).errors.rw);
+  assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "03", rt: "abcd" })).errors.rt);
+  assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "03", rt: "1234" })).errors.rt);
+  // RW/RT diketik manual: angka tanpa nol di depan dirapikan jadi dua digit.
+  const manual = validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: " 3 ", rt: "7" }));
+  assert.deepEqual(manual.errors, {});
+  assert.equal(manual.value.rw, "03");
+  assert.equal(manual.value.rt, "07");
+  assert.equal(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan, kelurahan, rw: "25", rt: "120" })).value.rt, "120");
   assert.ok(validateDomicile(form({ address: "Jl. Contoh No. 5", kecamatan: "__proto__", kelurahan, rw: "03", rt: "07" })).errors.kecamatan);
 });
 

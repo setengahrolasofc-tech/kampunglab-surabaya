@@ -26,7 +26,7 @@ Aplikasi menunggu kode **6 digit** (`OTP_LENGTH` di `src/lib/auth/validation.mjs
 Alamat, kecamatan, kelurahan, RW, dan RT disimpan di metadata akun Auth (`domicile_address`, `domicile_kecamatan`, `domicile_kelurahan`, `domicile_rw`, `domicile_rt`). Catatan penting:
 
 - Ini **klaim warga yang belum diverifikasi**. Tidak dipakai untuk hak akses atau antrean RT/RW.
-- Daftar kecamatan/kelurahan di `src/lib/auth/surabaya-areas.mjs` adalah data contoh yang belum dicocokkan dengan master resmi; rentang RW 01–20 dan RT 01–15 juga contoh.
+- Daftar kecamatan/kelurahan di `src/lib/auth/surabaya-areas.mjs` adalah data contoh yang belum dicocokkan dengan master resmi; RW dan RT diketik manual oleh warga (angka 1–999, disimpan dua digit seperti `03`) tanpa dicocokkan ke daftar.
 - Antrean RT/RW/kelurahan tetap memakai `profiles.domicile_rt_id` dari tabel `territories` (diisi lewat `/profil/wilayah`). Menghubungkan klaim daftar ke wilayah resmi memerlukan master wilayah Surabaya di database dan migrasi tersendiri, belum dibuat di paket ini.
 
 ## 5. Masuk dengan Google (opsional)

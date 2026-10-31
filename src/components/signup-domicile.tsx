@@ -1,16 +1,15 @@
 "use client";
 
-import { KECAMATAN_KELURAHAN, RT_MAX, RW_MAX, twoDigits } from "@/lib/auth/surabaya-areas.mjs";
+import { KECAMATAN_KELURAHAN } from "@/lib/auth/surabaya-areas.mjs";
 
 export type Domicile = { address: string; kecamatan: string; kelurahan: string; rw: string; rt: string };
 export const emptyDomicile: Domicile = { address: "", kecamatan: "", kelurahan: "", rw: "", rt: "" };
 
 const control = "min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 disabled:opacity-60 aria-invalid:border-red-600";
-const numbers = (max: number) => Array.from({ length: max }, (_, index) => twoDigits(index + 1));
 
-function Select({ id, name, label, value, onChange, disabled, error, placeholder, options, format }: {
+function Select({ id, name, label, value, onChange, disabled, error, placeholder, options }: {
   id: string; name: string; label: string; value: string; onChange: (value: string) => void; disabled?: boolean;
-  error?: string; placeholder: string; options: readonly string[]; format?: (option: string) => string;
+  error?: string; placeholder: string; options: readonly string[];
 }) {
   return (
     <div>
@@ -21,14 +20,30 @@ function Select({ id, name, label, value, onChange, disabled, error, placeholder
         onChange={(event) => onChange(event.target.value)}
       >
         <option value="">{placeholder}</option>
-        {options.map((option) => <option key={option} value={option}>{format ? format(option) : option}</option>)}
+        {options.map((option) => <option key={option} value={option}>{option}</option>)}
       </select>
       {error ? <p id={`${id}-error`} className="mt-2 text-sm text-red-800">{error}</p> : null}
     </div>
   );
 }
 
-/** Alamat, lalu kecamatan → kelurahan → RW → RT. Pilihan di bawahnya terbuka setelah yang di atasnya dipilih. */
+function NumberField({ id, name, label, value, onChange, error, placeholder }: {
+  id: string; name: string; label: string; value: string; onChange: (value: string) => void; error?: string; placeholder: string;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold">{label}</label>
+      <input
+        id={id} name={name} required inputMode="numeric" autoComplete="off" maxLength={3} placeholder={placeholder}
+        value={value} onChange={(event) => onChange(event.target.value.replace(/\D/g, "").slice(0, 3))}
+        aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} className={control}
+      />
+      {error ? <p id={`${id}-error`} className="mt-2 text-sm text-red-800">{error}</p> : null}
+    </div>
+  );
+}
+
+/** Alamat, kecamatan → kelurahan (pilihan), lalu RW dan RT yang diketik manual. */
 export function DomicileFields({ value, onChange, errors, prefix }: {
   value: Domicile; onChange: (next: Domicile) => void; errors?: Record<string, string>; prefix: string;
 }) {
@@ -50,26 +65,18 @@ export function DomicileFields({ value, onChange, errors, prefix }: {
         <Select
           id={`${prefix}-kecamatan`} name="kecamatan" label="Kecamatan" value={value.kecamatan} error={errors?.kecamatan}
           placeholder="Pilih kecamatan" options={Object.keys(KECAMATAN_KELURAHAN)}
-          onChange={(kecamatan) => onChange({ ...value, kecamatan, kelurahan: "", rw: "", rt: "" })}
+          onChange={(kecamatan) => onChange({ ...value, kecamatan, kelurahan: "" })}
         />
         <Select
           id={`${prefix}-kelurahan`} name="kelurahan" label="Kelurahan" value={value.kelurahan} error={errors?.kelurahan}
           placeholder="Pilih kelurahan" options={kelurahan} disabled={!value.kecamatan}
-          onChange={(next) => onChange({ ...value, kelurahan: next, rw: "", rt: "" })}
+          onChange={(next) => onChange({ ...value, kelurahan: next })}
         />
-        <Select
-          id={`${prefix}-rw`} name="rw" label="RW" value={value.rw} error={errors?.rw}
-          placeholder="Pilih RW" options={numbers(RW_MAX)} format={(option) => `RW ${option}`} disabled={!value.kelurahan}
-          onChange={(rw) => onChange({ ...value, rw, rt: "" })}
-        />
-        <Select
-          id={`${prefix}-rt`} name="rt" label="RT" value={value.rt} error={errors?.rt}
-          placeholder="Pilih RT" options={numbers(RT_MAX)} format={(option) => `RT ${option}`} disabled={!value.rw}
-          onChange={(rt) => onChange({ ...value, rt })}
-        />
+        <NumberField id={`${prefix}-rw`} name="rw" label="RW" placeholder="Contoh: 3" value={value.rw} error={errors?.rw} onChange={(rw) => onChange({ ...value, rw })} />
+        <NumberField id={`${prefix}-rt`} name="rt" label="RT" placeholder="Contoh: 7" value={value.rt} error={errors?.rt} onChange={(rt) => onChange({ ...value, rt })} />
       </div>
       <p className="text-sm leading-6 text-slate-600">
-        Data wilayah masih contoh dan perlu dicocokkan dengan master resmi. Domisili ini belum diverifikasi RT/RW dan tidak memberi akses petugas.
+        Ketik angka RW dan RT saja. Daftar kecamatan dan kelurahan masih contoh dan perlu dicocokkan dengan master resmi. Domisili ini belum diverifikasi RT/RW dan tidak memberi akses petugas.
       </p>
     </div>
   );

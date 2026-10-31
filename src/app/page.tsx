@@ -33,9 +33,9 @@ export default function HomePage() {
             <Link href="/panduan" className="rounded-full bg-emerald-900 px-6 py-3.5 text-sm font-semibold text-white hover:bg-emerald-800">
               Kenali KampungLab
             </Link>
-            <a href="#alur" className="rounded-sm py-3 text-sm font-semibold text-emerald-900 hover:underline">
-              Lihat alur program <span aria-hidden="true">↗</span>
-            </a>
+            <Link href="/masuk" className="rounded-full border border-emerald-900 px-6 py-3.5 text-sm font-semibold text-emerald-900 hover:bg-emerald-50">
+              Login
+            </Link>
           </div>
         </div>
         <aside aria-label="Prinsip pembuktian inovasi" className="rounded-3xl bg-emerald-950 p-8 text-white sm:p-10">
