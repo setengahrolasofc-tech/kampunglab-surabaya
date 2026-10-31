@@ -334,6 +334,7 @@ PRD dan RAB adalah dokumen wajib, tetapi handbook tidak memastikan apakah semuan
 | Kelurahan | Rekomendasi sebelumnya, tingkat, kelengkapan | Putus Mikro atau teruskan Kecil; revisi/tolak sesuai kebijakan peninjauan |
 
 - Rekomendasi dibuat di dalam sistem, bertanggal/waktu; tidak mewajibkan surat rekomendasi terpisah.
+- Pengecualian (keputusan pengguna, 31 Okt 2026): bila RT atau RW belum memutuskan setelah 7 hari (parameter yang dapat diatur Admin), tombol "Ajukan lewat dokumen fisik" terbuka untuk inovator. Inovator mencetak surat rekomendasi (template tersedia, versi terisi otomatis diusulkan), meminta tanda tangan dan stempel, lalu mengunggah scan/foto. Kelurahan mengonfirmasi ke RT/RW; konfirmasi sah dicatat sebagai keputusan Setuju bermetode `fisik` dan pengajuan lanjut ke tingkat berikutnya. Dokumen disimpan privat dan tidak tampil di etalase/passport; yang tampil hanya label rekomendasi manual. Siapa yang mengonfirmasi (usulan: kelurahan) belum final. Status implementasi: belum dibangun pada alur DEMO; membutuhkan bucket privat dan perubahan alur keputusan.
 - Tolak wajib alasan terlihat inovator. Revisi wajib catatan yang dapat ditindaklanjuti.
 - Persetujuan memindahkan antrean ke tingkat berikutnya; tidak melompat kecuali konflik yang sah.
 - Masa revisi tidak dihitung sebagai waktu aktif tingkat tersebut.
@@ -538,7 +539,7 @@ Passport harus memuat:
 - Catat dijadwalkan, dicoba, berhasil, gagal; jangan menyebut “terkirim” bila baru masuk antrean.
 - Batas 24 jam adalah waktu berlalu, bukan jam kerja, sesuai teks handbook. Aturan waktu ulang saat kirim ulang revisi masih D-07.
 - Timeline inovator menunjukkan masuk antrean, lama menunggu, revisi, dan status pengingat. Angka 24 jam tidak disajikan sebagai batas auto-approval.
-- Eskalasi setelah satu pengingat belum ditetapkan. Jangan membuat kenaikan tingkat atau persetujuan otomatis. D-22.
+- Diputuskan pengguna (31 Okt 2026): tidak ada eskalasi atau kenaikan tingkat otomatis. Setelah 7 hari tanpa keputusan RT/RW hanya terbuka jalur dokumen fisik (FR-04) yang dijalankan inovator. Hitungan 7 hari per tingkat, dimulai ulang setiap pengajuan masuk antrean tingkat itu (waktu revisi tidak dihitung). D-22 tersisa untuk provider email/scheduler.
 
 ### FR-18. Audit aktivitas dan validitas data - P0/P1
 
@@ -900,6 +901,9 @@ Kriteria berikut menjadi dasar unit/integration/database/API tests serta UAT man
 | AC-15 | Dua petugas memutus langkah sama bersamaan | Hanya satu hasil aktif sah; pihak lain menerima konflik versi/status |
 | AC-16 | Antrean lewat 24 jam tanpa keputusan | Satu pengingat ke utama/cadangan; usulan tidak naik otomatis |
 | AC-17 | Job pengingat dijalankan ulang | Tidak mengirim email ganda untuk pengingat antrean yang sama |
+| AC-17A | Pengajuan di antrean RT/RW kurang dari 7 hari | Tombol dokumen fisik tidak muncul; permintaan langsung ke server ditolak |
+| AC-17B | Pengajuan di antrean RT/RW 7 hari atau lebih | Tombol dan unggah tersedia; status tidak naik otomatis |
+| AC-17C | Kelurahan menolak dokumen fisik | Alasan terlihat inovator; antrean tetap; unggah ulang diperbolehkan |
 | AC-18 | Reviewer konflik kepentingan | Tidak dapat memberi nilai/suara; pengganti diperlukan |
 | AC-19 | Skor panel 69 vs 70; suara 1/3 vs 2/3 | Hasil sesuai aturan D-03 yang eksplisit; skor tidak menggantikan jumlah suara |
 | AC-20 | Dokumen belum memenuhi kelayakan Mikro | Tidak lolos hanya karena Mikro tanpa panel |
@@ -984,7 +988,7 @@ Sebelum pitch/pilot, handbook menyarankan pengujian dengan RT, RW, dan staf kelu
 | D-19 | Jenis tanda tangan digital dan siapa penerbit sah | Acknowledgement login untuk demo berlabel simulasi; TTE operasional ditentukan pengelola | Klaim verifikasi resmi |
 | D-20 | Bentuk reward/sertifikat dan penerbit | Penghargaan penyelesaian non-tunai; tidak bergantung rating | Fitur reward operasional |
 | D-21 | Verifikasi OPD/industri dan tindak lanjut minat pilot; kontak CS | Form publik dengan kontak privat dan triase pengelola | Penanganan minat nyata |
-| D-22 | Provider email/scheduler, jam job, eskalasi setelah reminder, target akun/deployment | Pengingat idempoten dari server; eskalasi hanya setelah kebijakan disepakati | Pengingat operasional dan setup |
+| D-22 | Provider email/scheduler, jam job, eskalasi setelah reminder, target akun/deployment | Pengingat idempoten dari server. Eskalasi DIPUTUSKAN: hanya jalur dokumen fisik setelah 7 hari, tanpa kenaikan otomatis; provider email/scheduler masih terbuka | Pengingat operasional dan setup |
 | D-23 | Tipe/ukuran/jumlah file, video, batas penyimpanan, retensi | Dokumen/gambar dulu, video lewat mekanisme yang disepakati; validasi server | Upload final dan biaya layanan |
 | D-24 | Logo, warna, font, brand, alamat kontak resmi | UI netral yang mudah dibaca sebagai desain sementara | Finalisasi visual, bukan alur domain |
 

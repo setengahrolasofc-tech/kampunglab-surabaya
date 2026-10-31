@@ -58,6 +58,10 @@ PRD_KampungLab_Surabaya_v1.md  Kebutuhan produk dan keputusan tertunda
 AGENTS.md            Petunjuk pengembangan untuk AI
 ```
 
+## Deploy dan template dokumen
+
+Langkah Vercel dan pengaturan Auth Supabase ada di [`docs/DEPLOY.md`](docs/DEPLOY.md). Template dokumen program (14 file Word) ada di `public/templates` dan halaman `/dokumen`. Teks pengganti handbook untuk aturan 7 hari ada di [`docs/REVISI_HANDBOOK.md`](docs/REVISI_HANDBOOK.md).
+
 ## Dokumen acuan
 
 - [PRD sistem](PRD_KampungLab_Surabaya_v1.md): baca sebelum menambah aturan bisnis.
