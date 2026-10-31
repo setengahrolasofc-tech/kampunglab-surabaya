@@ -90,6 +90,7 @@ export type Database = {
           document: Json
           draft_id: string
           draft_revision: number
+          evaluation_path: string | null
           id: string
           kelurahan_id: string
           mode: string
@@ -109,6 +110,7 @@ export type Database = {
           document: Json
           draft_id: string
           draft_revision: number
+          evaluation_path?: string | null
           id?: string
           kelurahan_id: string
           mode?: string
@@ -128,6 +130,7 @@ export type Database = {
           document?: Json
           draft_id?: string
           draft_revision?: number
+          evaluation_path?: string | null
           id?: string
           kelurahan_id?: string
           mode?: string
@@ -412,6 +415,8 @@ export type Database = {
           body: string
           checks: Json
           created_at: string
+          evaluation_acknowledged: boolean
+          evaluation_path: string | null
           expected_version: number
           from_status: string
           id: string
@@ -430,6 +435,8 @@ export type Database = {
           body: string
           checks: Json
           created_at?: string
+          evaluation_acknowledged?: boolean
+          evaluation_path?: string | null
           expected_version: number
           from_status: string
           id?: string
@@ -448,6 +455,8 @@ export type Database = {
           body?: string
           checks?: Json
           created_at?: string
+          evaluation_acknowledged?: boolean
+          evaluation_path?: string | null
           expected_version?: number
           from_status?: string
           id?: string

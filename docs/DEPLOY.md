@@ -4,9 +4,9 @@ Panduan ini memakai kondisi proyek terbaru: database Supabase `kampunglab-suraba
 
 ## A. Database (Supabase)
 
-Menurut `docs/PROJECT_STATUS.md`, delapan migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
+Menurut `docs/PROJECT_STATUS.md`, sembilan migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
 
-- Dashboard Supabase > **Database > Migrations**: harus ada delapan entri, dari `20261030134536_identity_and_office_mandates` sampai `20261031045110_demo_review_decisions_and_revision_rounds`.
+- Dashboard Supabase > **Database > Migrations**: harus ada sembilan entri, dari `20261030134536_identity_and_office_mandates` sampai `20261031111312_demo_kelurahan_intake_and_evaluation_paths`.
 - Atau lewat CLI: `npx supabase login`, `npx supabase link --project-ref zxfaotlqldfrlccahebw`, `npx supabase migration list`.
 
 Jika kamu memakai project Supabase baru/kosong, terapkan semua file migrasi berurutan menurut nama file (`npx supabase db push`).
@@ -19,6 +19,7 @@ Dashboard > **Authentication**:
 
 - **URL Configuration > Site URL:** alamat produksi Vercel, misalnya `https://kampunglab-surabaya.vercel.app`.
 - **Redirect URLs:** `https://<domain-vercel>/auth/callback`, `http://localhost:3000/auth/callback`, dan untuk preview `https://*-<nama-tim>.vercel.app/auth/callback`.
+- **Kode OTP:** kode daftar/pemulihan dari paket akun memerlukan template `{{ .Token }}` serta panjang OTP yang sama dengan aplikasi. Ikuti `docs/OTP_SETUP.md`; pengaturan ini belum diubah/diverifikasi pada milestone kelurahan.
 - **Email:** layanan email bawaan Supabase sangat dibatasi jumlah kirimnya. Cukup untuk uji kecil, tidak untuk demo dengan banyak peserta. Pasang **SMTP kustom** (Authentication > SMTP Settings), misalnya Resend atau Brevo.
 - Aktifkan **Leaked password protection** bila tersedia di paketmu (peringatan advisor ini masih tercatat di status proyek).
 

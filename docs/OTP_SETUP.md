@@ -35,4 +35,4 @@ Tombol memanggil `signInWithOAuth` dengan tujuan `/auth/callback`. Aktifkan prov
 
 ## 6. Verifikasi
 
-Yang sudah dijalankan untuk paket ini: `npm test` (30 tes lulus, termasuk aturan password, domisili, dan OTP). Yang **belum** dijalankan: lint, typecheck, build, uji browser, dan pengiriman email/OTP sungguhan. Jalankan `npm run lint`, `npm run typecheck`, `npm run build`, lalu uji manual: daftar dengan email sendiri, terima kode, verifikasi, keluar, lupa password, dan kirim ulang kode.
+Catatan paket upstream menyebut `npm test` (30 tes lulus, termasuk aturan password, domisili, dan OTP). Tes tersebut **tidak dijalankan ulang pada milestone kelurahan**, sesuai permintaan penundaan tes alur. Lint, TypeScript, dan build produksi hasil gabungan sudah lulus. Konfigurasi template/panjang OTP/provider Google, pengiriman email/OTP sungguhan, dan uji browser belum diperiksa atau diubah pada milestone ini. Saat tes dilanjutkan, periksa daftar, penerimaan kode, verifikasi, keluar, pemulihan password, dan kirim ulang dengan akun sendiri.

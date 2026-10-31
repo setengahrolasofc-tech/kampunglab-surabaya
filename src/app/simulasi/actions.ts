@@ -24,6 +24,8 @@ const errors:Record<string,string>={
   WORKFLOW_CONFLICT:"Tahap atau versi alur sudah berubah. Input tetap ada; buka riwayat di tab baru sebelum mencoba kembali.",
   REVIEW_REQUEST_CONFLICT:"Tindakan sebelumnya sudah diterima dengan isi berbeda. Buka riwayat di tab baru untuk melihat hasil dan memulai tindakan baru.",
   INVALID_REVIEW:"Periksa tindakan, deklarasi, alasan, dan daftar periksa sebelum menyimpan.",
+  EVALUATION_PATH_REQUIRED:"Pilih jalur Mikro/Kecil DEMO dan konfirmasikan bahwa ini belum menjadi persetujuan program atau dana.",
+  PREVIOUS_RECOMMENDATIONS_REQUIRED:"Rekomendasi RT dan RW pada putaran ini belum lengkap. Pengelola perlu memeriksa riwayat sebelum tindakan kelurahan.",
 };
 const failure=(message:string)=>({error:errors[message]??"Penyimpanan belum dapat dikonfirmasi. Periksa riwayat di tab baru sebelum mencoba kembali."});
 export async function submitSimulation(_state:SimulationFormState,form:FormData):Promise<SimulationFormState>{

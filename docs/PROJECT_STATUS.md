@@ -2,7 +2,7 @@
 
 Tanggal pembaruan: 31 Oktober 2026.
 
-## Milestone saat ini: keputusan RT/RW dan putaran revisi DEMO
+## Milestone saat ini: pemeriksaan kelurahan dan rencana evaluasi DEMO
 
 Tersedia:
 
@@ -15,9 +15,9 @@ Tersedia:
 - Proyek Supabase `kampunglab-surabaya` pada koneksi SetengahRolasOfc, organisasi `setengahrolasofc-tech's Org`, region Singapore.
 - Template environment tanpa key asli, factory SDK publik stateless yang belum dipakai halaman, script pemeriksaan koneksi, dan tes validasi konfigurasi.
 - Model akun pribadi + mandat jabatan disetujui pengguna (bagian D-18).
-- Daftar/masuk email-password, callback PKCE, permintaan reset password, ubah password, dan keluar akun.
+- Daftar/masuk email-password, callback PKCE, permintaan reset password, ubah password, dan keluar akun. Perubahan upstream menambahkan UI OTP daftar/pemulihan, aturan password, klaim domisili saat daftar, dan pemicu OAuth Google. Integrasi sumber dipertahankan; template email/panjang OTP/provider Google belum diubah atau diverifikasi pada milestone kelurahan. Klaim domisili Auth tidak dipakai sebagai hak akses atau pengganti `profiles.domicile_rt_id`.
 - Dashboard terlindungi, profil sendiri, nama tampilan dapat diubah, serta daftar mandat/peran aktif dari database.
-- Sepuluh tabel public dengan RLS (profiles, territories, offices, office_mandates, platform_role_grants, innovation_themes, innovation_drafts, innovation_simulations, simulation_rt_notes, simulation_review_events), audit privat, dan delapan migrasi yang sudah diterapkan. Tipe TypeScript dihasilkan dari schema nyata.
+- Sepuluh tabel public dengan RLS (profiles, territories, offices, office_mandates, platform_role_grants, innovation_themes, innovation_drafts, innovation_simulations, simulation_rt_notes, simulation_review_events), audit privat, dan sembilan migrasi yang sudah diterapkan. Tipe TypeScript dihasilkan dari schema nyata.
 - Pembatasan penulisan kolom profil, audit privat, dan exclusion constraints untuk periode mandat.
 - Admin pertama ditetapkan atas instruksi eksplisit pemilik setelah identitas akun dicocokkan dengan dashboard dan email terkonfirmasi di Auth. Tidak ada bootstrap otomatis dari pendaftar pertama atau user_metadata.
 - Halaman `/admin`: cari akun terkonfirmasi lewat email lengkap, tetapkan/cabut peran program dan mandat jabatan, buat wilayah/jabatan, lihat riwayat akun dan 30 audit perubahan akses terbaru.
@@ -34,7 +34,9 @@ Tersedia:
 - `/simulasi/[id]` menampilkan salinan isi saat dikirim, referensi berawalan DEMO, revisi sumber, putaran, status terkini, catatan awal, dan riwayat tindakan beralasan. Edit draf tidak mengubah salinan yang dibagikan.
 - `/antrean/rt`, `/antrean/rw`, dan `/antrean/kelurahan` menyediakan antrean sesuai tingkat, status menunggu, dan wilayah mandat utama aktif dengan pagination 20 per halaman. Cadangan/delegasi, admin global tanpa mandat, dan RT wilayah lain tidak mendapat akses isi otomatis. Pengaju tidak dapat memeriksa simulasinya sendiri.
 - Catatan awal RT mencatat deklarasi konflik, pemeriksaan domisili/masalah, teks, aktor, jabatan, mandat, dan waktu. Atribusi diisi database dan penulisan diserialkan dengan perubahan mandat admin. Catatan tidak menyetujui, menolak, atau memindahkan pengajuan.
-- Keputusan RT/RW DEMO mencakup rekomendasi satu tahap, permintaan revisi, penolakan beralasan, dan laporan konflik. Kelurahan membaca salinan setelah rekomendasi RW; belum membuat keputusan akhir program/panel/dana. Tindakan mencatat checklist manual, atribusi, mandat, waktu, status sebelum/sesudah, dan request ID.
+- Keputusan RT/RW DEMO mencakup rekomendasi satu tahap, permintaan revisi, penolakan beralasan, dan laporan konflik. Kelurahan memeriksa rekomendasi/kelengkapan setelah rekomendasi RW, dapat meminta revisi/menolak/melaporkan konflik, dan menyiapkan jalur evaluasi Mikro/Kecil DEMO; belum membuat keputusan akhir program/panel/dana. Tindakan mencatat checklist manual, atribusi, mandat, waktu, status sebelum/sesudah, dan request ID.
+- Jalur evaluasi dipilih manual oleh pemegang mandat utama kelurahan yang independen dengan checklist dan deklarasi simulasi wajib. Database mensyaratkan rekomendasi RT/RW putaran yang sama. Jalur, alasan, deklarasi, aktor, mandat, dan waktu tersimpan di riwayat; pengaju melihat rencana pada salinan. Tab Rencana evaluasi DEMO tersedia pada antrean kelurahan, dengan pagination dan scope wilayah. Tidak menghitung skor, menunjuk evaluator/panel, atau menyetujui dana.
+- Migrasi kelurahan `20261031111312_demo_kelurahan_intake_and_evaluation_paths.sql` diterapkan tanpa perubahan RLS/grant. Hash sumber fungsi lama dicocokkan sebelum penggantian untuk mencegah overwrite perubahan bersamaan.
 - Kirim ulang atas permintaan revisi membuat referensi dan putaran baru dari draf yang telah berubah. Salinan lama tetap tersimpan; aturan DEMO memulai pemeriksaan lagi dari RT, tanpa menetapkan D-07 operasional. Tautan riwayat putaran tersedia untuk pemilik.
 - Petugas yang melaporkan konflik atau sudah merekomendasikan putaran yang sama tidak dapat mengambil keputusan substansi berikutnya. Pengelola menyiapkan petugas independen; tidak ada eskalasi/cadangan otomatis dan D-17/D-18 tetap terbuka.
 - Riwayat tindakan baru ditutup dari akses tabel langsung (termasuk SELECT authenticated), dengan RLS deny-all. Pembacaan melalui RPC details memeriksa hak atas salinan induk terlebih dahulu. Mutasi memeriksa versi alur, lock salinan, serta lock perubahan mandat; replay dengan isi berbeda dikembalikan sebagai konflik.
@@ -43,7 +45,7 @@ Tersedia:
 
 Belum diimplementasikan:
 
-- Google OAuth, unggah SK, workflow permohonan peran/undangan, pagination/import skala kota, serta master wilayah resmi. Form administratif tersedia; verifikasi dasar kewenangan tetap dilakukan manusia.
+- Aktivasi/verifikasi provider Google dan konfigurasi OTP/email, unggah SK, workflow permohonan peran/undangan, pagination/import skala kota, serta master wilayah resmi. Form administratif tersedia; verifikasi dasar kewenangan tetap dilakukan manusia.
 - Pengiriman resmi/nomor pengajuan resmi, amendment operasional, duplikasi otomatis, unggah lampiran, keputusan akhir kelurahan/panel. Salinan, keputusan RT/RW, dan kirim ulang revisi yang tersedia hanya simulasi DEMO; bukan pengesahan kebijakan D-xx.
 - Schema modul pengajuan terkirim/dana/uji, policy Storage, dan bucket berkas. Schema draf sudah tersedia.
 - Pencatatan dana, checkpoint, misi, consent, serta bukti uji.
@@ -56,7 +58,7 @@ Tidak ada angka statistik, transaksi, akun jabatan, atau hasil uji fiktif yang d
 
 ## Verifikasi
 
-Pengguna meminta tes alur ditunda pada 31 Oktober 2026. Untuk milestone keputusan RT/RW ini, hanya lint, TypeScript, kompilasi produksi, serta metadata schema/advisor yang diperiksa. Tes unit, SQL skenario, HTTP, dan UAT keputusan/revisi/akses kelurahan **belum dijalankan**. Tidak ada akun atau mandat QA yang diaktifkan kembali. Keberadaan kode/script dan keberhasilan migrasi tidak membuktikan alur fungsional lulus.
+Pengguna meminta tes alur ditunda pada 31 Oktober 2026. Untuk milestone pemeriksaan kelurahan ini, hanya lint, TypeScript, kompilasi produksi, serta metadata schema/advisor yang diperiksa. Tes unit, SQL skenario, HTTP, dan UAT keputusan/revisi/pemilihan jalur/akses kelurahan **belum dijalankan**. Tidak ada akun atau mandat QA yang diaktifkan kembali. Keberadaan kode/script dan keberhasilan migrasi tidak membuktikan alur fungsional lulus.
 
 - Lint: lulus (`npm run lint`).
 - Typecheck: lulus (`npm run typecheck`).
@@ -83,7 +85,7 @@ Hasil berikut berasal dari fondasi akun/admin/draf/salinan awal sebelum fitur ke
 - UAT visual/interaksi profil wilayah dan empat langkah draf masih perlu dilakukan manusia; pengujian HTTP tidak membuktikan perilaku klik/hidrasi, dialog perubahan belum disimpan, atau aksesibilitas keyboard sudah lulus.
 - UAT simulasi dan catatan RT dengan dua akun, hidrasi, persetujuan berbagi, serta aksesibilitas keyboard masih perlu dilakukan manusia melalui SIMULATION_UAT.md.
 - Database kini memiliki sepuluh tabel public aplikasi dengan RLS aktif. Pembacaan metadata milestone keputusan memastikan grant SELECT authenticated untuk tabel riwayat tindakan baru tidak tersedia; bukan tes RLS dengan login petugas. Root metadata Data API tetap membutuhkan privilege tambahan; query tabel menggunakan sesi pengguna telah diuji tanpa secret key.
-- Security advisors setelah migrasi keputusan: hanya peringatan proteksi password bocor belum aktif. Performance advisors terakhir pada milestone catatan awal: 12 index belum digunakan; tidak diperiksa ulang pada milestone keputusan. Tautan remediasi ada di AUTH_UAT.md.
+- Security advisors setelah migrasi kelurahan: hanya peringatan proteksi password bocor belum aktif. Performance advisors terakhir pada milestone catatan awal: 12 index belum digunakan; tidak diperiksa ulang pada milestone keputusan. Tautan remediasi ada di AUTH_UAT.md.
 - Email konfirmasi nyata diterima dan sesi dashboard pemilik terlihat pada screenshot; detail pembukaan callback tidak diperiksa langsung. Recovery nyata, Google, refresh token dalam browser setelah kedaluwarsa, serta UAT admin belum diverifikasi.
 - Deployment Vercel: belum dilakukan.
 
@@ -102,3 +104,7 @@ Milestone draf menggunakan kembali akun sintetis yang sama tanpa hak admin. Satu
 Milestone simulasi memakai akun QA yang sama tanpa menambahkan akun atau mandat RT persisten. Satu salinan QA dibuat lewat HTTP, lalu isinya diganti dengan data sintetis berlabel `DEMO QA (disabled)` melalui pemeliharaan database yang diaudit. Akun dan sesi kembali dinonaktifkan, domisili/draf dibersihkan, 0 mandat QA aktif, dan file kredensial dihapus. Salinan QA dari pengaju nonaktif tidak tampil dalam antrean petugas. Seluruh petugas, catatan positif, dan wilayah khusus pada pengujian SQL di-rollback; tidak ada pejabat fiktif atau keputusan program yang ditetapkan. Admin pemilik tetap aktif.
 
 Milestone keputusan RT/RW hanya menerapkan schema/kode. Tidak menjalankan skenario fungsional, membuat fixture baru, mengaktifkan QA, menetapkan mandat, atau membuat keputusan simulasi pada data tersimpan. Metadata menunjukkan tidak ada salinan dari pengaju aktif pada saat migrasi; artefak QA nonaktif sebelumnya tetap terpisah dari data program.
+
+Milestone kelurahan menambahkan kode/schema pemeriksaan administrasi, revisi/penolakan/konflik, dan pilihan jalur evaluasi DEMO. Tidak menjalankan skenario fungsional atau mengaktifkan fixture/mandat QA. RLS seluruh tabel public tetap aktif dan riwayat tindakan tetap tanpa SELECT authenticated, berdasarkan metadata database setelah migrasi. Ini bukan bukti tes akses dengan sesi petugas.
+
+Saat integrasi ditemukan tiga commit upstream berisi template dokumen, pembaruan kebijakan jalur fisik 7 hari, dan alur akun/OTP. Seluruh perubahan dipertahankan dan digabung sebelum lint/typecheck/build hasil akhir. Tes fungsional tetap ditunda; fitur unggah/jalur fisik 7 hari tidak ikut dibangun dalam milestone kelurahan.
