@@ -31,7 +31,7 @@ const date = (value: string) => new Intl.DateTimeFormat("id-ID", {dateStyle:"med
 export function DraftWizard({ draftId, initialDocument, initialVersion, initialStep, initialSavedAt, territories, existingSimulation, attachmentRevision, attachmentCount, attachmentsPending, readyFileIds }: {
   draftId: string; initialDocument: DraftDocument; initialVersion: number; initialStep: number; initialSavedAt: string; territories: Territory[]; existingSimulation: SimulationRef|null; attachmentRevision:number;attachmentCount:number;attachmentsPending:boolean;readyFileIds:string[];
 }) {
-  const [documentData,setDocument] = useState(()=>migrateLegacyBudget(initialDocument));
+  const [documentData,setDocument] = useState<DraftDocument>(()=>migrateLegacyBudget(initialDocument));
   const [version,setVersion] = useState(initialVersion);
   const [step,setStep] = useState(initialStep);
   const [savedAt,setSavedAt] = useState(initialSavedAt);

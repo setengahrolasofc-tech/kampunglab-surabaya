@@ -179,6 +179,10 @@ export function draftChecklist(data) {
 }
 
 /** Draf lama menyimpan rincian RAB per baris. Alur dokumen memakai satu subtotal; rincian lama diringkas menjadi subtotal (dibulatkan ke bawah) saat draf dibuka. */
+/**
+ * @param {import("./types").DraftDocument} data
+ * @returns {import("./types").DraftDocument}
+ */
 export function migrateLegacyBudget(data) {
   if (!data.budget.items.length) return data;
   const totals = budgetTotals({ ...data.budget, contingency: "", honor: "", maintenance_cost: "" });
