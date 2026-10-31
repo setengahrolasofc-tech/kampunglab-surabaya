@@ -39,6 +39,7 @@ Tersedia:
 - Petugas yang melaporkan konflik atau sudah merekomendasikan putaran yang sama tidak dapat mengambil keputusan substansi berikutnya. Pengelola menyiapkan petugas independen; tidak ada eskalasi/cadangan otomatis dan D-17/D-18 tetap terbuka.
 - Riwayat tindakan baru ditutup dari akses tabel langsung (termasuk SELECT authenticated), dengan RLS deny-all. Pembacaan melalui RPC details memeriksa hak atas salinan induk terlebih dahulu. Mutasi memeriksa versi alur, lock salinan, serta lock perubahan mandat; replay dengan isi berbeda dikembalikan sebagai konflik.
 - Ketiadaan petugas utama yang memenuhi syarat ditampilkan pada salinan; tidak ada pelompatan tahap. Akun pengaju yang dinonaktifkan tidak dibuka datanya kepada petugas. Riwayat disimpan, tanpa menetapkan retensi operasional D-13.
+- Halaman `/dokumen` dengan 14 template dokumen Word (`public/templates`) dan panduan deploy `docs/DEPLOY.md`. Template berstatus usulan, belum divalidasi BRIDA/OPD.
 
 Belum diimplementasikan:
 
@@ -48,6 +49,7 @@ Belum diimplementasikan:
 - Pencatatan dana, checkpoint, misi, consent, serta bukti uji.
 - Passport/QR, LPJ, distribusi, etalase data, minat pilot, dan banding.
 - Scheduler, email, dan audit operasional.
+- Jalur dokumen fisik: keputusan pengguna 31 Okt 2026 bahwa setelah 7 hari tanpa keputusan RT/RW inovator dapat memakai dokumen bertanda tangan yang dikonfirmasi kelurahan, tanpa kenaikan otomatis (PRD FR-04/FR-17/D-22). Belum dibangun pada alur DEMO; membutuhkan bucket privat dan perubahan RPC `simulation_workflow`.
 - Hosting/deployment Vercel.
 
 Tidak ada angka statistik, transaksi, akun jabatan, atau hasil uji fiktif yang disajikan sebagai data nyata.
