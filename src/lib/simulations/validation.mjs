@@ -1,4 +1,4 @@
-import { validateDraftDocument, draftChecklist, documentSlotProblem, documentSlots, rupiahInteger } from "../drafts/schema.mjs";
+import { validateDraftDocument, draftChecklist, documentSlotProblem, documentSlots, budgetTotals, quantityMilli, rupiahInteger } from "../drafts/schema.mjs";
 import { isUuid } from "../admin/validation.mjs";
 export function simulationMissing(document) {
   const result=validateDraftDocument(document);
@@ -9,7 +9,9 @@ export function simulationMissing(document) {
     const problem=documentSlotProblem(data,slot.key);
     if(problem)missing.push(`${slot.label}: ${problem}`);
   }
-  if(!((rupiahInteger(data.budget.subtotal)??0n)>0n))missing.push("Isi subtotal kebutuhan RAB");
+  const total=budgetTotals(data.budget);
+  if(total.invalid||total.subtotal<=0n)missing.push("Lengkapi angka RAB untuk subtotal kebutuhan");
+  if(data.budget.items.some(row=>!row.description||!row.category||!row.unit||!row.usage_stage||(quantityMilli(row.quantity)??0n)<=0n||(rupiahInteger(row.unit_price)??0n)<=0n))missing.push("Lengkapi rincian RAB lama yang dipertahankan");
   if(!data.budget.maintenance_months)missing.push("Isi rencana masa perawatan (6–12 bulan)");
   return missing;
 }

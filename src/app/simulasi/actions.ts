@@ -9,6 +9,7 @@ import type { DraftAttachmentData } from "@/lib/attachments/types";
 import type { SimulationFormState } from "@/lib/simulations/types";
 const errors:Record<string,string>={
   INCOMPLETE_DRAFT:"Lengkapi seluruh isian pokok dan simpan draf sebelum mengirim simulasi.",
+  INVALID_TERRITORY:"Pilih RT, RW, dan kelurahan dengan hierarki yang sesuai pada draf, lalu simpan kembali.",
   DEMO_ONLY:"Simulasi hanya tersedia untuk tema dan wilayah yang sudah disiapkan pengelola.",
   ACK_REQUIRED:"Konfirmasikan pembagian salinan kepada petugas berwenang sesuai tahap pemeriksaan.",
   DRAFT_CONFLICT:"Draf sudah berubah. Muat ulang setelah menyimpan salinan perubahanmu, lalu periksa versi yang akan dikirim.",

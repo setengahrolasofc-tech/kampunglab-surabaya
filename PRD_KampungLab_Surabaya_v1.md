@@ -27,6 +27,8 @@ Penomoran halaman di PRD ini mengikuti tulisan `Page X of 15` pada handbook. PRD
 
 Nilai usulan dalam handbook tetap berstatus usulan meskipun diberi label [H]. Contoh: plafon Rp5 juta dan porsi 30/50/20 adalah fakta tentang isi handbook, **bukan bukti besaran resmi program**.
 
+**Catatan integrasi 1 November 2026 [U, prototipe]:** alur upstream kini mengunggah PRD/RAB/surat keaslian sebagai dokumen pendukung, dengan ringkasan biaya dan pemeriksaan AI opsional sebagai bantuan. Pengajuan tetap simulasi DEMO, bukan keputusan resmi. Hierarki wilayah yang ada di database dapat dipakai tanpa awalan kode DEMO; klaim wilayah tetap belum diverifikasi dan tidak memberi mandat. Rincian RAB lama dipertahankan saat baca/simpan, subtotal dihitung presisi dari baris lama, dan penunjuk tiga berkas diperiksa di database pada submit. Perubahan ini tidak mengesahkan master wilayah resmi, AI penilai kelayakan, D-03/D-04, retensi, atau keputusan pendanaan. UAT tetap ditunda; lihat `docs/INTEGRATION_REPAIR.md`.
+
 ### 0.2 Aturan untuk AI pengembang
 
 1. Bedakan **PRD platform ini** dari **PRD inovasi warga** yang diisi di wizard. Keduanya bukan dokumen yang sama.

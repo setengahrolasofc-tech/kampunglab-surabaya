@@ -162,7 +162,7 @@ export function validateDraftDocument(raw) {
   data.declaration.notes = text(declaration,"notes",3000,"declaration.notes");
   data.documents = validateDocuments(raw.documents, errors);
   // Pernyataan karya sendiri kini dibuktikan oleh surat bertanda tangan yang diunggah, bukan kotak centang.
-  data.declaration.own_work = Boolean(data.documents.declaration);
+  data.declaration.own_work = data.declaration.own_work || Boolean(data.documents.declaration);
   if (new TextEncoder().encode(JSON.stringify(data)).length > 131072) errors.document = "Draf terlalu besar. Ringkas uraian dan rincian yang dimasukkan.";
   return { data, errors };
 }
@@ -172,20 +172,7 @@ export function draftChecklist(data) {
   return [
     Boolean(i.title && i.form && i.rt_id && i.summary && i.team.some(member => member.name && member.role)),
     documentSlotProblem(data, "prd") === null,
-    documentSlotProblem(data, "rab") === null && (rupiahInteger(b.subtotal) ?? 0n) > 0n && Boolean(b.maintenance_months),
+    documentSlotProblem(data, "rab") === null && !budgetTotals(b).invalid && budgetTotals(b).subtotal > 0n && b.items.every(row=>row.description&&row.category&&row.unit&&row.usage_stage&&(quantityMilli(row.quantity)??0n)>0n&&(rupiahInteger(row.unit_price)??0n)>0n) && Boolean(b.maintenance_months),
     documentSlotProblem(data, "declaration") === null && data.declaration.own_work,
   ];
-}
-
-/** Draf lama menyimpan rincian RAB per baris. Alur dokumen memakai satu subtotal; rincian lama diringkas menjadi subtotal (dibulatkan ke bawah) saat draf dibuka. */
-/**
- * @param {import("./types").DraftDocument} data
- * @returns {import("./types").DraftDocument}
- */
-export function migrateLegacyBudget(data) {
-  if (!data.budget.items.length) return data;
-  const totals = budgetTotals({ ...data.budget, contingency: "", honor: "", maintenance_cost: "" });
-  if (totals.invalid) return data;
-  const subtotal = data.budget.subtotal || (totals.subtotal / 1000n).toString();
-  return { ...data, budget: { ...data.budget, items: [], subtotal } };
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 export function SiteHeader() {
   return (
     <header className="border-b border-emerald-950/10 bg-white">
+      <aside aria-label="Status prototipe" className="border-b border-amber-200 bg-amber-50 px-5 py-3 text-center text-sm leading-6 text-amber-950"><strong>Mode simulasi DEMO.</strong> Pengiriman, rekomendasi, dan penilaian di aplikasi belum menjadi keputusan resmi program atau persetujuan dana.</aside>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
         <Link href="/" aria-label="KampungLab Surabaya, beranda" className="flex items-center gap-3 rounded-sm">
           <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-xl bg-emerald-900 text-sm font-bold text-white">

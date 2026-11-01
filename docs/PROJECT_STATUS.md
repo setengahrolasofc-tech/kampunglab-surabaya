@@ -1,10 +1,17 @@
 # Status Proyek KampungLab Surabaya
 
-Tanggal pembaruan: 31 Oktober 2026.
+Tanggal pembaruan: 1 November 2026.
 
-## Milestone saat ini: penugasan dan rubrik individual panel Kecil DEMO
+## Milestone saat ini: rekonsiliasi integrasi wilayah, migrasi, dan perlindungan RAB lama
 
 Tersedia:
+
+- Integrasi perubahan upstream sampai `efab2cd`: profil/kelengkapan akun Google, klaim domisili, penautan kecamatan-kelurahan-RW-RT, unggah PRD/RAB/surat keaslian, ringkasan biaya, batas tiga draf, dan pemeriksaan dokumen AI opsional. Perubahan upstream dipertahankan; konfigurasi provider/email/AI dan alur pengguna belum diverifikasi.
+- Audit awal menemukan 18 file migrasi tetapi 14 entri cloud. Sepuluh definisi fungsi final, seed kelurahan, dan perubahan nama dicocokkan sebelum empat entri diperbaiki tanpa menjalankan ulang DDL/data. Migrasi integrasi berikutnya membuat total 19 file/entri. Catatan dan script sekali pakai ada di `docs/INTEGRATION_REPAIR.md` serta `supabase/repairs`.
+- Unggah dan kirim simulasi menerima hierarki RT → RW → kelurahan yang ada di database tanpa bergantung pada awalan kode DEMO. Tema aktif berstatus demo dan mode salinan DEMO tetap wajib. Wilayah klaim tidak dianggap terverifikasi dan tidak memberikan mandat/hak petugas. Tidak mengubah pembaca dokumen atau mengaktifkan keputusan operasional.
+- Pemeriksaan tiga penunjuk PRD/RAB/keaslian saat submit kini juga dilakukan atomik di database: berkas berbeda, milik pengaju, draf yang sama, supporting, siap, dan belum diarsipkan. Pemeriksaan awal Next.js tidak lagi menjadi satu-satunya penghalang penunjuk berkas yang tidak sah.
+- Draf lama mempertahankan rincian RAB serta presisi tiga desimal. Editor rincian tersedia hanya ketika draf sudah mempunyai baris lama; ringkasan biaya baru tetap tersedia untuk draf tanpa rincian. Angka AI tidak menimpa rincian lama. Database menolak tab/klien lama yang mencoba menyimpan daftar rincian kosong dari draf berisi rincian, dengan konflik yang menjelaskan langkah pemulihan. Tidak merekonstruksi data yang mungkin sudah hilang sebelum perbaikan.
+- Banner mode simulasi DEMO terlihat di seluruh halaman; referensi database ditampilkan utuh, termasuk awalan DEMO. Jalur evaluasi juga berlabel DEMO. Ini mengembalikan kejelasan status setelah perapian tampilan upstream.
 
 - Next.js App Router, TypeScript, dan Tailwind CSS.
 - Halaman pengantar berbahasa Indonesia dan halaman panduan alur.
@@ -17,7 +24,7 @@ Tersedia:
 - Model akun pribadi + mandat jabatan disetujui pengguna (bagian D-18).
 - Daftar/masuk email-password, callback PKCE, permintaan reset password, ubah password, dan keluar akun. Perubahan upstream menambahkan UI OTP daftar/pemulihan, aturan password, klaim domisili saat daftar, dan pemicu OAuth Google. Integrasi sumber dipertahankan; template email/panjang OTP/provider Google belum diubah atau diverifikasi pada milestone kelurahan. Klaim domisili Auth tidak dipakai sebagai hak akses atau pengganti `profiles.domicile_rt_id`.
 - Dashboard terlindungi, profil sendiri, nama tampilan dapat diubah, serta daftar mandat/peran aktif dari database.
-- Sembilan belas tabel public dengan RLS (profiles, territories, offices, office_mandates, platform_role_grants, innovation_themes, innovation_drafts, innovation_simulations, simulation_rt_notes, simulation_review_events, draft_attachments, simulation_attachment_links, physical_route_settings, physical_recommendation_requests, physical_recommendation_actions, simulation_panel_cases, simulation_panel_assignments, simulation_panel_entries, simulation_panel_events), audit privat, dan empat belas migrasi yang sudah diterapkan. Tipe TypeScript dihasilkan dari schema nyata.
+- Sembilan belas tabel public dengan RLS (profiles, territories, offices, office_mandates, platform_role_grants, innovation_themes, innovation_drafts, innovation_simulations, simulation_rt_notes, simulation_review_events, draft_attachments, simulation_attachment_links, physical_route_settings, physical_recommendation_requests, physical_recommendation_actions, simulation_panel_cases, simulation_panel_assignments, simulation_panel_entries, simulation_panel_events), audit privat, dan sembilan belas migrasi yang tercatat konsisten. Tipe TypeScript dihasilkan dari schema nyata.
 - Pembatasan penulisan kolom profil, audit privat, dan exclusion constraints untuk periode mandat.
 - Admin pertama ditetapkan atas instruksi eksplisit pemilik setelah identitas akun dicocokkan dengan dashboard dan email terkonfirmasi di Auth. Tidak ada bootstrap otomatis dari pendaftar pertama atau user_metadata.
 - Halaman `/admin`: cari akun terkonfirmasi lewat email lengkap, tetapkan/cabut peran program dan mandat jabatan, buat wilayah/jabatan, lihat riwayat akun dan 30 audit perubahan akses terbaru.
@@ -79,13 +86,13 @@ Tidak ada angka statistik, transaksi, akun jabatan, atau hasil uji fiktif yang d
 
 ## Verifikasi
 
-Pengguna meminta tes alur ditunda pada 31 Oktober 2026. Untuk milestone panel ini, hanya lint, TypeScript Next.js/Edge, kompilasi produksi, deployment fungsi, serta metadata schema/advisor yang diperiksa. Tes unit, SQL skenario, HTTP, dan UAT pembagian panel, penugasan/penggantian, rubrik/suara, konflik, akses peran ganda, timer jalur fisik, unggah/unduh dan izin berkas **belum dijalankan**. Tes alur keputusan/revisi/pemilihan jalur sebelumnya juga tetap ditunda. Tidak ada akun atau mandat QA yang diaktifkan kembali. Keberadaan kode/script dan keberhasilan migrasi tidak membuktikan alur fungsional lulus.
+Pengguna meminta tes alur ditunda pada 31 Oktober 2026. Untuk milestone perbaikan integrasi ini, hanya lint, TypeScript Next.js/Edge, kompilasi produksi, deployment fungsi, serta metadata schema/advisor yang diperiksa. Tes unit, SQL skenario, HTTP, dan UAT pembagian panel, penugasan/penggantian, rubrik/suara, konflik, akses peran ganda, timer jalur fisik, unggah/unduh dan izin berkas **belum dijalankan**. Tes alur keputusan/revisi/pemilihan jalur sebelumnya juga tetap ditunda. Tidak ada akun atau mandat QA yang diaktifkan kembali. Keberadaan kode/script dan keberhasilan migrasi tidak membuktikan alur fungsional lulus.
 
 - Lint: lulus (`npm run lint`).
 - Typecheck: lulus (`npm run typecheck`).
 - Build produksi: lulus (`npm run build`), halaman informasi berhasil diprerender.
 - Edge Function: deployment versi 4 berstatus ACTIVE; bukan bukti uji permintaan pengguna sudah lulus.
-- Metadata/advisor database: RLS aktif pada 19 tabel public; empat tabel baru panel serta tabel jalur fisik/berkas/tautan tanpa CRUD authenticated, dan peringatan lama proteksi password bocor tetap ada. Ini pembacaan metadata, bukan tes skenario akses petugas.
+- Metadata/advisor database: 19 migrasi tercatat sesuai repository, RLS aktif pada 19 tabel public; empat tabel baru panel serta tabel jalur fisik/berkas/tautan tanpa CRUD authenticated, dan peringatan lama proteksi password bocor tetap ada. Ini pembacaan metadata, bukan tes skenario akses petugas.
 
 ### Catatan historis milestone sebelumnya
 
@@ -136,3 +143,5 @@ Milestone lampiran menerapkan dua migrasi tambahan dan deployment Edge tanpa ung
 Milestone jalur fisik hanya menerapkan schema/kode dan deployment Edge. Tidak menjalankan tes unit, SQL skenario, HTTP, browser, atau UAT; tidak mengubah clock/batas hari untuk mencoba alur dan tidak membuat permintaan/keputusan/unggahan QA. Metadata setelah migrasi: 15 tabel public dengan RLS, 12 migrasi, konfigurasi versi 0 = 7 hari, 0 permintaan fisik, 0 tindakan fisik, 0 metadata berkas. Tiga tabel baru menolak CRUD langsung anon/authenticated; RPC publik hanya dapat dieksekusi authenticated dan tetap memeriksa sesi/hak di dalam fungsi. Security advisor hanya melaporkan peringatan lama proteksi password bocor belum aktif; performance advisor tidak dijalankan ulang pada milestone ini.
 
 Milestone panel hanya menerapkan kode/schema/deployment, tanpa tes unit, SQL skenario, HTTP, browser, atau UAT dan tanpa mengaktifkan QA. Metadata setelah migrasi panel pertama: 19 tabel public, empat tabel panel dengan RLS dan tanpa CRUD authenticated/SELECT anon, 0 case/assignment/entry/event. Setelah tambahan pemisahan akun peran ganda, terdapat 14 migrasi. Hash sumber fungsi workflow dan lampiran dicocokkan dengan file migrasi saat pemeriksaan metadata; ini tidak membuktikan cabang runtime lulus. Security advisor tetap hanya peringatan lama proteksi password bocor belum aktif. D-03 tetap menghambat kelulusan Kecil; D-02 menghambat evaluator Mikro nyata. Performance advisor tidak dijalankan ulang.
+
+Milestone perbaikan integrasi 1 November 2026 tidak menjalankan tes unit, SQL skenario, HTTP, browser, atau UAT; fixture/QA tidak diaktifkan. Sumber tes regresi RAB diperbarui untuk tahap verifikasi nanti. Lint, TypeScript Next.js/Edge dan build diperiksa; pengecekan dependensi migrasi secara statis mencocokkan 4/4 definisi pendahulu yang dinormalisasi spasinya. Metadata cloud memastikan helper baru privat, guard manifest dan RAB terpasang, pembatas tema demo tetap ada, serta awalan kode wilayah tidak lagi menjadi syarat. Pemeriksaan ini tidak membuktikan runtime unggah/simpan/kirim lulus. Tidak melakukan deployment ulang Edge karena source Edge tidak berubah; versi 4 yang aktif memakai RPC database yang diperbarui. Vercel belum dideploy pada milestone ini.

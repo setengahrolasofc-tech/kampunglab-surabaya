@@ -41,7 +41,7 @@ Catatan paket upstream menyebut `npm test` (30 tes lulus, termasuk aturan passwo
 
 ## 7. Kelola akun di /profil
 
-Jalankan migrasi `20261101000000_profile_account_management.sql` (fungsi `set_profile_domicile` dan `delete_own_account`).
+Migrasi `20261101000000_profile_account_management.sql` (fungsi `set_profile_domicile` dan `delete_own_account`) sudah tersedia pada proyek yang dipilih; riwayatnya direkonsiliasi 1 November 2026. Jangan menjalankan ulang isinya pada proyek tersebut. Fungsi/alur belum diuji secara fungsional.
 
 Template email siap pakai ada di `docs/email-templates/` (tiga file HTML, semuanya menampilkan `{{ .Token }}`):
 

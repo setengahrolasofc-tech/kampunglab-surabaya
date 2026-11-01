@@ -10,6 +10,7 @@ import type { Json } from "@/lib/supabase/database.types";
 const failure = (message: string) => ({ error: message });
 const databaseError = (message: string) => ({ error: ({
   SESSION_REQUIRED: "Sesi tidak lagi berlaku. Masuk kembali sebelum menyimpan.",
+  BUDGET_DETAILS_REQUIRED: "Rincian RAB lama masih tersimpan. Salin perubahanmu, lalu buka ulang editor terbaru; rincian tidak boleh hilang saat menyimpan.",
   DRAFT_LIMIT: "Satu akun maksimal memiliki 3 pengajuan. Selesaikan atau gunakan salah satu pengajuan yang sudah ada.",
   DOMICILE_REQUIRED: "Lengkapi wilayah domisilimu terlebih dahulu.",
   INVALID_TERRITORY: "Pilih RT yang tersedia di bawah RW dan kelurahan yang sesuai.",

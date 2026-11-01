@@ -4,12 +4,12 @@ Panduan ini memakai kondisi proyek terbaru: database Supabase `kampunglab-suraba
 
 ## A. Database (Supabase)
 
-Menurut `docs/PROJECT_STATUS.md`, empat belas migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
+Menurut `docs/PROJECT_STATUS.md`, sembilan belas migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
 
-- Dashboard Supabase > **Database > Migrations**: harus ada empat belas entri, dari `20261030134536_identity_and_office_mandates` sampai `20261031132000_demo_panel_separation_for_dual_roles`.
+- Dashboard Supabase > **Database > Migrations**: harus ada sembilan belas entri, dari `20261030134536_identity_and_office_mandates` sampai `20261101030001_prototype_territory_and_legacy_budget_integration`.
 - Atau lewat CLI: `npx supabase login`, `npx supabase link --project-ref zxfaotlqldfrlccahebw`, `npx supabase migration list`.
 
-Jika kamu memakai project Supabase baru/kosong, terapkan semua file migrasi berurutan menurut nama file (`npx supabase db push`).
+Jika kamu memakai project Supabase baru/kosong, terapkan semua file migrasi berurutan menurut nama file (`npx supabase db push`). Empat migrasi unggahan sebelumnya sudah direkonsiliasi sebagai applied pada proyek ini; jangan jalankan ulang isi SQL-nya. Script `supabase/repairs` adalah catatan pemeliharaan sekali pakai untuk proyek lama, bukan bagian urutan deploy baru. Rincian urutan serta batas verifikasinya ada di `docs/INTEGRATION_REPAIR.md`.
 
 Admin pertama, tema DEMO, dan wilayah DEMO sudah ada menurut status proyek. Petugas RT/RW/kelurahan ditetapkan lewat halaman `/admin` (cari akun terkonfirmasi dengan email lengkap, lalu beri mandat); tidak perlu SQL manual.
 
