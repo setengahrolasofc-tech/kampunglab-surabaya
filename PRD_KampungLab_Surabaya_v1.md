@@ -582,6 +582,7 @@ Passport harus memuat:
 - Bedakan jumlah pengajuan, jumlah inovasi, jumlah misi, peserta unik, dan partisipasi agar tidak terjadi penghitungan ganda.
 - Laporan tidak menjumlahkan dana rencana dengan realisasi sebagai “dana cair”. Export hanya mencakup field yang diizinkan aktor.
 - Statistik publik agregat dan memperhatikan risiko identifikasi kelompok kecil. Batas agregasi untuk data nyata D-13.
+- Implementasi parsial 1 November 2026: `/admin/monitoring` menyediakan rekap internal DEMO per status/tema/kelurahan, filter, usia antrean RT/RW/kelurahan, indikator kekosongan petugas utama yang memenuhi syarat, koordinasi fisik/panel, dan CSV agregat. Putaran terakhir dipilih sebelum filter; jumlah draf dipisahkan dari seluruh putaran terkait dan tidak diklaim sebagai inovasi unik terverifikasi. Tidak mengekspor isi proposal, data pribadi, nilai/suara individual atau lampiran. Metrik dana/uji/LPJ/banding serta statistik publik belum tersedia. Rincian dan UAT yang ditunda ada di `docs/MONITORING_UAT.md`; sisa pekerjaan setiap FR dicatat dalam `docs/PRD_BACKLOG.md`.
 
 ## 8. Model proses dan transisi status
 

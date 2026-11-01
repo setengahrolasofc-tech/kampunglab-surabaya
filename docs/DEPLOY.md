@@ -4,9 +4,9 @@ Panduan ini memakai kondisi proyek terbaru: database Supabase `kampunglab-suraba
 
 ## A. Database (Supabase)
 
-Menurut `docs/PROJECT_STATUS.md`, dua puluh migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
+Menurut `docs/PROJECT_STATUS.md`, dua puluh satu migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
 
-- Dashboard Supabase > **Database > Migrations**: harus ada dua puluh entri, dari `20261030134536_identity_and_office_mandates` sampai `20261101030001_prototype_territory_and_legacy_budget_integration`, termasuk `20261101022903_in_app_notification_inbox`. Migrasi notifikasi hanya bergantung pada schema 30–31 Oktober; urutan versi native sebelum dua migrasi upstream 030000/030001 tetap sah.
+- Dashboard Supabase > **Database > Migrations**: harus ada dua puluh satu entri, dari `20261030134536_identity_and_office_mandates` sampai `20261101030001_prototype_territory_and_legacy_budget_integration`, termasuk `20261101022903_in_app_notification_inbox` dan `20261101023914_admin_demo_monitoring_and_aggregate_reports`. Migrasi notifikasi/monitoring hanya bergantung pada schema 30–31 Oktober; urutan versi native sebelum dua migrasi upstream 030000/030001 tetap sah.
 - Atau lewat CLI: `npx supabase login`, `npx supabase link --project-ref zxfaotlqldfrlccahebw`, `npx supabase migration list`.
 
 Jika kamu memakai project Supabase baru/kosong, terapkan semua file migrasi berurutan menurut nama file (`npx supabase db push`). Empat migrasi unggahan sebelumnya sudah direkonsiliasi sebagai applied pada proyek ini; jangan jalankan ulang isi SQL-nya. Script `supabase/repairs` adalah catatan pemeliharaan sekali pakai untuk proyek lama, bukan bagian urutan deploy baru. Rincian urutan serta batas verifikasinya ada di `docs/INTEGRATION_REPAIR.md`.
@@ -52,6 +52,7 @@ Dashboard > **Authentication**:
 - **Alur pemeriksaan masih DEMO.** Nomor pengajuan resmi, keputusan akhir kelurahan/panel, dana, uji warga, passport, dan banding belum dibangun (lihat `docs/PROJECT_STATUS.md`). Jangan dipresentasikan sebagai pengajuan resmi.
 - **Lampiran privat DEMO tersedia.** Bucket dan Edge Function `private-attachments` sudah dibuat/deploy pada proyek yang dipilih; tidak perlu key backend pada environment Next.js. Untuk proyek lain, migrasi saja belum cukup: fungsi di `supabase/functions/private-attachments` juga perlu dideploy dengan konfigurasi auth `supabase/config.toml`. Ikuti ATTACHMENTS_UAT.md. Jalur dokumen fisik DEMO dibangun dengan batas awal 7 hari per tingkat, permintaan berkas terpisah, dan konfirmasi manual. Edge saat ini versi 4 ACTIVE; lihat PHYSICAL_UAT.md. Tidak perlu menjalankan ulang migrasi atau mengubah batas hari untuk membukanya lebih awal.
 - **Notifikasi dalam aplikasi tersedia di `/notifikasi`.** Tidak membutuhkan environment baru; gunakan database yang sudah menerima migrasi inbox. Hak baca mengikuti sumber dan mandat/penugasan terkini. Email, pengingat 24 jam dan scheduler belum ada; lihat NOTIFICATIONS_UAT.md.
+- **Monitoring admin tersedia di `/admin/monitoring`.** Rekap internal DEMO dan CSV agregat memerlukan admin aktif serta migrasi monitoring; tidak memerlukan environment baru. Laporan dana/uji dan statistik publik belum tersedia. Lihat MONITORING_UAT.md dan PRD_BACKLOG.md.
 - **Proyek Supabase gratis dijeda bila tidak aktif sekitar seminggu.** Aktifkan kembali dan buka web sehari sebelum demo/pitch.
 - **Tema dan wilayah DEMO** berlabel DEMO; master resmi harus disiapkan pengelola program.
 - Regenerasi tipe setelah mengubah schema: `npx supabase gen types typescript --project-id zxfaotlqldfrlccahebw > src/lib/supabase/database.types.ts`.

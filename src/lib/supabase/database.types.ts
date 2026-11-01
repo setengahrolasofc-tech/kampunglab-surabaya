@@ -1295,6 +1295,10 @@ export type Database = {
         Args: { operation: string; payload?: Json }
         Returns: Json
       }
+      program_monitoring: {
+        Args: { operation: string; payload?: Json }
+        Returns: Json
+      }
       set_profile_domicile: { Args: { rt: string }; Returns: Json }
       simulation_workflow: {
         Args: { operation: string; payload?: Json }
