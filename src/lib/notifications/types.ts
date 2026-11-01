@@ -3,6 +3,7 @@ export const notificationKinds = [
   "physical_queue", "physical_action", "panel_assignment", "panel_result",
   "panel_conflict", "panel_coordination", "panel_assignment_update", "panel_revoked",
   "role_grant", "role_revoked", "mandate_grant", "mandate_revoked",
+  "assign_rt", "assign_rw", "assign_kelurahan",
 ] as const;
 
 export type NotificationKind = typeof notificationKinds[number];

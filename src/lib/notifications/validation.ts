@@ -14,6 +14,8 @@ export function notificationInput(form: FormData) {
 export function notificationDestination(value: unknown): value is string {
   if (value === "/dashboard") return true;
   if (typeof value !== "string") return false;
+  const territory = /^\/mandat\/([^/]+)$/.exec(value);
+  if (territory) return isUuid(territory[1]);
   const match = /^\/(?:simulasi|dokumen-fisik|panel\/penugasan|admin\/panel)\/([^/]+)(\/panel)?$/.exec(value);
   return Boolean(match && isUuid(match[1]) && (!match[2] || value.startsWith("/simulasi/")));
 }
