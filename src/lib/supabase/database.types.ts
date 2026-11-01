@@ -1284,6 +1284,10 @@ export type Database = {
         }
         Returns: Json
       }
+      delegated_mandate: {
+        Args: { operation: string; payload?: Json }
+        Returns: Json
+      }
       notification_workflow: {
         Args: { operation: string; payload?: Json }
         Returns: Json
