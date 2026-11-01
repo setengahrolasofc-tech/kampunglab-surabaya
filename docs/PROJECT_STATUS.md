@@ -2,10 +2,12 @@
 
 Tanggal pembaruan: 1 November 2026.
 
-## Milestone saat ini: monitoring dan laporan admin DEMO
+## Milestone saat ini: draf surat rekomendasi fisik terisi otomatis
 
 Tersedia:
 
+- `/simulasi/[id]/dokumen-fisik/surat`: pratinjau privat untuk pemilik setelah jalur fisik RT/RW terbuka. Word terisi referensi/judul/putaran/revisi, nama tampilan akun, wilayah, serta konteks dan batas antrean. Isian teks PRD yang tersedia masuk lampiran; isian kosong perlu dilengkapi manual. Nomor surat resmi, identitas pemohon sesuai dokumen, pemeriksaan, keputusan, pemeriksa, tanggal tanda tangan dan tanda tangan/stempel tetap kosong, berlabel DEMO.
+- Endpoint `/surat/unduh` memeriksa sesi/pemilik/kelayakan dan versi tahap/alur/pengaturan/timestamp sebelum serta sesudah packing. File dibuat di memori sebagai attachment private/no-store; tidak disimpan ke public/Storage atau membuat rekomendasi. `docx@9.15.1` dan lockfile ditambahkan; jalankan `npm ci` setelah pull. Tanpa migrasi atau environment baru. UAT hasil Word/izin belum dijalankan; lihat `docs/PHYSICAL_LETTER_UAT.md`.
 - `/admin/monitoring`: laporan internal admin menurut status, tema dan kelurahan, filter, pagination, usia antrean RT/RW/kelurahan serta ekspor CSV seluruh rekap terfilter. Putaran terakhir dipilih sebelum filter; draf dan putaran terkait dihitung terpisah. Tidak mengklaim draf sebagai inovasi unik terverifikasi. Indikator koordinasi mencakup petugas utama yang belum memenuhi syarat, permintaan fisik pending dan status pembagian panel; tidak membuat keputusan atau memperluas akses isi proposal.
 - Migrasi `20261101023914_admin_demo_monitoring_and_aggregate_reports.sql` menambah RPC baca agregat dengan guard sesi/admin dan wrapper invoker, tanpa tabel/grant bisnis baru. Total 21 migrasi dan 20 tabel public dengan RLS. Laporan/CSV tidak berisi PII, isi proposal, nilai/suara, atau berkas. Rincian dan pemeriksaan yang belum dijalankan ada di `docs/MONITORING_UAT.md`; daftar sisa pekerjaan FR-01–20 ada di `docs/PRD_BACKLOG.md`.
 - `/notifikasi`: pembaruan antrean RT/RW/kelurahan DEMO, catatan/keputusan, dokumen fisik, penugasan/koordinasi panel, serta penetapan/pencabutan peran dan mandat. Daftar berasal dari catatan yang ada sesuai akses terkini; peristiwa lama dapat muncul. Filter Belum dibaca/Semua, pagination 20 baris, waktu WIB, muat ulang, serta jumlah belum dibaca di dashboard. Tombol buka memeriksa ulang hak dan menandai satu sumber/versi melalui POST; GET tidak mengubah tanda baca.
@@ -83,20 +85,21 @@ Belum diimplementasikan:
 - Pencatatan dana, checkpoint, misi, consent, serta bukti uji.
 - Passport/QR, LPJ, distribusi, etalase data, minat pilot, dan banding.
 - Scheduler, email, dan audit operasional.
-- Penetapan kewenangan konfirmasi dokumen fisik operasional, template terisi otomatis, reminder/email/scheduler. Timer dan konfirmasi fisik yang tersedia hanya DEMO; kewenangan operasional belum disahkan.
+- Penetapan kewenangan konfirmasi dokumen fisik operasional dan reminder/email/scheduler. Timer, konfirmasi fisik, serta draf Word terisi yang tersedia hanya DEMO; kewenangan operasional belum disahkan.
 - Hosting/deployment Vercel.
 
 Tidak ada angka statistik, transaksi, akun jabatan, atau hasil uji fiktif yang disajikan sebagai data nyata.
 
 ## Verifikasi
 
-Pengguna meminta tes alur ditunda pada 31 Oktober 2026. Untuk milestone monitoring ini, hanya lint, TypeScript Next.js/Edge, kompilasi produksi, serta metadata schema/advisor yang diperiksa. Tes unit, SQL skenario, HTTP, browser dan UAT monitoring/ekspor CSV **belum dijalankan**. Tes notifikasi, pembagian panel, penugasan/penggantian, rubrik/suara, konflik, akses peran ganda, timer jalur fisik, unggah/unduh, keputusan/revisi/pemilihan jalur sebelumnya juga tetap ditunda. Tidak ada akun atau mandat QA yang diaktifkan kembali dan tidak menulis pengajuan, hasil, atau transaksi. Keberadaan kode/script dan keberhasilan migrasi tidak membuktikan alur fungsional lulus.
+Pengguna meminta tes alur ditunda pada 31 Oktober 2026. Untuk milestone surat terisi ini, hanya lint, TypeScript Next.js/Edge, kompilasi produksi, audit dependency produksi, serta metadata RPC/kolom yang diperiksa. Tes unit, SQL skenario, HTTP, browser, pembuatan fixture surat, pembukaan/render Word/PDF, cetak dan UAT hasil surat/izin unduh **belum dijalankan**. Tes monitoring/CSV, notifikasi, panel, konflik, akses peran ganda, timer, unggah/unduh, keputusan/revisi/pemilihan jalur sebelumnya tetap ditunda. Tidak mengaktifkan akun/mandat QA, mengubah batas hari/clock, atau menulis pengajuan/permintaan/hasil/transaksi. Keberadaan kode dan build tidak membuktikan alur fungsional atau tata letak Word lulus.
 
 - Lint: lulus (`npm run lint`).
 - Typecheck: lulus (`npm run typecheck`).
 - Build produksi: lulus (`npm run build`), halaman informasi berhasil diprerender.
+- Audit dependency produksi: `npm audit --omit=dev` melaporkan 0 kerentanan setelah penambahan `docx@9.15.1`.
 - Edge Function: deployment versi 4 berstatus ACTIVE; bukan bukti uji permintaan pengguna sudah lulus.
-- Metadata/advisor database: 21 migrasi tercatat sesuai repository, RLS aktif pada 20 tabel public; tabel tanda baca, panel serta jalur fisik/berkas/tautan tanpa CRUD authenticated, dan peringatan lama proteksi password bocor tetap ada. Hash kedua fungsi monitoring dicocokkan dengan migrasi; anon tanpa izin eksekusi, wrapper invoker dan helper privat memakai search_path kosong. Ini pembacaan metadata, bukan tes skenario akses petugas. Tidak deploy ulang Edge atau deploy Vercel pada milestone ini.
+- Metadata database milestone surat: signature RPC physical/simulation dan kolom profil/master dicocokkan. Tidak mengubah schema/grant; total tetap 21 migrasi dan 20 tabel public dengan RLS menurut milestone monitoring. Advisor terakhir pada milestone monitoring hanya melaporkan peringatan lama proteksi password bocor; tidak dijalankan ulang pada milestone surat. Metadata bukan tes skenario akses. Tidak deploy ulang Edge atau deploy Vercel pada milestone ini.
 
 ### Catatan historis milestone sebelumnya
 

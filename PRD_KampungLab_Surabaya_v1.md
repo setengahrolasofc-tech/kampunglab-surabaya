@@ -343,6 +343,7 @@ PRD dan RAB adalah dokumen wajib, tetapi handbook tidak memastikan apakah semuan
 - Saat kirim ulang, simpan asal revisi. Usulan: kembali ke tingkat yang meminta revisi; perubahan materiil dapat memerlukan verifikasi ulang tingkat sebelumnya. D-07.
 - RW harus mempunyai penunjukan fasilitator yang sah sebelum alur uji aktif; waktu wajib penunjukan perlu disepakati.
 - Tidak ada kenaikan tingkat otomatis karena menunggu lama atau melewati 24 jam.
+- Implementasi 1 November 2026 [U, hanya DEMO]: pemilik salinan eligible dapat membuka pratinjau dan mengunduh DOCX rekomendasi RT/RW terisi dari salinan serta konteks antrean. Profil nama akun dan label wilayah dibaca dari master saat request; isian PRD kosong ditandai untuk dilengkapi manual. Nomor resmi, identitas pemohon sesuai dokumen, checklist, keputusan, pemeriksa, tanggal tanda tangan, tanda tangan/stempel tetap kosong. Endpoint memeriksa sesi/pemilik/kelayakan dan versi konteks sebelum/sesudah penyusunan file; tidak mengubah status atau mencatat rekomendasi. Kewenangan operasional/TTE tetap belum disahkan. Rincian dan UAT yang ditunda ada di `docs/PHYSICAL_LETTER_UAT.md`.
 
 ### FR-05. Panel kelayakan dan OPD - P0 untuk Kecil; P2 untuk Menengah
 

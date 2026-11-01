@@ -1,13 +1,13 @@
 # Sisa pekerjaan menurut PRD
 
-Pembaruan 1 November 2026 setelah pusat notifikasi dan monitoring admin. Acuan: PRD_KampungLab_Surabaya_v1.md, implementasi repository, serta metadata cloud pada milestone ini. Status **parsial** berarti sebagian kode tersedia, bukan modul operasional lengkap atau UAT lulus. Tidak menggunakan persentase penyelesaian karena cakupan dan keputusan D-xx belum final.
+Pembaruan 1 November 2026 setelah pusat notifikasi, monitoring admin, dan draf surat fisik terisi otomatis. Acuan: PRD_KampungLab_Surabaya_v1.md, implementasi repository, serta metadata cloud pada milestone ini. Status **parsial** berarti sebagian kode tersedia, bukan modul operasional lengkap atau UAT lulus. Tidak menggunakan persentase penyelesaian karena cakupan dan keputusan D-xx belum final.
 
 | PRD | Yang tersedia | Yang masih harus dikerjakan |
 |---|---|---|
 | FR-01 Akun/profil/mandat | Akun pribadi, profil/domisili, admin peran/mandat; kode OTP/Google dari upstream | Verifikasi konfigurasi email/OTP/Google, unggah SK, permohonan/undangan peran, hak anggota tim dan multi-peran operasional (D-18) |
 | FR-02 Wizard pengajuan | Empat langkah, PRD/RAB/keaslian privat, batas draf, pemeriksaan AI opsional | Pengiriman resmi, nomor resmi, validasi konfigurasi AI dan alur dokumen, aturan finansial final D-04 |
 | FR-03 Validasi/versi | Revisi draf, snapshot putaran DEMO, kirim ulang, retry/konflik | Duplikasi D-06; amendment, perubahan materiil dan rute revisi operasional D-07 |
-| FR-04 RT/RW/kelurahan | Antrean, rekomendasi/revisi/tolak/konflik DEMO, timer serta jalur fisik manual | Kewenangan fisik operasional, delegasi/cadangan dan serah terima, rute pengecualian konflik yang disahkan, template surat terisi otomatis; D-17/D-18/D-19 |
+| FR-04 RT/RW/kelurahan | Antrean, rekomendasi/revisi/tolak/konflik DEMO, timer, jalur fisik manual, pratinjau dan unduh Word surat terisi privat | Kewenangan fisik operasional, delegasi/cadangan dan serah terima, rute pengecualian konflik yang disahkan; D-17/D-18/D-19. Hasil Word/izin download baru belum melalui UAT |
 | FR-05 Kelayakan/panel | Jalur Mikro/Kecil DEMO; panel Kecil tiga kursi, rubrik/suara individu, konflik/pengganti | Evaluator Mikro D-02; formula/kelengkapan/relasi skor-suara dan keputusan akhir panel D-03; integrasi OPD/Menengah P2 |
 | FR-06 Pendanaan | Isian/ringkasan RAB pada draf; belum ada modul dana | Anggaran disetujui, rencana/persetujuan tahap 1–3, bukti realisasi privat, konfirmasi, koreksi, penghentian/pengembalian; D-04/D-05. Transfer tetap di luar platform |
 | FR-07 Pembangunan | Belum | Mulai/tenggat, checkpoint, bukti progres, peninjauan dan satu perpanjangan; D-08 |

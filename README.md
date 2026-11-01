@@ -8,6 +8,8 @@ Pusat notifikasi dalam aplikasi tersedia di `/notifikasi`: antrean, hasil pemeri
 
 Monitoring admin tersedia di `/admin/monitoring`: filter dan rekap status/tema/kelurahan, jumlah draf dan putaran terpisah, usia antrean, koordinasi mandat/fisik/panel, serta CSV agregat. Migrasi monitoring sudah diterapkan; total kini 21 migrasi dengan 20 tabel public ber-RLS. Metrik dana/uji dan statistik publik belum tercakup. Lihat [rincian monitoring](docs/MONITORING_UAT.md) dan [sisa pekerjaan setiap FR pada PRD](docs/PRD_BACKLOG.md).
 
+Draf surat rekomendasi fisik RT/RW terisi otomatis tersedia melalui halaman pengajuan fisik setelah batas antrean terpenuhi. Pemilik dapat melihat pratinjau dan mengunduh Word privat; pemeriksaan, keputusan dan tanda tangan tetap manual dengan label DEMO. Setelah pull jalankan `npm ci` untuk dependency `docx@9.15.1`. Tidak memerlukan migrasi/environment baru; hasil Word dan alur unduh belum melalui UAT. Lihat [rincian surat terisi](docs/PHYSICAL_LETTER_UAT.md).
+
 ## Teknologi
 
 - Next.js App Router dan TypeScript.
