@@ -3,7 +3,7 @@ import { TEMPLATES } from "@/lib/templates";
 
 export const metadata: Metadata = {
   title: "Template dokumen",
-  description: "Unduh format dokumen KampungLab: PRD, RAB, surat keaslian, rekomendasi RT/RW, laporan, dan formulir persetujuan.",
+  description: "Unduh format dokumen KampungLab: PRD, RAB, surat pernyataan keaslian dan pertanggungjawaban, rekomendasi RT/RW, laporan, dan formulir persetujuan.",
 };
 
 export default function DocumentsPage() {

@@ -10,7 +10,7 @@ export type DocumentSlotKey = "prd" | "rab" | "declaration";
 export type DocumentCheckStatus = "lulus" | "perlu_dicek" | "perlu_perbaikan" | "tidak_diperiksa";
 export type DocumentCheck = {
   status: DocumentCheckStatus; summary: string; issues: string[]; checked_title: string; checked_at: string;
-  signature: "ada" | "tidak_ada" | "tidak_jelas" | "tidak_perlu"; title_match: "ya" | "tidak" | "tidak_terbaca"; ai: boolean;
+  signature: "ada" | "tidak_ada" | "tidak_jelas" | "tidak_perlu"; stamp: "ada" | "tidak_ada" | "tidak_jelas" | "tidak_perlu"; title_match: "ya" | "tidak" | "tidak_terbaca"; ai: boolean;
   extracted: { ordinary?: number; contingency?: number; honor?: number; maintenance?: number };
 };
 export type DraftDocumentSlot = { attachment_id: string; file_name: string; check: DocumentCheck };

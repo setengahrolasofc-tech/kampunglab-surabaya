@@ -30,7 +30,7 @@ const errors:Record<string,string>={
   EVALUATION_PATH_REQUIRED:"Pilih jalur Mikro/Kecil dan konfirmasikan bahwa ini belum menjadi persetujuan program atau dana.",
   PREVIOUS_RECOMMENDATIONS_REQUIRED:"Rekomendasi RT dan RW pada putaran ini belum lengkap. Pengelola perlu memeriksa riwayat sebelum tindakan kelurahan.",
   ATTACHMENT_CONFLICT:"Daftar lampiran sudah berubah. Muat ulang setelah menyimpan perubahan draf, lalu tinjau berkas yang akan dikirim.",
-  DOCUMENT_FILE_MISSING:"Salah satu dokumen PRD, RAB, atau surat keaslian sudah dilepas dari draf atau belum siap. Unggah ulang dokumennya pada langkah terkait, simpan, lalu kirim.",
+  DOCUMENT_FILE_MISSING:"Salah satu dokumen wajib (PRD, RAB, atau surat pernyataan keaslian dan pertanggungjawaban) sudah dilepas dari draf atau belum siap. Unggah ulang dokumennya pada langkah terkait, simpan, lalu kirim.",
   ATTACHMENTS_PENDING:"Masih ada unggahan yang belum terkonfirmasi. Selesaikan atau lepas reservasinya pada halaman lampiran sebelum mengirim simulasi.",
 };
 const failure=(message:string)=>({error:errors[message]??"Penyimpanan belum dapat dikonfirmasi. Periksa riwayat di tab baru sebelum mencoba kembali."});

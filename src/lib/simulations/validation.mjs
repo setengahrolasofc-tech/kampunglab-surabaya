@@ -1,11 +1,12 @@
-import { validateDraftDocument, draftChecklist, documentSlotProblem, documentSlots, budgetTotals, quantityMilli, rupiahInteger } from "../drafts/schema.mjs";
+import { validateDraftDocument, draftChecklist, documentSlotProblem, requiredSlots, budgetTotals, quantityMilli, rupiahInteger } from "../drafts/schema.mjs";
 import { isUuid } from "../admin/validation.mjs";
 export function simulationMissing(document) {
   const result=validateDraftDocument(document);
   if(Object.keys(result.errors).length)return ["Format isian draf perlu diperbaiki"];
   const data=result.data,missing=[];
   if(!draftChecklist(data)[0]||data.innovation.team.some(member=>!member.name||!member.role))missing.push("Data inovasi dan tim");
-  for(const slot of documentSlots){
+  // Hanya dokumen yang wajib untuk jenis inovasi ini (Inovasi Program tidak memerlukan PRD).
+  for(const slot of requiredSlots(data.innovation.form)){
     const problem=documentSlotProblem(data,slot.key);
     if(problem)missing.push(`${slot.label}: ${problem}`);
   }

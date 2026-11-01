@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 const stages = [
-  ["Ajukan inovasi", "Inovator menyiapkan data inovasi, PRD, RAB, dan pernyataan keaslian."],
+  ["Ajukan inovasi", "Inovator mengisi data inovasi lebih dulu, lalu menyiapkan dokumen wajib sesuai jenis inovasi: PRD (kecuali Inovasi Program), RAB, dan pernyataan keaslian dan pertanggungjawaban bermeterai Rp10.000."],
   ["Verifikasi berjenjang", "RT memeriksa domisili dan masalah; RW meninjau kelayakan lokal; kelurahan menentukan keputusan atau penerusan sesuai tingkat."],
   ["Penilaian panel", "Tingkat Kecil ditinjau panel reviewer. Tingkat Mikro diputuskan kelurahan sesuai aturan kelayakan yang ditetapkan program."],
   ["Catat dana tahap awal", "Setelah keputusan berwenang, transfer dilakukan di luar platform. Bukti dan realisasinya dicatat untuk ditinjau."],

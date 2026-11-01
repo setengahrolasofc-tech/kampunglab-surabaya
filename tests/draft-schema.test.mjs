@@ -52,7 +52,7 @@ test("template document pointers are normalized and unknown slots are dropped",(
   d.documents.prd=slotRow("Pompa","approved");assert.equal(validateDraftDocument(d).data.documents.prd.check.status,"tidak_diperiksa");
 });
 test("legacy declaration remains intact while checklist still requires the uploaded letter",()=>{
-  const d=emptyDraftDocument();d.innovation.title="Pompa";d.declaration.own_work=true;
+  const d=emptyDraftDocument();d.innovation.title="Pompa";d.innovation.form="produk";d.declaration.own_work=true;
   assert.equal(validateDraftDocument(d).data.declaration.own_work,true);
   assert.equal(draftChecklist(validateDraftDocument(d).data)[3],false);
   d.documents={prd:slotRow("Pompa"),declaration:slotRow("Pompa")};

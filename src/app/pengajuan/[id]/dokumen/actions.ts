@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { isUuid } from "@/lib/admin/validation.mjs";
-import { documentSlots } from "@/lib/drafts/schema.mjs";
+import { documentSlots, formLabels, requiredSlotKeys } from "@/lib/drafts/schema.mjs";
 import { edgeFileError, fileErrorMessage } from "@/lib/attachments/errors";
 import { checkTemplateDocument, type CheckContext } from "@/lib/ai/document-check";
 import type { DocumentSlotKey, DocumentUploadState } from "@/lib/drafts/types";
@@ -32,6 +32,15 @@ export async function uploadTemplateDocument(_state: DocumentUploadState, form: 
   if (file.size > MAX_FILE) return { error: fileErrorMessage("FILE_TOO_LARGE") };
   const context = parseContext(form.get("context"));
   if (!context.title) return { error: "Isi nama inovasi pada langkah 1 dan simpan draf sebelum mengunggah dokumen, supaya dokumen dapat dicocokkan dengan judulnya." };
+  // Jenis inovasi yang tersimpan di draf menentukan dokumen mana yang boleh diunggah; nilai dari klien tidak dipercaya.
+  const saved = await supabase.from("innovation_drafts").select("document").eq("id", String(draftId)).maybeSingle();
+  if (saved.error || !saved.data) return { error: "Draf tidak ditemukan atau tidak dapat diakses oleh akunmu." };
+  const savedDocument = saved.data.document as { innovation?: { form?: unknown } } | null;
+  const savedForm = typeof savedDocument?.innovation?.form === "string" ? savedDocument.innovation.form : "";
+  const allowed = requiredSlotKeys(savedForm);
+  if (!allowed.length) return { error: "Pilih jenis inovasi pada langkah 1 dan simpan draf sebelum mengunggah dokumen." };
+  if (!allowed.includes(slotKey)) return { error: `Dokumen ${slot.label} tidak diperlukan untuk ${formLabels[savedForm as keyof typeof formLabels]}.` };
+  context.form = savedForm;
   const extension = file.name.toLowerCase().split(".").at(-1) ?? "";
   const mime = mimeByExtension[extension];
   if (!mime) return { error: fileErrorMessage("INVALID_FILE") };

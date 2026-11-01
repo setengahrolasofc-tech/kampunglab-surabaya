@@ -1,4 +1,14 @@
-export const innovationForms = ["gagasan", "produk", "prototipe", "program", "teknologi"];
+/** Jenis inovasi dan dokumen bertemplate yang wajib diunggah untuk masing-masing. Inovasi Program tidak memerlukan PRD. */
+export const formDocuments = {
+  prototipe: ["prd", "rab", "declaration"],
+  produk: ["prd", "rab", "declaration"],
+  program: ["rab", "declaration"],
+  teknologi: ["prd", "rab", "declaration"],
+};
+export const formLabels = { prototipe: "Inovasi Prototipe", produk: "Inovasi Produk", program: "Inovasi Program", teknologi: "Inovasi Teknologi" };
+export const innovationForms = Object.keys(formDocuments);
+/** Kunci dokumen yang wajib untuk satu jenis inovasi; kosong bila jenis belum dipilih. @param {string} form @returns {string[]} */
+export function requiredSlotKeys(form) { return Object.hasOwn(formDocuments, form) ? formDocuments[form] : []; }
 export const prdFields = [
   ["problem", "Masalah yang ingin diselesaikan"],
   ["problem_evidence", "Bukti atau pengamatan masalah"],
@@ -13,15 +23,18 @@ export const prdFields = [
   ["risks", "Risiko yang mungkin terjadi"],
   ["mitigation", "Cara mengurangi risiko"],
 ];
-/** Dokumen bertemplate yang diunggah menggantikan isian teks PRD/RAB/keaslian. `signature`: surat harus bertanda tangan. */
-/** @type {{ key: import("./types").DocumentSlotKey, label: string, tag: string, template: string, signature: boolean }[]} */
+/** Dokumen bertemplate yang diunggah menggantikan isian teks PRD/RAB/pernyataan. `signature`: harus bertanda tangan; `stamp`: tanda tangan harus di atas meterai Rp10.000. */
+/** @type {{ key: import("./types").DocumentSlotKey, label: string, tag: string, template: string, signature: boolean, stamp?: boolean }[]} */
 export const documentSlots = [
   { key: "prd", label: "PRD inovasi", tag: "PRD", template: "Template_PRD.docx", signature: false },
   { key: "rab", label: "RAB", tag: "RAB", template: "Template_RAB.docx", signature: true },
-  { key: "declaration", label: "Surat pernyataan keaslian karya", tag: "Keaslian", template: "Surat_Pernyataan_Keaslian_Karya.docx", signature: true },
+  { key: "declaration", label: "Surat pernyataan keaslian dan pertanggungjawaban", tag: "Pernyataan", template: "Surat_Pernyataan_Keaslian_dan_Pertanggungjawaban.docx", signature: true, stamp: true },
 ];
+/** Dokumen bertemplate yang wajib untuk satu jenis inovasi, urut seperti documentSlots. @param {string} form */
+export function requiredSlots(form) { const keys = requiredSlotKeys(form); return documentSlots.filter(slot => keys.includes(slot.key)); }
 export const checkStatuses = ["lulus", "perlu_dicek", "perlu_perbaikan", "tidak_diperiksa"];
 const signatureValues = ["ada", "tidak_ada", "tidak_jelas", "tidak_perlu"];
+const stampValues = signatureValues;
 export const MAX_DRAFTS = 3;
 const titleMatchValues = ["ya", "tidak", "tidak_terbaca"];
 export const extractedKeys = ["ordinary", "contingency", "honor", "maintenance"];
@@ -101,6 +114,7 @@ function validateDocuments(raw, errors) {
         checked_title: str(check.checked_title, 160),
         checked_at: str(check.checked_at, 40),
         signature: signatureValues.includes(check.signature) ? check.signature : "tidak_jelas",
+        stamp: stampValues.includes(check.stamp) ? check.stamp : (slot.stamp ? "tidak_jelas" : "tidak_perlu"),
         title_match: titleMatchValues.includes(check.title_match) ? check.title_match : "tidak_terbaca",
         ai: check.ai === true,
         extracted,
@@ -168,11 +182,13 @@ export function validateDraftDocument(raw) {
 }
 
 export function draftChecklist(data) {
-  const i = data.innovation, b = data.budget;
+  const i = data.innovation, b = data.budget, required = requiredSlotKeys(i.form);
+  // Dokumen yang tidak wajib untuk jenis inovasi ini (mis. PRD untuk Program) dianggap selesai begitu jenis inovasi dipilih.
+  const slotOk = key => required.includes(key) ? documentSlotProblem(data, key) === null : Boolean(i.form);
   return [
     Boolean(i.title && i.form && i.rt_id && i.summary && i.team.some(member => member.name && member.role)),
-    documentSlotProblem(data, "prd") === null,
-    documentSlotProblem(data, "rab") === null && !budgetTotals(b).invalid && budgetTotals(b).subtotal > 0n && b.items.every(row=>row.description&&row.category&&row.unit&&row.usage_stage&&(quantityMilli(row.quantity)??0n)>0n&&(rupiahInteger(row.unit_price)??0n)>0n) && Boolean(b.maintenance_months),
-    documentSlotProblem(data, "declaration") === null && data.declaration.own_work,
+    slotOk("prd"),
+    slotOk("rab") && !budgetTotals(b).invalid && budgetTotals(b).subtotal > 0n && b.items.every(row=>row.description&&row.category&&row.unit&&row.usage_stage&&(quantityMilli(row.quantity)??0n)>0n&&(rupiahInteger(row.unit_price)??0n)>0n) && Boolean(b.maintenance_months),
+    slotOk("declaration") && data.declaration.own_work,
   ];
 }

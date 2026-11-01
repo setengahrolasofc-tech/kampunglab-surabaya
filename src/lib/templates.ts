@@ -1,6 +1,6 @@
 // Daftar template dokumen program. File .docx ada di public/templates.
 export const TEMPLATES = [
-  ["Surat_Pernyataan_Keaslian_Karya.docx", "Surat pernyataan keaslian karya", "Inovator", "Tahap 1 (wajib saat mengirim)"],
+  ["Surat_Pernyataan_Keaslian_dan_Pertanggungjawaban.docx", "Surat pernyataan keaslian dan pertanggungjawaban (bermeterai Rp10.000)", "Inovator", "Tahap 1 (wajib saat mengirim)"],
   ["Template_PRD.docx", "PRD (dokumen kebutuhan produk)", "Inovator", "Tahap 1"],
   ["Template_RAB.docx", "RAB (rencana anggaran biaya)", "Inovator", "Tahap 1"],
   ["Surat_Rekomendasi_RT.docx", "Surat rekomendasi RT (jalur dokumen fisik)", "Ketua RT", "Tahap 2, setelah batas antrean RT terpenuhi"],

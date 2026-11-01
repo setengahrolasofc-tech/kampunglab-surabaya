@@ -18,6 +18,7 @@ export function buildDocumentCheck(slotKey, report, title, now) {
   const issues = Array.isArray(raw.issues) ? raw.issues.map(item => text(item, 300)).filter(Boolean).slice(0, 12) : [];
   const titleMatch = pick(raw.title_match, ["ya", "tidak", "tidak_terbaca"], "tidak_terbaca");
   const signature = slot.signature ? pick(raw.signature, ["ada", "tidak_ada", "tidak_jelas"], "tidak_jelas") : "tidak_perlu";
+  const stamp = slot.stamp ? pick(raw.stamp, ["ada", "tidak_ada", "tidak_jelas"], "tidak_jelas") : "tidak_perlu";
   const completeness = pick(raw.completeness, ["lengkap", "sebagian", "kosong"], "sebagian");
   const wrongDocument = raw.document_type_ok !== true;
   const extracted = {};
@@ -31,10 +32,12 @@ export function buildDocumentCheck(slotKey, report, title, now) {
   if (wrongDocument) blockers.push(`Berkas ini tidak tampak sebagai dokumen ${slot.label} sesuai template KampungLab.`);
   if (!wrongDocument && titleMatch === "tidak") blockers.push("Nama inovasi di dokumen berbeda dengan judul inovasi pada draf.");
   if (!wrongDocument && slot.signature && signature === "tidak_ada") blockers.push("Tanda tangan belum ditemukan pada dokumen.");
+  if (!wrongDocument && slot.stamp && stamp === "tidak_ada") blockers.push("Meterai Rp10.000 belum ditemukan. Tempel meterai (atau pakai meterai elektronik) dan tanda tangani di atasnya.");
   if (!wrongDocument && completeness === "kosong") blockers.push("Isian dokumen masih kosong.");
   const warnings = [];
   if (!wrongDocument && titleMatch === "tidak_terbaca") warnings.push("Nama inovasi di dokumen tidak terbaca jelas; periksa sendiri.");
   if (!wrongDocument && slot.signature && signature === "tidak_jelas") warnings.push("Tanda tangan tidak terlihat jelas; pastikan hasil pindai terbaca.");
+  if (!wrongDocument && slot.stamp && stamp === "tidak_jelas") warnings.push("Meterai tidak terlihat jelas; pastikan meterai dan tanda tangan di atasnya terbaca pada hasil pindai.");
   if (!wrongDocument && completeness === "sebagian") warnings.push("Sebagian isian dokumen tampak belum terisi.");
   const status = blockers.length ? "perlu_perbaikan" : warnings.length || issues.length ? "perlu_dicek" : "lulus";
   return {
@@ -44,6 +47,7 @@ export function buildDocumentCheck(slotKey, report, title, now) {
     checked_title: title.trim(),
     checked_at: now,
     signature,
+    stamp,
     title_match: wrongDocument ? "tidak_terbaca" : titleMatch,
     ai: true,
     extracted,
@@ -55,6 +59,6 @@ export function uncheckedDocument(slotKey, reason, title, now) {
   const slot = documentSlots.find(item => item.key === slotKey);
   return {
     status: "tidak_diperiksa", summary: text(reason, 1200), issues: [], checked_title: title.trim(), checked_at: now,
-    signature: slot?.signature ? "tidak_jelas" : "tidak_perlu", title_match: "tidak_terbaca", ai: false, extracted: {},
+    signature: slot?.signature ? "tidak_jelas" : "tidak_perlu", stamp: slot?.stamp ? "tidak_jelas" : "tidak_perlu", title_match: "tidak_terbaca", ai: false, extracted: {},
   };
 }

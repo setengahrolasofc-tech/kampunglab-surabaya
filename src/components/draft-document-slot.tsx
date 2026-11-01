@@ -12,6 +12,7 @@ const statusView: Record<string, { label: string; tone: string }> = {
   tidak_diperiksa: { label: "Tersimpan, belum diperiksa AI", tone: "bg-slate-100 text-slate-800" },
 };
 const signatureLabel: Record<string, string> = { ada: "Tanda tangan terdeteksi", tidak_ada: "Tanda tangan tidak ditemukan", tidak_jelas: "Tanda tangan tidak jelas", tidak_perlu: "" };
+const stampLabel: Record<string, string> = { ada: "Meterai terdeteksi", tidak_ada: "Meterai tidak ditemukan", tidak_jelas: "Meterai tidak jelas", tidak_perlu: "" };
 
 /** Unggah satu dokumen bertemplate, lalu tampilkan hasil pemeriksaan. Penunjuk baru tersimpan ke draf lewat tombol Simpan draf. */
 export function DocumentSlot({ draftId, slotKey, value, title, context, blockedReason, readyFileIds, onChange }: {
@@ -47,10 +48,10 @@ export function DocumentSlot({ draftId, slotKey, value, title, context, blockedR
   };
   return <div className="space-y-4 rounded-xl border border-slate-200 p-4 sm:p-5">
     <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-bold">Dokumen {slot.label}</h3><a href={`/templates/${slot.template}`} download className="text-sm font-semibold text-emerald-900 underline">Unduh template {slot.tag} (.docx)</a></div>
-    <p className="text-sm leading-6 text-slate-600">Unduh template, isi di Word, {slot.signature ? "cetak lalu tanda tangani (atau bubuhkan tanda tangan digital), " : ""}ubah menjadi PDF atau foto/pindaian, lalu unggah di sini. Format PDF, JPEG, PNG, atau WebP, maksimal 3 MiB.</p>
+    <p className="text-sm leading-6 text-slate-600">Unduh template, isi di Word, {slot.stamp ? "cetak, tempel meterai Rp10.000, lalu tanda tangani di atas meterai (atau gunakan meterai elektronik), " : slot.signature ? "cetak lalu tanda tangani (atau bubuhkan tanda tangan digital), " : ""}ubah menjadi PDF atau foto/pindaian, lalu unggah di sini. Format PDF, JPEG, PNG, atau WebP, maksimal 3 MiB.</p>
     {value && check && view ? <div className="space-y-2 rounded-xl bg-slate-50 p-4 text-sm leading-6">
       <p className="break-words font-semibold">{value.file_name}</p>
-      <p><span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${view.tone}`}>{view.label}</span>{check.ai && signatureLabel[check.signature] ? <span className="ml-3 text-slate-700">{signatureLabel[check.signature]}</span> : null}</p>
+      <p><span className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${view.tone}`}>{view.label}</span>{check.ai && signatureLabel[check.signature] ? <span className="ml-3 text-slate-700">{signatureLabel[check.signature]}</span> : null}{check.ai && slot.stamp && stampLabel[check.stamp ?? "tidak_jelas"] ? <span className="ml-3 text-slate-700">{stampLabel[check.stamp ?? "tidak_jelas"]}</span> : null}</p>
       {check.summary ? <p className="text-slate-700">{check.summary}</p> : null}
       {check.issues.length ? <ul className="list-inside list-disc text-slate-800">{check.issues.map(issue => <li key={issue}>{issue}</li>)}</ul> : null}
       {titleChanged ? <p role="alert" className="font-semibold text-red-800">Judul inovasi berubah sejak dokumen diperiksa (“{check.checked_title}”). Perbarui dokumen lalu unggah ulang.</p> : null}
@@ -66,6 +67,6 @@ export function DocumentSlot({ draftId, slotKey, value, title, context, blockedR
         <button type="button" onClick={submit} disabled={pending || Boolean(blockedReason)} className="min-h-11 rounded-xl border border-emerald-900 px-4 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-50 disabled:cursor-wait disabled:opacity-50">{pending ? "Mengunggah dan memeriksa…" : value ? "Unggah ulang dan periksa" : "Unggah dan periksa"}</button>
       </div>
     </div>
-    <p className="text-xs leading-5 text-slate-600">Saat diunggah, isi berkas dikirim ke layanan AI (Anthropic) untuk memeriksa jenis dokumen, kecocokan nama inovasi, tanda tangan, dan kelengkapan. Hasilnya hanya bantuan: bukan persetujuan, dan petugas tetap memeriksa dokumenmu.</p>
+    <p className="text-xs leading-5 text-slate-600">Saat diunggah, isi berkas dikirim ke layanan AI (Anthropic) untuk memeriksa jenis dokumen, kecocokan nama inovasi, tanda tangan, meterai (bila diwajibkan), dan kelengkapan. Hasilnya hanya bantuan: bukan persetujuan, dan petugas tetap memeriksa dokumenmu.</p>
   </div>;
 }
