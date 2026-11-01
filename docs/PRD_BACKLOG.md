@@ -1,6 +1,6 @@
 # Sisa pekerjaan menurut PRD
 
-Pembaruan 1 November 2026 setelah pusat notifikasi, monitoring admin, dan draf surat fisik terisi otomatis. Acuan: PRD_KampungLab_Surabaya_v1.md, implementasi repository, serta metadata cloud pada milestone ini. Status **parsial** berarti sebagian kode tersedia, bukan modul operasional lengkap atau UAT lulus. Tidak menggunakan persentase penyelesaian karena cakupan dan keputusan D-xx belum final.
+Pembaruan 1 November 2026 setelah pusat notifikasi, monitoring admin, draf surat fisik terisi otomatis dan pembaca audit administrasi. Acuan: PRD_KampungLab_Surabaya_v1.md, implementasi repository, serta metadata cloud pada milestone ini. Status **parsial** berarti sebagian kode tersedia, bukan modul operasional lengkap atau UAT lulus. Tidak menggunakan persentase penyelesaian karena cakupan dan keputusan D-xx belum final.
 
 | PRD | Yang tersedia | Yang masih harus dikerjakan |
 |---|---|---|
@@ -21,7 +21,7 @@ Pembaruan 1 November 2026 setelah pusat notifikasi, monitoring admin, dan draf s
 | FR-15 Minat Pilot/CS | Belum | Form minat, consent kontak, verifikasi organisasi, anti-spam, triase/notifikasi dan kontak CS yang disetujui; D-21 |
 | FR-16 Banding | Belum | Pengajuan ke keputusan tertentu, lampiran, reviewer independen, putusan dan pemulihan alur; kalender/kuota/dampak D-12 |
 | FR-17 Notifikasi | Inbox dari catatan tersimpan, tanda baca, scope aktif | Email satu kali ≥24 jam, scheduler, idempotensi retry dan status/audit pengiriman; D-22. Notifikasi modul dana/uji/banding mengikuti modul tersebut |
-| FR-18 Audit/validitas | Audit privat identitas/draf/review/lampiran/fisik/panel | Pembaca audit lintas modul sesuai hak, anomali/peninjauan, sampling acak, rotasi fasilitator, koreksi metrik; D-14/D-17 serta dependensi uji |
+| FR-18 Audit/validitas | Audit privat identitas/draf/review/lampiran/fisik/panel; `/admin/audit` membaca metadata akses/master/pengaturan fisik/koordinasi panel, filter dan cursor | Pembaca audit keputusan bisnis sesuai scope objek/mandat, anomali/peninjauan, sampling acak, rotasi fasilitator, koreksi metrik dan audit akses pembaca; D-14/D-17 serta dependensi uji |
 | FR-19 Pengaturan/master | Wilayah/jabatan, pemberian/pencabutan mandat/peran, batas hari fisik DEMO | Program/periode, kebijakan berversi, parameter plafon/durasi/ambang/rubrik/consent, master resmi tervalidasi/import, kesiapan operasional menyeluruh; D-01/D-04/D-18/D-23 |
 | FR-20 Dashboard/laporan | Dashboard akun/warga, antrean petugas, monitoring admin status/tema/kelurahan, usia antrean, CSV agregat | Dashboard fasilitator serta metrik dana/uji/LPJ/banding/reminder gagal, laporan operasional lengkap, agregasi publik D-13 |
 

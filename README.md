@@ -6,9 +6,11 @@ Website tata kelola inovasi warga: pengajuan, verifikasi berjenjang, uji warga, 
 
 Pusat notifikasi dalam aplikasi tersedia di `/notifikasi`: antrean, hasil pemeriksaan DEMO, dokumen fisik, panel, dan penetapan akses sesuai hak terkini. Dashboard menampilkan jumlah belum dibaca; tombol buka menandai satu pembaruan melalui POST. Migrasi inbox sudah diterapkan. Email, pengingat 24 jam, dan scheduler belum tersedia; lihat [rincian serta UAT yang ditunda](docs/NOTIFICATIONS_UAT.md).
 
-Monitoring admin tersedia di `/admin/monitoring`: filter dan rekap status/tema/kelurahan, jumlah draf dan putaran terpisah, usia antrean, koordinasi mandat/fisik/panel, serta CSV agregat. Migrasi monitoring sudah diterapkan; total kini 21 migrasi dengan 20 tabel public ber-RLS. Metrik dana/uji dan statistik publik belum tercakup. Lihat [rincian monitoring](docs/MONITORING_UAT.md) dan [sisa pekerjaan setiap FR pada PRD](docs/PRD_BACKLOG.md).
+Monitoring admin tersedia di `/admin/monitoring`: filter dan rekap status/tema/kelurahan, jumlah draf dan putaran terpisah, usia antrean, koordinasi mandat/fisik/panel, serta CSV agregat. Migrasi monitoring sudah diterapkan. Metrik dana/uji dan statistik publik belum tercakup. Lihat [rincian monitoring](docs/MONITORING_UAT.md) dan [sisa pekerjaan setiap FR pada PRD](docs/PRD_BACKLOG.md).
 
 Draf surat rekomendasi fisik RT/RW terisi otomatis tersedia melalui halaman pengajuan fisik setelah batas antrean terpenuhi. Pemilik dapat melihat pratinjau dan mengunduh Word privat; pemeriksaan, keputusan dan tanda tangan tetap manual dengan label DEMO. Setelah pull jalankan `npm ci` untuk dependency `docx@9.15.1`. Tidak memerlukan migrasi/environment baru; hasil Word dan alur unduh belum melalui UAT. Lihat [rincian surat terisi](docs/PHYSICAL_LETTER_UAT.md).
+
+Audit administrasi tersedia di `/admin/audit`: riwayat akses/master/pengaturan fisik/koordinasi panel, filter modul/operasi/aktor/tanggal WIB dan cursor 20 baris. Ringkasan before/after memakai metadata yang tersimpan; log teknis tanpa snapshot diberi keterangan. Akses admin hanya-baca, tanpa isi proposal/nilai/berkas. Migrasi reader sudah diterapkan; total 22 migrasi dan 20 tabel public ber-RLS. Rincian dan UAT yang ditunda ada di [ADMIN_AUDIT_UAT.md](docs/ADMIN_AUDIT_UAT.md).
 
 ## Teknologi
 

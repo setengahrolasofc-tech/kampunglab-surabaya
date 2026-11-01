@@ -560,6 +560,7 @@ Passport harus memuat:
 - Audit acak mengonfirmasi ulang sampel 10-20%; pilih nilai, pembulatan, pencatatan sampling, dan kontak terbatas sesuai D-14.
 - Dukung rotasi fasilitator dan riwayat penugasan agar verifikasi tidak bergantung pada satu petugas terus-menerus. Jadwal, pengganti, dan independensi auditor ditetapkan pengelola; rotasi tidak menghapus atribusi verifikasi sebelumnya.
 - Jika manipulasi dikonfirmasi, data dapat dianulir dan fasilitator diganti melalui keputusan tercatat; publikasi dan metrik diperbarui menurut versi.
+- Implementasi parsial 1 November 2026: `/admin/audit` menyediakan pembaca audit administrasi untuk akses/mandat, master wilayah/jabatan, pengaturan jalur fisik dan koordinasi panel. Memerlukan sesi/admin aktif, filter modul/operasi/aktor/tanggal WIB, pagination cursor 20 baris, serta ringkasan scalar before/after yang benar-benar tersimpan. Log teknis tanpa snapshot diberi keterangan keterbatasan; tidak direkonstruksi dari state objek sekarang. Nama profil aktor saat ini dibedakan dari ID historis. Profil sebagai objek perubahan, draf/proposal, skor/suara, berkas, isi surat dan alasan bebas dikecualikan. Tidak ada edit/hapus/ekspor audit. Pembaca audit keputusan bisnis sesuai scope, anomali, sampling dan rotasi tetap belum dibangun; rincian serta UAT yang ditunda ada di `docs/ADMIN_AUDIT_UAT.md`.
 
 ### FR-19. Pengaturan, master data, akun jabatan - P0/P1
 

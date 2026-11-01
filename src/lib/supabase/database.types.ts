@@ -1264,6 +1264,7 @@ export type Database = {
         Args: { p_operation: string; p_payload?: Json }
         Returns: Json
       }
+      admin_audit_log: { Args: { payload?: Json }; Returns: Json }
       attachment_service: {
         Args: { operation: string; payload?: Json }
         Returns: Json

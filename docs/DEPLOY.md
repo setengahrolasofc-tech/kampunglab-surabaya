@@ -4,9 +4,9 @@ Panduan ini memakai kondisi proyek terbaru: database Supabase `kampunglab-suraba
 
 ## A. Database (Supabase)
 
-Menurut `docs/PROJECT_STATUS.md`, dua puluh satu migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
+Menurut `docs/PROJECT_STATUS.md`, dua puluh dua migrasi di `supabase/migrations` sudah diterapkan ke project ini. **Jangan dijalankan ulang.** Periksa dulu:
 
-- Dashboard Supabase > **Database > Migrations**: harus ada dua puluh satu entri, dari `20261030134536_identity_and_office_mandates` sampai `20261101030001_prototype_territory_and_legacy_budget_integration`, termasuk `20261101022903_in_app_notification_inbox` dan `20261101023914_admin_demo_monitoring_and_aggregate_reports`. Migrasi notifikasi/monitoring hanya bergantung pada schema 30–31 Oktober; urutan versi native sebelum dua migrasi upstream 030000/030001 tetap sah.
+- Dashboard Supabase > **Database > Migrations**: harus ada dua puluh dua entri, dari `20261030134536_identity_and_office_mandates` sampai `20261101033003_scoped_administration_audit_reader`, termasuk notifikasi `20261101022903`, monitoring `20261101023914`, dan perbaikan integrasi `20261101030001`. Migrasi notifikasi/monitoring hanya bergantung pada schema 30–31 Oktober; urutan versi native sebelum dua migrasi upstream 030000/030001 tetap sah.
 - Atau lewat CLI: `npx supabase login`, `npx supabase link --project-ref zxfaotlqldfrlccahebw`, `npx supabase migration list`.
 
 Jika kamu memakai project Supabase baru/kosong, terapkan semua file migrasi berurutan menurut nama file (`npx supabase db push`). Empat migrasi unggahan sebelumnya sudah direkonsiliasi sebagai applied pada proyek ini; jangan jalankan ulang isi SQL-nya. Script `supabase/repairs` adalah catatan pemeliharaan sekali pakai untuk proyek lama, bukan bagian urutan deploy baru. Rincian urutan serta batas verifikasinya ada di `docs/INTEGRATION_REPAIR.md`.
@@ -54,6 +54,7 @@ Dashboard > **Authentication**:
 - **Notifikasi dalam aplikasi tersedia di `/notifikasi`.** Tidak membutuhkan environment baru; gunakan database yang sudah menerima migrasi inbox. Hak baca mengikuti sumber dan mandat/penugasan terkini. Email, pengingat 24 jam dan scheduler belum ada; lihat NOTIFICATIONS_UAT.md.
 - **Monitoring admin tersedia di `/admin/monitoring`.** Rekap internal DEMO dan CSV agregat memerlukan admin aktif serta migrasi monitoring; tidak memerlukan environment baru. Laporan dana/uji dan statistik publik belum tersedia. Lihat MONITORING_UAT.md dan PRD_BACKLOG.md.
 - **Draf Word fisik terisi tersedia untuk pemilik setelah batas antrean terpenuhi.** Rute pratinjau/unduh di bawah `/simulasi/[id]/dokumen-fisik/surat` memakai runtime Node.js dan dependency `docx@9.15.1`; instal dari lockfile dengan `npm ci`. Tanpa migrasi, Storage baru atau environment baru. File dibuat privat di memori dan belum melalui UAT Word/cetak. Lihat PHYSICAL_LETTER_UAT.md.
+- **Audit administrasi tersedia di `/admin/audit`.** Memerlukan admin aktif dan migrasi reader; tanpa dependency/environment baru. Metadata akses/master/fisik/koordinasi panel dibatasi pada field yang diizinkan. Audit keputusan bisnis serta anomali/sampling belum tersedia. Lihat ADMIN_AUDIT_UAT.md.
 - **Proyek Supabase gratis dijeda bila tidak aktif sekitar seminggu.** Aktifkan kembali dan buka web sehari sebelum demo/pitch.
 - **Tema dan wilayah DEMO** berlabel DEMO; master resmi harus disiapkan pengelola program.
 - Regenerasi tipe setelah mengubah schema: `npx supabase gen types typescript --project-id zxfaotlqldfrlccahebw > src/lib/supabase/database.types.ts`.
