@@ -13,10 +13,11 @@ export function SiteHeader() {
             KampungLab <span className="font-normal text-emerald-900">Surabaya</span>
           </span>
         </Link>
-        <nav aria-label="Navigasi utama" className="flex items-center gap-6 text-sm font-semibold">
+        <nav aria-label="Navigasi utama" className="flex flex-wrap items-center gap-x-6 gap-y-4 text-sm font-semibold">
           <Link href="/#alur" className="rounded-sm hover:text-emerald-700">Alur program</Link>
           <Link href="/panduan" className="rounded-sm hover:text-emerald-700">Panduan</Link>
           <Link href="/dokumen" className="rounded-sm hover:text-emerald-700">Dokumen</Link>
+          <Link href="/notifikasi" className="rounded-sm hover:text-emerald-700">Notifikasi</Link>
           <Link href="/dashboard" className="rounded-sm hover:text-emerald-700">Akun</Link>
         </nav>
       </div>

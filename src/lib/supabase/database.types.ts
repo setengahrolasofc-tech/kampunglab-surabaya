@@ -299,6 +299,38 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_receipts: {
+        Row: {
+          event_at: string
+          kind: string
+          read_at: string
+          source_id: string
+          user_id: string
+        }
+        Insert: {
+          event_at: string
+          kind: string
+          read_at?: string
+          source_id: string
+          user_id: string
+        }
+        Update: {
+          event_at?: string
+          kind?: string
+          read_at?: string
+          source_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_receipts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       office_mandates: {
         Row: {
           appointment_reference: string
@@ -1249,6 +1281,10 @@ export type Database = {
           p_rt: number
           p_rw: number
         }
+        Returns: Json
+      }
+      notification_workflow: {
+        Args: { operation: string; payload?: Json }
         Returns: Json
       }
       panel_workflow: {

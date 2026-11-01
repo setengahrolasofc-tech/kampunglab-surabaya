@@ -544,6 +544,7 @@ Passport harus memuat:
 - Batas 24 jam adalah waktu berlalu, bukan jam kerja, sesuai teks handbook. Aturan waktu ulang saat kirim ulang revisi masih D-07.
 - Timeline inovator menunjukkan masuk antrean, lama menunggu, revisi, dan status pengingat. Angka 24 jam tidak disajikan sebagai batas auto-approval.
 - Diputuskan pengguna (31 Okt 2026): tidak ada eskalasi atau kenaikan tingkat otomatis. Setelah 7 hari tanpa keputusan RT/RW hanya terbuka jalur dokumen fisik (FR-04) yang dijalankan inovator. Hitungan 7 hari per tingkat, dimulai ulang setiap pengajuan masuk antrean tingkat itu (waktu revisi tidak dihitung). D-22 tersisa untuk provider email/scheduler.
+- Implementasi parsial 1 November 2026: pusat notifikasi `/notifikasi` menyediakan pembaruan antrean DEMO, hasil pemeriksaan, dokumen fisik, panel, dan penetapan akses dari catatan yang sudah tersimpan, mengikuti sesi dan kewenangan terkini. Tanda baca disimpan saat sumber dibuka melalui POST; pemuatan daftar tidak menandai baca. Peristiwa lama dapat muncul, dan akses yang berakhir menghilangkan item terkait. Tidak menyalin isi proposal/nilai/berkas ke notifikasi. Email, pengingat 24 jam, scheduler, dan audit pengiriman belum diimplementasikan; rincian dan skenario yang ditunda ada di `docs/NOTIFICATIONS_UAT.md`.
 
 ### FR-18. Audit aktivitas dan validitas data - P0/P1
 

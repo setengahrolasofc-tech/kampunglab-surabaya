@@ -3,6 +3,7 @@ import Link from "next/link";
 import { logout } from "@/app/auth/actions";
 import { getAccountSnapshot } from "@/lib/auth/account";
 import {stageLabels} from "@/lib/simulations/workflow";
+import { getNotificationSummary } from "@/lib/notifications/data";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard pribadi", robots: { index: false, follow: false } };
@@ -10,7 +11,8 @@ const mandateLabels: Record<string, string> = { primary: "Utama", backup: "Cadan
 const roleLabels: Record<string, string> = { program_admin: "Admin program", reviewer: "Reviewer", facilitator: "Fasilitator" };
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
-  const { user, profile, currentMandates, currentRoles, isAdmin, reviewStages, error } = await getAccountSnapshot();
+  const [account, notifications] = await Promise.all([getAccountSnapshot(), getNotificationSummary()]);
+  const { user, profile, currentMandates, currentRoles, isAdmin, reviewStages, error } = account;
   const status = (await searchParams).status;
 
   return <main id="konten-utama" tabIndex={-1} className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
@@ -24,6 +26,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     <nav aria-label="Ruang inovator" className="mt-6 flex flex-wrap gap-4 font-semibold text-emerald-900"><Link href="/pengajuan" className="underline underline-offset-4">Pengajuan Saya</Link><Link href="/profil" className="underline underline-offset-4">Profil dan akun</Link>{reviewStages.map(stage=><Link key={stage} href={`/antrean/${stage}`} className="underline underline-offset-4">Antrean simulasi {stageLabels[stage]}</Link>)}{reviewStages.includes("kelurahan")?<Link href="/antrean/dokumen-fisik" className="underline underline-offset-4">Dokumen fisik</Link>:null}{currentRoles.some(role=>role.role==="reviewer")?<Link href="/panel" className="underline underline-offset-4">Penugasan panel saya</Link>:null}</nav>
     {status === "profil-disimpan" ? <p role="status" className="mt-6 rounded-xl bg-emerald-50 p-4 text-emerald-950">Nama tampilan berhasil disimpan.</p> : null}
     {error ? <p role="alert" className="mt-6 rounded-xl bg-amber-50 p-4 leading-7 text-amber-950">Sebagian data akun belum dapat dimuat. Muat ulang halaman; hubungi pengelola jika tetap bermasalah. Tidak ada hak petugas yang diberikan secara otomatis.</p> : null}
+    <section aria-labelledby="notifikasi" className="mt-7 flex flex-wrap items-center justify-between gap-5 rounded-2xl border border-emerald-950/10 bg-white p-6">
+      <div><h2 id="notifikasi" className="text-xl font-bold">Notifikasi</h2><p className="mt-2 text-sm leading-7 text-slate-600">{notifications ? `${notifications.unread} pembaruan belum dibaca. Antrean, hasil pemeriksaan, dan penugasan sesuai aksesmu.` : "Jumlah pembaruan belum dapat dimuat. Buka pusat notifikasi untuk mencoba kembali."}</p></div>
+      <Link href="/notifikasi" className="inline-flex min-h-11 items-center rounded-full bg-emerald-900 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-800">Buka notifikasi</Link>
+    </section>
     <div className="mt-10 grid gap-7 lg:grid-cols-2">
       <section aria-labelledby="profil" className="rounded-2xl border border-emerald-950/10 bg-white p-7"><h2 id="profil" className="mb-4 text-xl font-bold">Profil pribadimu</h2><p className="leading-7 text-slate-600">Ubah nama, domisili, dan password, atau hapus akunmu di halaman profil.</p><Link href="/profil" className="mt-6 inline-block text-sm font-semibold text-emerald-900 underline underline-offset-4">Buka profil dan akun</Link></section>
       <section aria-labelledby="akses" className="rounded-2xl border border-emerald-950/10 bg-white p-7"><h2 id="akses" className="text-xl font-bold">Akses dan mandat</h2><p className="mt-4 leading-7 text-slate-600">Akun terdaftar memiliki akses dasar sebagai warga/inovator. Hak petugas mengikuti penetapan berwenang dan masa berlakunya.</p>
