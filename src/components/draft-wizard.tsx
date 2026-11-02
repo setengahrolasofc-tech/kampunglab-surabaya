@@ -29,19 +29,20 @@ function SelectField({ path, label, value, onChange, options, error }: { path: s
 }
 const date = (value: string) => new Intl.DateTimeFormat("id-ID", {dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Jakarta"}).format(new Date(value))+" WIB";
 
-export function DraftWizard({ draftId, initialDocument, initialVersion, initialSavedAt, territories, existingSimulation, attachmentRevision, attachmentCount, attachmentsPending, readyFileIds }: {
+export function DraftWizard({ draftId, initialDocument, initialVersion, initialStep, initialSavedAt, territories, existingSimulation, attachmentRevision, attachmentCount, attachmentsPending, readyFileIds }: {
   draftId: string; initialDocument: DraftDocument; initialVersion: number; initialStep: number; initialSavedAt: string; territories: Territory[]; existingSimulation: SimulationRef|null; attachmentRevision:number;attachmentCount:number;attachmentsPending:boolean;readyFileIds:string[];
 }) {
   const [documentData,setDocument] = useState<DraftDocument>(initialDocument);
   const [version,setVersion] = useState(initialVersion);
-  const [step,setStep] = useState(1);
+  // Draf yang data inovasinya belum lengkap selalu dibuka di langkah 1.
+  const [step,setStep] = useState(()=>draftChecklist(initialDocument)[0]?initialStep:1);
   const [savedAt,setSavedAt] = useState(initialSavedAt);
   const [dirty,setDirty] = useState(false);
   const [state,action,pending] = useActionState<DraftFormState,FormData>(async(previous,form)=>{
     const result=await saveDraft(previous,form);
     if(result.saved && result.version!==undefined && result.updatedAt && result.document){
       setVersion(result.version);setSavedAt(result.updatedAt);setDocument(result.document);setDirty(false);
-      if(form.get("intent")==="continue")setStep(Math.min(4,Number(form.get("step"))+1));
+      if(form.get("intent")==="continue"&&(Number(form.get("step"))>1||draftChecklist(result.document)[0]))setStep(Math.min(4,Number(form.get("step"))+1));
     }
     return result;
   },{});

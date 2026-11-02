@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { isUuid } from "@/lib/admin/validation.mjs";
-import { validateDraftDocument } from "@/lib/drafts/schema.mjs";
+import { validateDraftDocument, draftChecklist } from "@/lib/drafts/schema.mjs";
 import type { DraftFormState } from "@/lib/drafts/types";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -60,7 +60,7 @@ export async function saveDraft(_state: DraftFormState, form: FormData): Promise
     validated.data.innovation.theme_id = fallback.id;
   }
   const { data, error } = await supabase.rpc("write_innovation_draft", { operation: "save", payload: {
-    id: String(id), revision: Number(revision), step: form.get("intent")==="continue" ? Math.min(4,Number(step)+1) : Number(step), document: validated.data as unknown as Json,
+    id: String(id), revision: Number(revision), step: form.get("intent")==="continue" && (Number(step)>1 || draftChecklist(validated.data)[0]) ? Math.min(4,Number(step)+1) : Number(step), document: validated.data as unknown as Json,
   } }).abortSignal(AbortSignal.timeout(45000));
   if (error) return databaseError(error.message);
   const result = data as { revision: number; updated_at: string };
