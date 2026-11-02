@@ -1,103 +1,34 @@
 # KampungLab Surabaya
 
-Website tata kelola inovasi warga: pengajuan, verifikasi berjenjang, uji warga, dan Evidence Passport. KampungLab mencatat keputusan dan realisasi dana; transfer uang dilakukan di luar platform oleh pihak berwenang.
+Platform tata kelola inovasi kampung (Handbook Rev. 4). Next.js (App Router) + TypeScript + Tailwind + Supabase.
+Website **tidak** menyimpan atau mentransfer uang; hanya mencatat bukti transfer.
 
-**Status saat ini: draf pribadi dan alur pemeriksaan DEMO RT → RW → kelurahan.** Akun, admin/mandat, domisili, editor empat langkah, salinan simulasi, keputusan RT/RW beralasan, kirim ulang revisi, lampiran privat dengan arsip/pemulihan dan daftar berkas terkunci per putaran, serta jalur rekomendasi fisik DEMO setelah batas hari telah dibangun. Batas awal 7 hari per tingkat dapat diatur admin DEMO; permintaan dan konfirmasi kelurahan independen tetap manual. Kewenangan operasional pemeriksa belum final (`docs/PHYSICAL_UAT.md`). Panel Kecil DEMO kini menyediakan pembagian aktif/jeda oleh pengaju, tiga kursi, penugasan admin, rubrik dan suara individual terkunci, serta konflik/penggantian reviewer (`docs/PANEL_UAT.md`). Formula skor gabungan/kelulusan D-03 belum ditetapkan. Kelurahan dapat memeriksa rekomendasi, meminta revisi/menolak dengan alasan, serta menyiapkan jalur evaluasi Mikro/Kecil DEMO; keputusan akhir program, panel, dana, uji warga, dan deployment Vercel belum tersedia. Kode akun/OTP/Google dari upstream dipertahankan; konfigurasi email/OTP/provider belum diverifikasi pada milestone ini. Backend berkas sudah dideploy di Supabase; Vercel belum diverifikasi. Lint, tipe Next.js/Edge, dan build diperiksa; tes alur keputusan baru serta UAT ditunda atas permintaan pengguna. Perbaikan integrasi 1 November 2026 menyambungkan wilayah berkode non-DEMO ke simulasi, mempertahankan rincian RAB lama, memvalidasi penunjuk dokumen di database, dan merekonsiliasi 19 migrasi (`docs/INTEGRATION_REPAIR.md`). Lihat status proyek untuk batas verifikasi.
+**Status build: Tahap (a) selesai** (skema DB, RLS, seed). Aplikasi baru berisi beranda sementara. Lihat `docs/PLAN.md` dan `ASSUMPTIONS.md`.
 
-Pusat notifikasi dalam aplikasi tersedia di `/notifikasi`: antrean, hasil pemeriksaan DEMO, dokumen fisik, panel, dan penetapan akses sesuai hak terkini. Dashboard menampilkan jumlah belum dibaca; tombol buka menandai satu pembaruan melalui POST. Migrasi inbox sudah diterapkan. Email, pengingat 24 jam, dan scheduler belum tersedia; lihat [rincian serta UAT yang ditunda](docs/NOTIFICATIONS_UAT.md).
-
-Monitoring admin tersedia di `/admin/monitoring`: filter dan rekap status/tema/kelurahan, jumlah draf dan putaran terpisah, usia antrean, koordinasi mandat/fisik/panel, serta CSV agregat. Migrasi monitoring sudah diterapkan. Metrik dana/uji dan statistik publik belum tercakup. Lihat [rincian monitoring](docs/MONITORING_UAT.md) dan [sisa pekerjaan setiap FR pada PRD](docs/PRD_BACKLOG.md).
-
-Draf surat rekomendasi fisik RT/RW terisi otomatis tersedia melalui halaman pengajuan fisik setelah batas antrean terpenuhi. Pemilik dapat melihat pratinjau dan mengunduh Word privat; pemeriksaan, keputusan dan tanda tangan tetap manual dengan label DEMO. Setelah pull jalankan `npm ci` untuk dependency `docx@9.15.1`. Tidak memerlukan migrasi/environment baru; hasil Word dan alur unduh belum melalui UAT. Lihat [rincian surat terisi](docs/PHYSICAL_LETTER_UAT.md).
-
-Audit administrasi tersedia di `/admin/audit`: riwayat akses/master/pengaturan fisik/koordinasi panel, filter modul/operasi/aktor/tanggal WIB dan cursor 20 baris. Ringkasan before/after memakai metadata yang tersimpan; log teknis tanpa snapshot diberi keterangan. Akses admin hanya-baca, tanpa isi proposal/nilai/berkas. Migrasi reader sudah diterapkan. Rincian dan UAT yang ditunda ada di [ADMIN_AUDIT_UAT.md](docs/ADMIN_AUDIT_UAT.md).
-
-Draf program/periode dan usulan evaluasi tersedia di `/admin/program`, dengan alasan/aktor/waktu, versi baru, riwayat dan perbandingan versi. Semua state tetap draft; D-02/D-03 belum ditetapkan dan belum ada penerapan ke pengajuan. Migrasi draf sudah diterapkan; setelah integrasi upstream total 25 migrasi dan 22 tabel public ber-RLS. Lihat [PROGRAM_DRAFTS_UAT.md](docs/PROGRAM_DRAFTS_UAT.md).
-
-Integrasi 2 November mempertahankan dokumen per bentuk dan penetapan admin berjenjang dari tiga commit teman sampai `e21fc9a`. Dua SQL ditemukan sudah terpasang di cloud; hanya riwayat metadata yang diperbaiki setelah definisi/constraint/grant cocok. Perbedaan dari handbook serta keputusan dokumen/kewenangan yang belum disahkan dicatat di [UPSTREAM_INTEGRATION_2026-11-02.md](docs/UPSTREAM_INTEGRATION_2026-11-02.md). Tes alur tetap ditunda.
-
-## Teknologi
-
-- Next.js App Router dan TypeScript.
-- React Server Components untuk halaman informasi.
-- Tailwind CSS, ESLint, dan npm lockfile.
-- Supabase Auth SSR berbasis cookie, database identitas dengan RLS, dan SDK publik tanpa privilege admin.
-- Target hosting: Vercel.
-
-Versi dependency tercatat di `package.json` dan `package-lock.json`. Repository publik; field `private: true` pada `package.json` mencegah publikasi package npm dan tidak mengubah visibilitas GitHub.
-
-## Membuka di Antigravity
-
-Gunakan Node.js 24 dan Git. Pada terminal di folder tempat menyimpan proyek:
+## Menjalankan di lokal
+Prasyarat: Node 24, Docker, [Supabase CLI](https://supabase.com/docs/guides/cli).
 
 ```bash
-git clone https://github.com/setengahrolasofc-tech/kampunglab-surabaya.git
-cd kampunglab-surabaya
-npm ci
-npm run dev
+npm install
+supabase start                      # menjalankan Postgres/Auth/Storage lokal
+supabase db reset                   # menerapkan migrasi 001-004 (+ seed.sql)
+cp .env.example .env.local          # isi URL & key dari output `supabase status`
+npm run seed:accounts               # Super Admin + akun contoh tiap peran
+npm run dev                         # http://localhost:3000
 ```
 
-Buka folder `kampunglab-surabaya` di Antigravity, kemudian buka [localhost:3000](http://localhost:3000). Halaman informasi belum memerlukan file environment. Untuk memeriksa koneksi Supabase, ikuti [panduan konfigurasi](docs/SUPABASE_SETUP.md) dan buat `.env.local` di root proyek.
-
-Setelah perubahan berikutnya sudah masuk GitHub, jalankan dari folder proyek:
-
+### Menguji skema (tahap a)
 ```bash
-git pull --ff-only
-npm ci
+psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/stage_a_smoke.sql
 ```
+Keluaran akhir yang diharapkan: `stage_a_smoke: SEMUA LULUS`.
 
-Jika ada perubahan lokal, periksa `git status` dan selesaikan terlebih dahulu. Jangan menimpa perubahan dengan reset paksa. Hentikan dan jalankan ulang server lokal bila dependency berubah.
+### Akun contoh (hasil `npm run seed:accounts`)
+| Peran | Email | Kata sandi | Catatan |
+|---|---|---|---|
+| BRIDA_ADMIN (Super Admin) | `superadmin@kampunglab.local` | `GantiPasswordIni123!` | ubah lewat `.env.local` |
+| INNOVATOR | `inovator@kampunglab.local` | `Inovator123!` | |
+| KELURAHAN | `lurah.gubeng@kampunglab.local` | `Lurah12345!` | MENUNGGU_MANDAT sampai diberi mandat (tahap c) |
 
-## Pemeriksaan
-
-```bash
-npm run lint
-npm run typecheck
-npm test
-npm run build
-```
-
-`typecheck` menghasilkan tipe rute Next.js sebelum menjalankan TypeScript. `build` membuat hasil produksi; `npm run start` menjalankan hasil build tersebut. Pemeriksaan otomatis tidak menggantikan UAT tampilan dan interaksi oleh pengguna.
-
-## Struktur
-
-```text
-src/app/             Halaman, layout, metadata, dan style global
-src/components/      Komponen tampilan bersama
-public/              Aset publik yang aman ditampilkan
-docs/                Status proyek dan catatan implementasi
-PRD_KampungLab_Surabaya_v1.md  Kebutuhan produk dan keputusan tertunda
-AGENTS.md            Petunjuk pengembangan untuk AI
-```
-
-## Deploy dan template dokumen
-
-Langkah Vercel dan pengaturan Auth Supabase ada di [`docs/DEPLOY.md`](docs/DEPLOY.md). Template dokumen program (14 file Word) ada di `public/templates` dan halaman `/dokumen`. Teks pengganti handbook untuk aturan 7 hari ada di [`docs/REVISI_HANDBOOK.md`](docs/REVISI_HANDBOOK.md).
-
-## Dokumen acuan
-
-- [PRD sistem](PRD_KampungLab_Surabaya_v1.md): baca sebelum menambah aturan bisnis.
-- [Status proyek](docs/PROJECT_STATUS.md): yang tersedia, belum diimplementasikan, dan belum diverifikasi.
-- [Petunjuk AI](AGENTS.md): aturan teknis dan batas pengembangan.
-- [Konfigurasi Supabase](docs/SUPABASE_SETUP.md): proyek yang dipilih, environment lokal, dan pemeriksaan hanya-baca `npm run check:supabase`.
-- [Desain identitas/mandat](docs/IDENTITY_ACCESS_DESIGN.md): keputusan D-18 yang disetujui, hak akses, dan batas milestone.
-- [UAT akun](docs/AUTH_UAT.md): langkah pengujian email, sesi, profil, dan batas verifikasi.
-- [Admin dan akses](docs/ADMIN_UAT.md): penetapan peran/mandat, wilayah/jabatan, pencabutan, audit, dan verifikasi.
-- [Profil wilayah dan draf](docs/DRAFTS_UAT.md): pengisian empat langkah, RAB sementara, simpan/edit, dan batas akses pribadi.
-- [Simulasi dan antrean petugas](docs/SIMULATION_UAT.md): salinan DEMO, keputusan RT/RW, pemeriksaan kelurahan, revisi, jalur evaluasi DEMO, dan pemeriksaan yang masih ditunda.
-- [Lampiran privat](docs/ATTACHMENTS_UAT.md): unggah/unduh, salinan berkas, arsip/pulihkan, batas DEMO, dan tes yang ditunda.
-- [Aturan alur DEMO](docs/DEMO_REVIEW_WORKFLOW.md): status, versi, kewenangan, riwayat, dan batas terhadap kebijakan operasional.
-
-Angka plafon, durasi, dan skema 30/50/20 dari handbook merupakan usulan kebijakan. Jangan menampilkannya sebagai ketetapan resmi Pemkot. Keputusan `D-01` sampai `D-24` pada PRD belum otomatis disetujui.
-
-## Konfigurasi berikutnya
-
-1. Gunakan proyek Supabase yang sudah dipilih dan tercatat pada panduan konfigurasi; jangan membuat proyek duplikat.
-2. Uji daftar/masuk lewat email pribadi dan pastikan callback tetap sesuai origin aplikasi.
-3. Admin pertama sudah ditetapkan atas instruksi pemilik setelah akun terverifikasi. Buka `/admin` dari dashboard untuk pengelolaan akses; data wilayah resmi dan dokumen mandat tetap perlu disiapkan pemilik. Tidak ada pendaftar yang mendapat admin otomatis.
-4. Siapkan project Vercel dan environment; verifikasi akses repository untuk build/deploy.
-5. Profil wilayah dan draf empat langkah tersedia pada `/profil/wilayah` dan `/pengajuan`. Uji dengan katalog DEMO yang jelas berlabel; master resmi dan pengiriman final tetap perlu disiapkan sebelum operasional.
-
-Jangan commit `.env`, secret key, kredensial, data warga, SK, atau bukti keuangan. Contoh environment nanti hanya memuat nama variabel dan placeholder. Jangan memakai database produksi untuk demo/preview.
-
-Brand dan tampilan fondasi bersifat sementara. Tidak ada klaim afiliasi resmi atau pengelolaan dana pemerintah yang telah berjalan.
+## Produksi
+Terapkan migrasi berurutan (`supabase db push`). **Verifikasi daftar kelurahan** di migrasi 004, isi `BRIDA_INVITE_CODE` dan `IP_HASH_SALT`, dan jangan pernah mengekspos `SUPABASE_SERVICE_ROLE_KEY` ke browser.
