@@ -286,6 +286,7 @@ ID `FR-xx` adalah identitas modul. Butir di dalamnya tetap merupakan persyaratan
 
 - Nama, tema, bentuk, tahap inovasi, Tim Inovasi, wilayah, ringkasan solusi.
 - Bentuk dari handbook: gagasan, produk, prototipe, program, teknologi.
+- Catatan implementasi upstream 2 November 2026 [U, belum mengubah handbook]: editor/guard simulasi saat ini menawarkan prototipe, produk, program dan teknologi. Program memakai RAB/surat pernyataan; bentuk lain juga PRD. Surat gabungan keaslian/pertanggungjawaban dan pemeriksaan AI meterai tersedia. Definisi database ditemukan sudah aktif lalu riwayat migrasinya dicocokkan; ini bukan persetujuan penghapusan gagasan atau perubahan kebutuhan dokumen resmi. Perbedaan dan regresi yang masih ditunda dicatat di `docs/UPSTREAM_INTEGRATION_2026-11-02.md`.
 - Tahap inovasi dari handbook: inisiatif, uji coba, penerapan.
 - Pisahkan tahap kematangan inovasi ini dari status proses pengajuan; “penerapan” tidak berarti sudah disetujui program.
 - Tim memuat nama dan peran. Kewenangan kolaborasi akun tim belum ditentukan; jangan memberikan hak edit kepada semua anggota otomatis. D-18.
@@ -572,6 +573,7 @@ Passport harus memuat:
 - Data wilayah resmi diimpor dari sumber yang disepakati, bukan dibuat AI seolah seluruh RT/RW Surabaya valid.
 - Jika belum ada petugas aktif pada tingkat tujuan, usulan tetap tertahan dengan alasan dan tugas penetapan kepada admin; jangan melompati tahap.
 - Sediakan indikator “program belum siap operasional” jika parameter kritis atau petugas wajib belum tersedia.
+- Implementasi parsial 1 November 2026: `/admin/program` menyediakan draf bersama program/periode dan usulan evaluasi Mikro/Kecil dengan snapshot versi, alasan, aktor/waktu, histori dan perbandingan versi. Kolom yang belum dibahas tetap kosong/null; tidak ada angka atau rumus bawaan. Status di database dibatasi `draft`. Belum ada pengesahan/aktivasi, penetapan evaluator/mandat, penerapan parameter ke pengajuan, perhitungan kelulusan atau keputusan dana. D-02/D-03 dan keputusan lain tetap terbuka; versi kebijakan yang berlaku serta pengikatannya ke salinan baru masih perlu dibangun setelah penetapan. Rincian dan UAT yang ditunda ada di `docs/PROGRAM_DRAFTS_UAT.md`.
 
 ### FR-20. Dashboard dan laporan program - P0/P1
 

@@ -29,7 +29,7 @@ function SelectField({ path, label, value, onChange, options, error }: { path: s
 }
 const date = (value: string) => new Intl.DateTimeFormat("id-ID", {dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Jakarta"}).format(new Date(value))+" WIB";
 
-export function DraftWizard({ draftId, initialDocument, initialVersion, initialStep, initialSavedAt, territories, existingSimulation, attachmentRevision, attachmentCount, attachmentsPending, readyFileIds }: {
+export function DraftWizard({ draftId, initialDocument, initialVersion, initialSavedAt, territories, existingSimulation, attachmentRevision, attachmentCount, attachmentsPending, readyFileIds }: {
   draftId: string; initialDocument: DraftDocument; initialVersion: number; initialStep: number; initialSavedAt: string; territories: Territory[]; existingSimulation: SimulationRef|null; attachmentRevision:number;attachmentCount:number;attachmentsPending:boolean;readyFileIds:string[];
 }) {
   const [documentData,setDocument] = useState<DraftDocument>(initialDocument);

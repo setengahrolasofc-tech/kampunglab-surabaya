@@ -1,0 +1,10 @@
+import { missingProposalFields, proposalLabels, proposalValue, type ProposalKey } from "@/lib/programs/display";
+import type { ProgramProposal } from "@/lib/programs/types";
+export function ProgramProposalSummary({ document }: { document: ProgramProposal }) {
+  const missing = missingProposalFields(document);
+  return <><p className="mt-4 text-sm leading-7 text-slate-600">{missing.length ? `${missing.length} isian usulan belum diisi: ${missing.join(", ")}.` : "Seluruh kolom usulan sudah diisi. Status tetap draf dan belum menjadi aturan yang berlaku."}</p><dl className="mt-5 divide-y divide-slate-200">{(Object.keys(proposalLabels) as ProposalKey[]).map(key => <div key={key} className="grid gap-2 py-4 sm:grid-cols-[210px_1fr]"><dt className="text-sm font-semibold">{proposalLabels[key]}</dt><dd className="min-w-0 whitespace-pre-wrap break-words text-sm leading-7 text-slate-600">{proposalValue(document, key)}</dd></div>)}</dl></>;
+}
+export function ProgramProposalDiff({ before, after }: { before: ProgramProposal; after: ProgramProposal }) {
+  const changed = (Object.keys(proposalLabels) as ProposalKey[]).filter(key => JSON.stringify(before[key]) !== JSON.stringify(after[key]));
+  return changed.length ? <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200"><table className="w-full min-w-[620px] text-left text-sm"><caption className="sr-only">Perbedaan versi yang dipilih dengan versi draf terbaru</caption><thead className="bg-emerald-50"><tr>{["Isian", "Versi yang dipilih", "Versi draf terbaru"].map(label => <th key={label} scope="col" className="px-4 py-3 font-semibold">{label}</th>)}</tr></thead><tbody>{changed.map(key => <tr key={key} className="border-t border-slate-200"><th scope="row" className="px-4 py-4 font-semibold">{proposalLabels[key]}</th><td className="max-w-xs whitespace-pre-wrap break-words px-4 py-4 leading-7">{proposalValue(before, key)}</td><td className="max-w-xs whitespace-pre-wrap break-words px-4 py-4 leading-7">{proposalValue(after, key)}</td></tr>)}</tbody></table></div> : <p className="mt-4 text-sm text-slate-600">Tidak ada perbedaan isian terhadap versi draf terbaru.</p>;
+}

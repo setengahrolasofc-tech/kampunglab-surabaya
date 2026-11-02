@@ -10,7 +10,11 @@ Monitoring admin tersedia di `/admin/monitoring`: filter dan rekap status/tema/k
 
 Draf surat rekomendasi fisik RT/RW terisi otomatis tersedia melalui halaman pengajuan fisik setelah batas antrean terpenuhi. Pemilik dapat melihat pratinjau dan mengunduh Word privat; pemeriksaan, keputusan dan tanda tangan tetap manual dengan label DEMO. Setelah pull jalankan `npm ci` untuk dependency `docx@9.15.1`. Tidak memerlukan migrasi/environment baru; hasil Word dan alur unduh belum melalui UAT. Lihat [rincian surat terisi](docs/PHYSICAL_LETTER_UAT.md).
 
-Audit administrasi tersedia di `/admin/audit`: riwayat akses/master/pengaturan fisik/koordinasi panel, filter modul/operasi/aktor/tanggal WIB dan cursor 20 baris. Ringkasan before/after memakai metadata yang tersimpan; log teknis tanpa snapshot diberi keterangan. Akses admin hanya-baca, tanpa isi proposal/nilai/berkas. Migrasi reader sudah diterapkan; total 22 migrasi dan 20 tabel public ber-RLS. Rincian dan UAT yang ditunda ada di [ADMIN_AUDIT_UAT.md](docs/ADMIN_AUDIT_UAT.md).
+Audit administrasi tersedia di `/admin/audit`: riwayat akses/master/pengaturan fisik/koordinasi panel, filter modul/operasi/aktor/tanggal WIB dan cursor 20 baris. Ringkasan before/after memakai metadata yang tersimpan; log teknis tanpa snapshot diberi keterangan. Akses admin hanya-baca, tanpa isi proposal/nilai/berkas. Migrasi reader sudah diterapkan. Rincian dan UAT yang ditunda ada di [ADMIN_AUDIT_UAT.md](docs/ADMIN_AUDIT_UAT.md).
+
+Draf program/periode dan usulan evaluasi tersedia di `/admin/program`, dengan alasan/aktor/waktu, versi baru, riwayat dan perbandingan versi. Semua state tetap draft; D-02/D-03 belum ditetapkan dan belum ada penerapan ke pengajuan. Migrasi draf sudah diterapkan; setelah integrasi upstream total 25 migrasi dan 22 tabel public ber-RLS. Lihat [PROGRAM_DRAFTS_UAT.md](docs/PROGRAM_DRAFTS_UAT.md).
+
+Integrasi 2 November mempertahankan dokumen per bentuk dan penetapan admin berjenjang dari tiga commit teman sampai `e21fc9a`. Dua SQL ditemukan sudah terpasang di cloud; hanya riwayat metadata yang diperbaiki setelah definisi/constraint/grant cocok. Perbedaan dari handbook serta keputusan dokumen/kewenangan yang belum disahkan dicatat di [UPSTREAM_INTEGRATION_2026-11-02.md](docs/UPSTREAM_INTEGRATION_2026-11-02.md). Tes alur tetap ditunda.
 
 ## Teknologi
 

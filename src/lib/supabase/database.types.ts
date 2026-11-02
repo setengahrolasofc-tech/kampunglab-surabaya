@@ -748,6 +748,108 @@ export type Database = {
           },
         ]
       }
+      program_draft_versions: {
+        Row: {
+          actor_id: string
+          actor_name: string
+          created_at: string
+          document: Json
+          expected_version: number
+          id: string
+          operation: string
+          program_id: string
+          reason: string
+          request_id: string
+          version: number
+        }
+        Insert: {
+          actor_id: string
+          actor_name: string
+          created_at?: string
+          document: Json
+          expected_version: number
+          id?: string
+          operation: string
+          program_id: string
+          reason: string
+          request_id: string
+          version: number
+        }
+        Update: {
+          actor_id?: string
+          actor_name?: string
+          created_at?: string
+          document?: Json
+          expected_version?: number
+          id?: string
+          operation?: string
+          program_id?: string
+          reason?: string
+          request_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_draft_versions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_draft_versions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "program_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_drafts: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          id: string
+          state: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          id?: string
+          state?: string
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          state?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_draft_current_version"
+            columns: ["id", "version"]
+            isOneToOne: false
+            referencedRelation: "program_draft_versions"
+            referencedColumns: ["program_id", "version"]
+          },
+          {
+            foreignKeyName: "program_drafts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       simulation_attachment_links: {
         Row: {
           attachment_id: string
@@ -1273,6 +1375,10 @@ export type Database = {
         Args: { operation: string; payload?: Json }
         Returns: Json
       }
+      delegated_mandate: {
+        Args: { operation: string; payload?: Json }
+        Returns: Json
+      }
       delete_own_account: { Args: never; Returns: Json }
       is_program_admin: { Args: never; Returns: boolean }
       link_domicile: {
@@ -1284,10 +1390,6 @@ export type Database = {
         }
         Returns: Json
       }
-      delegated_mandate: {
-        Args: { operation: string; payload?: Json }
-        Returns: Json
-      }
       notification_workflow: {
         Args: { operation: string; payload?: Json }
         Returns: Json
@@ -1297,6 +1399,10 @@ export type Database = {
         Returns: Json
       }
       physical_workflow: {
+        Args: { operation: string; payload?: Json }
+        Returns: Json
+      }
+      program_draft_workflow: {
         Args: { operation: string; payload?: Json }
         Returns: Json
       }
