@@ -1,6 +1,1 @@
 project_id = "kampunglab-surabaya"
-
-[functions.private-attachments]
-# Auth.getUser verifies the caller JWT inside the handler; DB checks a live session.
-# Supports current asymmetric user JWTs and the publishable/secret key gateway.
-verify_jwt = false
