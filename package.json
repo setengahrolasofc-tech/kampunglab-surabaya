@@ -1,6 +1,6 @@
 {
   "name": "kampunglab-surabaya",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,12 +8,17 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "seed:accounts": "node --env-file=.env.local scripts/seed-accounts.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "test:db": "bash supabase/tests/run-local.sh",
+    "seed:admin": "node --env-file=.env.local scripts/seed-super-admin.mjs",
+    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs"
   },
   "dependencies": {
+    "@next/env": "16.4.3",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.118.0",
     "next": "16.4.3",
+    "qrcode": "1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "0.0.1"
@@ -21,6 +26,7 @@
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "20.19.43",
+    "@types/qrcode": "1.5.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "eslint": "9.39.5",
@@ -28,5 +34,7 @@
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3"
   },
-  "engines": { "node": "24.x" }
+  "engines": {
+    "node": "24.x"
+  }
 }

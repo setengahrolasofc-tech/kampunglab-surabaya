@@ -1,34 +1,41 @@
-# KampungLab Surabaya
+# KampungLab Surabaya (Handbook Rev. 4)
 
-Platform tata kelola inovasi kampung (Handbook Rev. 4). Next.js (App Router) + TypeScript + Tailwind + Supabase.
-Website **tidak** menyimpan atau mentransfer uang; hanya mencatat bukti transfer.
+Website pengajuan, pendanaan bertahap, uji warga, dan Rapor Bukti Inovasi untuk Inovboyo 2.0 – Surabaya Innovathon.
+**Website tidak menyimpan atau memindahkan uang**: Kelurahan mentransfer di luar aplikasi; website hanya mencatat bukti.
 
-**Status build: Tahap (a) selesai** (skema DB, RLS, seed). Aplikasi baru berisi beranda sementara. Lihat `docs/PLAN.md` dan `ASSUMPTIONS.md`.
+- Stack: Next.js 16 (App Router) + TypeScript + Tailwind 4 + Supabase (Auth, Postgres, Storage, RLS). Palet "Teal Blue & co." (Bab 8.4) dan logo (Bab 8.5).
+- Tiga role login: `INNOVATOR`, `KELURAHAN` (wajib mandat dari BRIDA), `BRIDA_ADMIN` (kode undangan). Warga penguji mengisi survei bawaan tanpa akun.
+- Status pengajuan dikendalikan state machine **di database** (tabel transisi + trigger + RPC), bukan hanya di UI.
 
-## Menjalankan di lokal
-Prasyarat: Node 24, Docker, [Supabase CLI](https://supabase.com/docs/guides/cli).
-
+## Mulai cepat
 ```bash
-npm install
-supabase start                      # menjalankan Postgres/Auth/Storage lokal
-supabase db reset                   # menerapkan migrasi 001-004 (+ seed.sql)
-cp .env.example .env.local          # isi URL & key dari output `supabase status`
-npm run seed:accounts               # Super Admin + akun contoh tiap peran
-npm run dev                         # http://localhost:3000
+npm ci
+cp .env.example .env.local     # isi kunci Supabase (lihat docs/SETUP_DEPLOY.md)
+npx supabase db push           # terapkan 20261103090000_rev4_core.sql
+npm run seed:admin             # 1 Super Admin BRIDA
+npm run dev                    # http://localhost:3000
+```
+Akun contoh per role: `docs/SETUP_DEPLOY.md` §4 (`npm run seed:demo`). Panduan uji per tahap: `docs/TAHAP_BUILD.md`.
+
+## Perintah
+| Perintah | Fungsi |
+|---|---|
+| `npm run typecheck` / `npm run lint` / `npm run build` | Tipe, lint, build produksi |
+| `npm test` | Uji logika domain (plafon, 30-30-40, ambang kelayakan, survei, state machine, kesamaan TS↔SQL) |
+| `npm run test:db` | Migrasi + alur end-to-end di PostgreSQL biasa (`PSQL="psql -U postgres"`) |
+
+## Struktur
+```
+supabase/migrations/20261103090000_rev4_core.sql   skema, RLS, RPC, seed (sumber kebenaran aturan)
+supabase/tests/                                    uji SQL end-to-end + tiruan Supabase
+src/lib/domain/                                    aturan murni (format, workflow, plafon, survei)
+src/lib/{auth,supabase}/                           sesi per role, klien Supabase (server/publik/browser/admin)
+src/app/{admin,kelurahan,dashboard}/               dashboard tiga role (+ actions.ts server action)
+src/app/{papan-masalah,etalase,rapor,uji,verifikasi}/  halaman publik (uji = survei warga via QR)
+docs/                                              SETUP_DEPLOY, TAHAP_BUILD, arsip-alur-lama
+ASSUMPTIONS.md                                     asumsi dan keputusan yang perlu Anda tinjau
 ```
 
-### Menguji skema (tahap a)
-```bash
-psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f supabase/tests/stage_a_smoke.sql
-```
-Keluaran akhir yang diharapkan: `stage_a_smoke: SEMUA LULUS`.
-
-### Akun contoh (hasil `npm run seed:accounts`)
-| Peran | Email | Kata sandi | Catatan |
-|---|---|---|---|
-| BRIDA_ADMIN (Super Admin) | `superadmin@kampunglab.local` | `GantiPasswordIni123!` | ubah lewat `.env.local` |
-| INNOVATOR | `inovator@kampunglab.local` | `Inovator123!` | |
-| KELURAHAN | `lurah.gubeng@kampunglab.local` | `Lurah12345!` | MENUNGGU_MANDAT sampai diberi mandat (tahap c) |
-
-## Produksi
-Terapkan migrasi berurutan (`supabase db push`). **Verifikasi daftar kelurahan** di migrasi 004, isi `BRIDA_INVITE_CODE` dan `IP_HASH_SALT`, dan jangan pernah mengekspos `SUPABASE_SERVICE_ROLE_KEY` ke browser.
+## Keamanan singkat
+RLS aktif di semua tabel; penulisan sensitif hanya lewat RPC `security definer`; kolom yang boleh diubah pengguna dibatasi di tingkat grant;
+`service_role` hanya di server untuk lima keperluan sempit (lihat `ASSUMPTIONS.md`). Jangan commit `.env.local`.
