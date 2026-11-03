@@ -1,52 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Card, Main, PageHeader } from "@/components/ui";
 
-export const metadata: Metadata = {
-  title: "Panduan program",
-  description: "Kenali konsep KampungLab, sepuluh tahap inovasi warga, dan prinsip pembuktian manfaat.",
-};
+export const metadata: Metadata = { title: "Panduan" };
 
-const stages = [
-  ["Ajukan inovasi", "Inovator mengisi data inovasi lebih dulu, lalu menyiapkan dokumen wajib sesuai jenis inovasi: PRD (kecuali Inovasi Program), RAB, dan pernyataan keaslian dan pertanggungjawaban bermeterai Rp10.000."],
-  ["Verifikasi berjenjang", "RT memeriksa domisili dan masalah; RW meninjau kelayakan lokal; kelurahan menentukan keputusan atau penerusan sesuai tingkat."],
-  ["Penilaian panel", "Tingkat Kecil ditinjau panel reviewer. Tingkat Mikro diputuskan kelurahan sesuai aturan kelayakan yang ditetapkan program."],
-  ["Catat dana tahap awal", "Setelah keputusan berwenang, transfer dilakukan di luar platform. Bukti dan realisasinya dicatat untuk ditinjau."],
-  ["Bangun inovasi", "Inovator mengembangkan solusi dan mengirim checkpoint kemajuan beserta penggunaan dana sementara."],
-  ["Uji bersama warga", "Penguji memberi persetujuan, diverifikasi fasilitator, menjalankan tugas, mengunggah bukti, lalu memberi feedback."],
-  ["Terbitkan Evidence Passport", "Hasil uji, tanggapan warga, dan verifikasi dirangkum dalam passport ber-QR. Hasil terverifikasi tetap dapat menunjukkan ambang belum tercapai."],
-  ["Tinjau dana lanjutan", "Ambang bukti, laporan pertanggungjawaban, dan persetujuan pihak berwenang menjadi gerbang peninjauan berikutnya."],
-  ["Bagikan dan rawat", "Inovasi disalurkan gratis kepada penerima program selama masa perawatan yang disepakati, disertai panduan dan pelatihan."],
-  ["Tampilkan di etalase", "Bukti manfaat dan penggunaan dana yang aman dipublikasikan dapat diperiksa publik dan menjadi dasar minat pilot."],
-] as const;
+const ATURAN: Array<[string, string]> = [
+  ["Siapa yang bisa ikut?", "Tim 2–6 orang: warga, pelajar minimal SMA/SMK, mahasiswa, atau komunitas. Pelajar SMP/SD ke bawah tidak dapat menjadi anggota tim."],
+  ["Berapa dananya?", "Skala Kecil (Program, Produk sederhana) maksimal Rp5.000.000 dalam 30 hari. Skala Terapan (Prototipe, Teknologi) maksimal Rp15.000.000 dalam 60 hari. Dana tak terduga maksimal 10%, honor tim maksimal 15%, dan wajib ada rencana perawatan 6–12 bulan."],
+  ["Bagaimana dana cair?", "Tiga tahap 30%–30%–40%. Kelurahan mentransfer di luar aplikasi; website hanya mencatat bukti transfer. Setelah pengajuan disetujui, anggaran dikunci sehingga tidak bisa dibatalkan sepihak tanpa alasan audit."],
+  ["Siapa yang menguji?", "Minimal 30 warga unik di kelurahan lokasi uji, selama 14 hari (bisa diperpanjang sekali, maksimal 7 hari). Mereka mengisi survei bawaan website lewat QR di poster, tanpa akun."],
+  ["Apa standar lolosnya?", "Empat syarat sekaligus: minimal 30 responden unik, rata-rata rating minimal 3,8, minimal 75% menjawab membantu, dan minimal 80% melampirkan foto. Dihitung otomatis dan tampil real-time."],
+  ["Bagaimana bila gagal?", "Gagal uji dengan nota jujur berarti dihentikan sebagai pembelajaran, bukan sanksi. Sanksi (daftar hitam dan restitusi 100% dana diterima) hanya untuk proyek mangkrak, fiktif, atau pemalsuan."],
+  ["Apa itu Rapor Bukti Inovasi?", "Ringkasan hasil uji dan dana yang terbit setelah serah terima divalidasi. Setiap Rapor punya QR; bila data berubah setelah terbit, halaman verifikasi menampilkan peringatan merah."],
+  ["Mengapa akun Kelurahan terkunci?", "Akun Kelurahan baru belum punya wewenang sampai Admin BRIDA memverifikasi SK dan memberi mandat (maksimal 1 utama dan 1 cadangan per kelurahan). Bila kelurahan tujuan belum punya akun bermandat, pengajuan menunggu dan BRIDA diberi tahu."],
+];
 
-export default function GuidePage() {
+export default function PanduanPage() {
   return (
-    <main id="konten-utama" tabIndex={-1} className="mx-auto w-full max-w-4xl px-5 py-12 sm:px-8 sm:py-20">
-      <Link href="/" className="rounded-sm text-sm font-semibold text-emerald-900 hover:underline">← Kembali ke beranda</Link>
-      <p className="mt-10 text-xs font-bold tracking-[0.16em] text-emerald-800">PANDUAN KONSEP</p>
-      <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight sm:text-5xl">Dari usulan sampai manfaat yang bisa diperiksa.</h1>
-      <p className="mt-6 text-lg leading-8 text-slate-600">KampungLab adalah lapisan pengajuan, pembuktian, dan tata kelola inovasi warga. Keputusan tetap di tangan pihak berwenang, dan uang tidak melewati platform.</p>
-      <aside aria-label="Status program" className="mt-8 rounded-2xl border border-amber-900/15 bg-amber-50 p-6 text-sm leading-7 text-amber-950">
-        Akun pribadi mulai tersedia; pengajuan dan uji warga belum dibuka. Angka plafon, durasi, serta mekanisme dana dalam handbook masih berupa usulan yang perlu divalidasi pengelola program.
-      </aside>
-      <section id="sepuluh-tahap" aria-labelledby="judul-tahap" className="mt-16">
-        <h2 id="judul-tahap" className="text-2xl font-bold tracking-tight sm:text-3xl">Sepuluh tahap KampungLab</h2>
-        <ol className="mt-8 divide-y divide-emerald-950/10">
-          {stages.map(([title, description], index) => (
-            <li key={title} className="flex gap-5 py-6 sm:gap-7">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-950">{String(index + 1).padStart(2, "0")}</span>
-              <div>
-                <h3 className="text-lg font-bold">{title}</h3>
-                <p className="mt-2 leading-7 text-slate-600">{description}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-      <section aria-labelledby="judul-hasil" className="mt-12 rounded-2xl bg-white p-7 sm:p-9">
-        <h2 id="judul-hasil" className="text-2xl font-bold tracking-tight">Uji yang jujur juga boleh gagal.</h2>
-        <p className="mt-4 leading-8 text-slate-600">Inovasi yang belum memenuhi ambang manfaat dicatat sebagai pembelajaran. Jika dana digunakan sesuai RAB, kegagalan uji tidak otomatis berarti pelanggaran. Feedback negatif tetap menjadi bagian dari hasil yang perlu diperiksa.</p>
-      </section>
-    </main>
+    <Main narrow>
+      <PageHeader title="Panduan singkat" subtitle="Aturan utama KampungLab Surabaya (Handbook Rev. 4)." />
+      <div className="space-y-3">{ATURAN.map(([q, a]) => <Card key={q}><h2 className="font-bold">{q}</h2><p className="mt-1 text-sm text-indigo-space/85">{a}</p></Card>)}</div>
+      <p className="mt-6 text-sm">Siap mulai? <Link href="/daftar" className="font-semibold text-teal-deep underline">Daftar akun</Link> atau lihat <Link href="/papan-masalah" className="font-semibold text-teal-deep underline">Papan Masalah</Link>.</p>
+    </Main>
   );
 }

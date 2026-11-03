@@ -1,187 +1,168 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { timingSafeEqual } from "node:crypto";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { requireUser } from "@/lib/auth/session";
-import { linkDomicile, linkDomicileFromSession } from "@/lib/auth/domicile-sync";
-import { getAppOrigin, isValidEmail, validateAuthForm, validateDomicile, validateOtp } from "@/lib/auth/validation.mjs";
+import { createAdminSupabaseClient, hasServiceRole } from "@/lib/supabase/admin";
+import { getAppOrigin, validateAuthForm, validateOtp, validateSignup } from "@/lib/auth/validation.mjs";
 import type { AuthActionState } from "@/lib/auth/types";
 
-const unavailable = { error: "Layanan akun belum dapat dihubungi. Coba lagi beberapa saat." };
-const badOtp = { error: "Kode OTP salah atau sudah kedaluwarsa. Periksa kodenya atau kirim ulang." };
+const GENERIK = "Terjadi kendala. Coba lagi sebentar lagi.";
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export async function login(_state: AuthActionState, form: FormData): Promise<AuthActionState> {
-  const input = validateAuthForm(form, "login");
-  if (Object.keys(input.errors).length) return { errors: input.errors };
-  try {
-    const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.signInWithPassword({ email: input.email, password: input.password });
-    if (error) return { error: "Belum berhasil masuk. Periksa email, password, dan konfirmasi emailmu." };
-  } catch { return unavailable; }
-  revalidatePath("/", "layout");
-  redirect("/dashboard");
+function sameSecret(a: string, b: string) {
+  const x = Buffer.from(a), y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
 }
 
-/** Masuk dengan Google. Membutuhkan provider Google aktif di Supabase (lihat docs/OTP_SETUP.md). */
-export async function loginWithGoogle(): Promise<void> {
-  let url: string | undefined;
-  try {
-    const supabase = await createServerSupabaseClient();
-    const origin = getAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
-    const { data, error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${origin}/auth/callback` } });
-    if (!error) url = data.url;
-  } catch { /* Detail provider tidak ditampilkan. */ }
-  if (!url) redirect("/masuk?status=google-gagal");
-  redirect(url);
-}
-
-export async function signup(_state: AuthActionState, form: FormData): Promise<AuthActionState> {
-  const input = validateAuthForm(form, "signup");
-  const domicile = validateDomicile(form);
-  const errors = { ...input.errors, ...domicile.errors };
+export async function loginAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
+  const { errors, email, password } = validateAuthForm(form, "login");
   if (Object.keys(errors).length) return { errors };
-  let immediateSession = false;
+  let ok = false;
   try {
     const supabase = await createServerSupabaseClient();
-    const origin = getAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
-    const { data, error } = await supabase.auth.signUp({
-      email: input.email, password: input.password,
-      options: {
-        // Klaim domisili tersimpan di metadata Auth. Belum diverifikasi dan tidak dipakai untuk hak akses.
-        data: {
-          display_name: input.displayName,
-          domicile_address: domicile.value.address,
-          domicile_kecamatan: domicile.value.kecamatan,
-          domicile_kelurahan: domicile.value.kelurahan,
-          domicile_rw: domicile.value.rw,
-          domicile_rt: domicile.value.rt,
-        },
-        emailRedirectTo: `${origin}/auth/callback`,
-      },
-    });
-    if (error) return { error: "Pendaftaran belum dapat diproses. Periksa isian atau coba lagi nanti. Jika sudah punya akun, gunakan halaman Masuk." };
-    immediateSession = Boolean(data.session);
-  } catch { return unavailable; }
-  if (immediateSession) {
-    revalidatePath("/", "layout");
-    redirect("/dashboard");
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    ok = !error;
+    if (error && error.code === "email_not_confirmed") return { error: "Email belum diverifikasi. Daftar ulang atau cek kode OTP di email Anda." };
+  } catch (e) {
+    return { error: e instanceof Error && e.message.includes("NEXT_PUBLIC") ? e.message : GENERIK };
   }
-  return { step: "otp", email: input.email };
-}
-
-export async function verifySignupOtp(_state: AuthActionState, form: FormData): Promise<AuthActionState> {
-  const input = validateOtp(form);
-  if (input.errors.email) return { error: "Sesi verifikasi tidak valid. Ulangi dari awal." };
-  if (input.errors.token) return { errors: { token: input.errors.token } };
-  try {
-    const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.verifyOtp({ email: input.email, token: input.token, type: "email" });
-    if (error) return badOtp;
-    // Cocokkan klaim domisili dari form daftar ke wilayah program; gagal tidak menghalangi masuk.
-    await linkDomicileFromSession(supabase);
-  } catch { return unavailable; }
-  revalidatePath("/", "layout");
+  if (!ok) return { error: "Email atau password salah." };
   redirect("/dashboard");
 }
 
-export async function requestPasswordReset(_state: AuthActionState, form: FormData): Promise<AuthActionState> {
-  const input = validateAuthForm(form, "reset");
-  if (Object.keys(input.errors).length) return { errors: input.errors };
+export async function signupAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
+  const v = validateSignup(form);
+  if (Object.keys(v.errors).length) return { errors: v.errors };
+  const origin = getAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
+
+  // ---- BRIDA: hanya dengan kode undangan staf (variabel lingkungan server) ----
+  if (v.role === "BRIDA_ADMIN") {
+    const expected = process.env.BRIDA_INVITE_CODE?.trim();
+    if (!expected || expected.length < 12 || !hasServiceRole()) {
+      return { error: "Pendaftaran Admin BRIDA belum dikonfigurasi di server (BRIDA_INVITE_CODE dan SUPABASE_SERVICE_ROLE_KEY)." };
+    }
+    if (!sameSecret(String(v.meta.kode_undangan), expected)) {
+      await sleep(800);
+      return { errors: { kode_undangan: "Kode undangan tidak valid." } };
+    }
+    try {
+      const admin = createAdminSupabaseClient();
+      const created = await admin.auth.admin.createUser({
+        email: v.email, password: v.password, email_confirm: true,
+        user_metadata: { display_name: v.meta.display_name, role: "INNOVATOR" },
+      });
+      if (created.error || !created.data.user) {
+        return { error: created.error?.code === "email_exists" ? "Email ini sudah terdaftar. Masuk atau gunakan email lain." : GENERIK };
+      }
+      const promoted = await admin.from("users").update({
+        role: "BRIDA_ADMIN", status: "AKTIF", is_verified: true, phone_wa: v.meta.phone_wa || null, name: v.meta.display_name,
+      }).eq("id", created.data.user.id);
+      if (promoted.error) return { error: GENERIK };
+      await admin.from("audit_logs").insert({ aktor_id: created.data.user.id, aksi: "AKUN BRIDA DIDAFTARKAN", target: `users/${created.data.user.id}`, detail_json: { lewat: "kode undangan" } });
+      const supabase = await createServerSupabaseClient();
+      const { error } = await supabase.auth.signInWithPassword({ email: v.email, password: v.password });
+      if (error) return { message: "Akun Admin BRIDA dibuat. Silakan masuk." };
+    } catch {
+      return { error: GENERIK };
+    }
+    redirect("/admin");
+  }
+
+  // ---- Inovator dan Kelurahan: pendaftaran biasa; akun Kelurahan tanpa wewenang sampai diberi mandat ----
+  const { kecamatan, kelurahan, kode_undangan: _kode, ...meta } = v.meta as Record<string, string>;
+  void _kode;
+  let kelurahanId: string | null = null;
+  if (v.role === "KELURAHAN") {
+    try {
+      const pub = await createServerSupabaseClient();
+      const { data } = await pub.from("master_kelurahan").select("id").eq("kecamatan", kecamatan).eq("kelurahan", kelurahan).maybeSingle();
+      kelurahanId = data?.id ?? null;
+    } catch { /* ditangani di bawah */ }
+    if (!kelurahanId) return { errors: { kelurahan: "Kelurahan tidak ditemukan di master data." } };
+    (meta as Record<string, string>).kelurahan_id = kelurahanId;
+  }
   try {
     const supabase = await createServerSupabaseClient();
-    const origin = getAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
-    const { error } = await supabase.auth.resetPasswordForEmail(input.email, {
-      redirectTo: `${origin}/auth/callback?next=/ubah-kata-sandi`,
+    const { data, error } = await supabase.auth.signUp({
+      email: v.email, password: v.password,
+      options: { data: meta, emailRedirectTo: `${origin}/auth/callback` },
     });
-    if (error) return { error: "Permintaan belum dapat diproses. Coba lagi nanti." };
-  } catch { return unavailable; }
-  // Respons sama untuk email terdaftar maupun tidak, agar akun tidak dapat ditebak.
-  return { step: "otp", email: input.email };
+    if (error) {
+      if (error.code === "weak_password") return { errors: { password: "Password ditolak karena terlalu lemah." } };
+      return { error: GENERIK };
+    }
+    // Email sudah terdaftar: respons netral agar daftar email tidak bisa ditebak.
+    if (data.user && data.user.identities?.length === 0) return { step: "otp", purpose: "signup", email: v.email, message: "Jika email ini belum terdaftar, kode OTP sudah dikirim." };
+
+    if (v.role === "KELURAHAN" && data.user && hasServiceRole()) {
+      const sk = form.get("sk") as File;
+      const ext = sk.type === "application/pdf" ? "pdf" : sk.type === "image/png" ? "png" : "jpg";
+      const path = `sk/${data.user.id}/sk-penugasan.${ext}`;
+      const admin = createAdminSupabaseClient();
+      const up = await admin.storage.from("berkas").upload(path, Buffer.from(await sk.arrayBuffer()), { contentType: sk.type, upsert: true });
+      if (!up.error) await admin.from("users").update({ sk_document_url: path }).eq("id", data.user.id);
+    }
+    if (data.session) redirect("/dashboard");
+    return { step: "otp", purpose: "signup", email: v.email };
+  } catch (e) {
+    if (e instanceof Error && e.message === "NEXT_REDIRECT") throw e;
+    if (typeof e === "object" && e && "digest" in e) throw e;
+    return { error: GENERIK };
+  }
 }
 
-export async function verifyRecoveryOtp(_state: AuthActionState, form: FormData): Promise<AuthActionState> {
-  const input = validateOtp(form);
-  if (input.errors.email) return { error: "Sesi verifikasi tidak valid. Ulangi dari awal." };
-  if (input.errors.token) return { errors: { token: input.errors.token } };
+export async function verifyOtpAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
+  const { errors, email, token } = validateOtp(form);
+  const purpose: "recovery" | "signup" = form.get("purpose") === "recovery" ? "recovery" : "signup";
+  if (Object.keys(errors).length) return { errors, step: "otp", email, purpose };
   try {
     const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.verifyOtp({ email: input.email, token: input.token, type: "recovery" });
-    if (error) return badOtp;
-  } catch { return unavailable; }
-  revalidatePath("/", "layout");
-  redirect("/ubah-kata-sandi");
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: purpose === "recovery" ? "recovery" : "signup" });
+    if (error) return { step: "otp", email, purpose, error: "Kode salah atau sudah kedaluwarsa." };
+  } catch {
+    return { step: "otp", email, purpose, error: GENERIK };
+  }
+  redirect(purpose === "recovery" ? "/ubah-kata-sandi" : "/dashboard");
 }
 
-/** Kirim ulang kode OTP. Dipanggil langsung dari komponen OTP. */
-export async function resendOtp(kind: "signup" | "recovery", email: string): Promise<AuthActionState> {
-  const clean = String(email ?? "").trim().toLowerCase();
-  if ((kind !== "signup" && kind !== "recovery") || !isValidEmail(clean)) return { error: "Alamat email tidak valid." };
+export async function resendOtpAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  const purpose: "recovery" | "signup" = form.get("purpose") === "recovery" ? "recovery" : "signup";
+  const base = { step: "otp" as const, email, purpose };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ...base, error: "Alamat email tidak valid." };
   try {
     const supabase = await createServerSupabaseClient();
-    const origin = getAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
-    const { error } = kind === "signup"
-      ? await supabase.auth.resend({ type: "signup", email: clean, options: { emailRedirectTo: `${origin}/auth/callback` } })
-      : await supabase.auth.resetPasswordForEmail(clean, { redirectTo: `${origin}/auth/callback?next=/ubah-kata-sandi` });
-    if (error) return { error: "Kode belum dapat dikirim ulang. Tunggu sebentar lalu coba lagi." };
-  } catch { return unavailable; }
-  return { message: "Kode baru sudah dikirim. Gunakan kode yang terbaru." };
+    if (purpose === "recovery") await supabase.auth.resetPasswordForEmail(email);
+    else await supabase.auth.resend({ type: "signup", email });
+  } catch { /* respons netral */ }
+  return { ...base, message: "Jika email terdaftar, kode baru sudah dikirim. Tunggu satu menit sebelum meminta lagi." };
 }
 
-export async function updatePassword(_state: AuthActionState, form: FormData): Promise<AuthActionState> {
-  const input = validateAuthForm(form, "password");
-  if (Object.keys(input.errors).length) return { errors: input.errors };
-  const { supabase } = await requireUser();
-  try {
-    const { error } = await supabase.auth.updateUser({ password: input.password });
-    if (error) return { error: "Password belum dapat diperbarui. Coba password lain atau minta kode pemulihan baru." };
-  } catch { return unavailable; }
-  return { message: "Password berhasil diperbarui. Kamu dapat kembali ke dashboard." };
-}
-
-export async function updateProfile(_state: AuthActionState, form: FormData): Promise<AuthActionState> {
-  const input = validateAuthForm(form, "profile");
-  if (Object.keys(input.errors).length) return { errors: input.errors };
-  const { supabase, user } = await requireUser();
-  try {
-    const { data, error } = await supabase.from("profiles").update({ display_name: input.displayName }).eq("id", user.id).select("id").single();
-    if (error || !data) return { error: "Profil belum tersimpan. Muat ulang halaman dan coba kembali." };
-  } catch { return unavailable; }
-  revalidatePath("/dashboard");
-  redirect("/dashboard?status=profil-disimpan");
-}
-
-/** Akun Google baru: simpan nama dan domisili (metadata Auth, sama seperti pendaftar email), lalu masuk ke dashboard. */
-export async function completeProfile(_state: AuthActionState, form: FormData): Promise<AuthActionState> {
-  const input = validateAuthForm(form, "profile");
-  const domicile = validateDomicile(form);
-  const errors = { ...input.errors, ...domicile.errors };
+export async function requestResetAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
+  const { errors, email } = validateAuthForm(form, "reset");
   if (Object.keys(errors).length) return { errors };
-  const { supabase, user } = await requireUser({ allowIncomplete: true });
   try {
-    const { error } = await supabase.auth.updateUser({
-      data: {
-        display_name: input.displayName,
-        domicile_address: domicile.value.address,
-        domicile_kecamatan: domicile.value.kecamatan,
-        domicile_kelurahan: domicile.value.kelurahan,
-        domicile_rw: domicile.value.rw,
-        domicile_rt: domicile.value.rt,
-      },
-    });
-    if (error) return { error: "Data belum tersimpan. Muat ulang halaman dan coba lagi." };
-    // Samakan nama di tabel profil; bila gagal, nama masih tersimpan di metadata dan bisa diubah di dashboard.
-    await supabase.from("profiles").update({ display_name: input.displayName }).eq("id", user.id);
-    await linkDomicile(supabase, domicile.value);
-  } catch { return unavailable; }
-  revalidatePath("/", "layout");
+    const supabase = await createServerSupabaseClient();
+    await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${getAppOrigin(process.env.NEXT_PUBLIC_APP_URL)}/auth/callback?next=/ubah-kata-sandi` });
+  } catch { /* respons netral */ }
+  return { step: "otp", purpose: "recovery", email, message: "Jika email terdaftar, kode OTP pemulihan sudah dikirim." };
+}
+
+export async function updatePasswordAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
+  const { errors, password } = validateAuthForm(form, "password");
+  if (Object.keys(errors).length) return { errors };
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) return { error: error.code === "same_password" ? "Gunakan password yang berbeda dari sebelumnya." : "Sesi pemulihan sudah berakhir. Minta kode baru." };
+  } catch {
+    return { error: GENERIK };
+  }
   redirect("/dashboard");
 }
 
-export async function logout() {
-  const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.auth.signOut({ scope: "local" });
-  if (error) redirect("/dashboard?status=keluar-gagal");
-  revalidatePath("/", "layout");
-  redirect("/masuk?status=keluar");
+export async function signOutAction() {
+  try { await (await createServerSupabaseClient()).auth.signOut(); } catch { /* tetap keluar */ }
+  redirect("/");
 }

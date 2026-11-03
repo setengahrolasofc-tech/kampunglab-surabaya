@@ -1,44 +1,43 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { logout } from "@/app/auth/actions";
-import { getAccountSnapshot } from "@/lib/auth/account";
-import {stageLabels} from "@/lib/simulations/workflow";
-import { getNotificationSummary } from "@/lib/notifications/data";
+import { redirect } from "next/navigation";
+import { Flash } from "@/components/flash";
+import { Card, Empty, Main, PageHeader, PhaseTimeline, StatusBadge, btnPrimary } from "@/components/ui";
+import { requireAnyUser, homeFor } from "@/lib/auth/session";
+import { rupiah, tanggal } from "@/lib/domain/format.mjs";
+import { phaseOf, STATUS_INFO } from "@/lib/domain/workflow.mjs";
+import type { InnovationRow } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Dashboard pribadi", robots: { index: false, follow: false } };
-const mandateLabels: Record<string, string> = { primary: "Utama", backup: "Cadangan", delegate: "Delegasi" };
-const roleLabels: Record<string, string> = { program_admin: "Admin program", reviewer: "Reviewer", facilitator: "Fasilitator" };
+export const metadata: Metadata = { title: "Dashboard Inovator" };
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
-  const [account, notifications] = await Promise.all([getAccountSnapshot(), getNotificationSummary()]);
-  const { user, profile, currentMandates, currentRoles, isAdmin, reviewStages, error } = account;
-  const status = (await searchParams).status;
-
-  return <main id="konten-utama" tabIndex={-1} className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-    <div className="flex flex-wrap items-start justify-between gap-6">
-      <div><p className="text-xs font-bold tracking-widest text-emerald-800">DASHBOARD PRIBADI</p><h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Halo, {profile?.display_name || "Warga"}.</h1><p className="mt-3 break-all text-slate-600">{user.email}</p></div>
-      <form action={logout}><button type="submit" className="min-h-11 rounded-full border border-emerald-900 px-5 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-50">Keluar akun</button></form>
-    </div>
-    {status === "keluar-gagal" ? <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-red-900">Belum berhasil keluar. Coba kembali.</p> : null}
-    {status === "akses-ditolak" ? <p role="alert" className="mt-6 rounded-xl bg-amber-50 p-4 text-amber-950">Halaman pengelola memerlukan akses admin yang masih berlaku.</p> : null}
-    {isAdmin ? <Link href="/admin" className="mt-6 inline-flex min-h-11 items-center rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white hover:bg-emerald-800">Buka pengelolaan admin</Link> : null}
-    <nav aria-label="Ruang inovator" className="mt-6 flex flex-wrap gap-4 font-semibold text-emerald-900"><Link href="/pengajuan" className="underline underline-offset-4">Pengajuan Saya</Link><Link href="/profil" className="underline underline-offset-4">Profil dan akun</Link>{reviewStages.map(stage=><Link key={stage} href={`/antrean/${stage}`} className="underline underline-offset-4">Antrean simulasi {stageLabels[stage]}</Link>)}{reviewStages.includes("kelurahan")?<Link href="/antrean/dokumen-fisik" className="underline underline-offset-4">Dokumen fisik</Link>:null}{currentRoles.some(role=>role.role==="reviewer")?<Link href="/panel" className="underline underline-offset-4">Penugasan panel saya</Link>:null}</nav>
-    {status === "profil-disimpan" ? <p role="status" className="mt-6 rounded-xl bg-emerald-50 p-4 text-emerald-950">Nama tampilan berhasil disimpan.</p> : null}
-    {error ? <p role="alert" className="mt-6 rounded-xl bg-amber-50 p-4 leading-7 text-amber-950">Sebagian data akun belum dapat dimuat. Muat ulang halaman; hubungi pengelola jika tetap bermasalah. Tidak ada hak petugas yang diberikan secara otomatis.</p> : null}
-    <section aria-labelledby="notifikasi" className="mt-7 flex flex-wrap items-center justify-between gap-5 rounded-2xl border border-emerald-950/10 bg-white p-6">
-      <div><h2 id="notifikasi" className="text-xl font-bold">Notifikasi</h2><p className="mt-2 text-sm leading-7 text-slate-600">{notifications ? `${notifications.unread} pembaruan belum dibaca. Antrean, hasil pemeriksaan, dan penugasan sesuai aksesmu.` : "Jumlah pembaruan belum dapat dimuat. Buka pusat notifikasi untuk mencoba kembali."}</p></div>
-      <Link href="/notifikasi" className="inline-flex min-h-11 items-center rounded-full bg-emerald-900 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-800">Buka notifikasi</Link>
-    </section>
-    <div className="mt-10 grid gap-7 lg:grid-cols-2">
-      <section aria-labelledby="profil" className="rounded-2xl border border-emerald-950/10 bg-white p-7"><h2 id="profil" className="mb-4 text-xl font-bold">Profil pribadimu</h2><p className="leading-7 text-slate-600">Ubah nama, domisili, dan password, atau hapus akunmu di halaman profil.</p><Link href="/profil" className="mt-6 inline-block text-sm font-semibold text-emerald-900 underline underline-offset-4">Buka profil dan akun</Link></section>
-      <section aria-labelledby="akses" className="rounded-2xl border border-emerald-950/10 bg-white p-7"><h2 id="akses" className="text-xl font-bold">Akses dan mandat</h2><p className="mt-4 leading-7 text-slate-600">Akun terdaftar memiliki akses dasar sebagai warga/inovator. Hak petugas mengikuti penetapan berwenang dan masa berlakunya.</p>
-        <h3 className="mt-6 text-sm font-bold">Mandat jabatan aktif</h3>
-        {error ? <p className="mt-2 text-sm text-slate-600">Data mandat belum dapat dipastikan.</p> : currentMandates.length ? <ul className="mt-3 space-y-3">{currentMandates.map((item) => <li key={item.id} className="rounded-xl bg-emerald-50 p-3 text-sm">{item.offices?.name} · {mandateLabels[item.mandate_type] ?? item.mandate_type}</li>)}</ul> : <p className="mt-2 text-sm text-slate-600">Belum ada mandat jabatan aktif.</p>}
-        <h3 className="mt-6 text-sm font-bold">Penetapan peran program</h3>
-        {error ? <p className="mt-2 text-sm text-slate-600">Data peran belum dapat dipastikan.</p> : currentRoles.length ? <ul className="mt-3 space-y-3">{currentRoles.map((item) => <li key={item.id} className="rounded-xl bg-emerald-50 p-3 text-sm">{roleLabels[item.role] ?? item.role}</li>)}</ul> : <p className="mt-2 text-sm text-slate-600">Belum ada penetapan peran tambahan.</p>}
-      </section>
-    </div>
-    <section aria-labelledby="selanjutnya" className="mt-7 rounded-2xl bg-emerald-950 p-7 text-white"><h2 id="selanjutnya" className="text-xl font-bold">Mulai susun inovasimu</h2><p className="mt-3 max-w-3xl leading-7 text-emerald-100">Lengkapi wilayah domisili, lalu buat draf data inovasi, PRD, dan RAB. Draf dapat disimpan dan dilanjutkan kembali. Pengiriman final dan uji warga belum dibuka.</p><Link href="/pengajuan" className="mt-5 inline-block font-semibold underline underline-offset-4">Buka Pengajuan Saya</Link></section>
-  </main>;
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ ok?: string; err?: string }> }) {
+  const sp = await searchParams;
+  const session = await requireAnyUser();
+  if (session.profile.role !== "INNOVATOR") redirect(homeFor(session.profile.role));
+  if (session.profile.status === "DIBLOKIR") redirect("/masuk?status=diblokir");
+  const { supabase, userId } = session;
+  await supabase.rpc("sync_due_tests");
+  const { data } = await supabase.from("innovations").select("id, judul, status, total_rab, tipe_inovasi, kode_unik, status_changed_at, catatan_pemeriksaan, kelurahan:master_kelurahan(kecamatan, kelurahan)").eq("leader_user_id", userId).order("created_at", { ascending: false });
+  const rows = (data ?? []) as unknown as Array<InnovationRow & { kelurahan: { kecamatan: string; kelurahan: string } | null }>;
+  return (
+    <Main>
+      <PageHeader title="Ringkasan Proyek" subtitle={`Halo, ${session.profile.name}. Pantau semua pengajuan inovasi Anda di sini.`} actions={<Link href="/dashboard/pengajuan/baru" className={btnPrimary}>+ Pengajuan baru</Link>} />
+      <Flash ok={sp.ok} err={sp.err} />
+      {rows.length === 0 ? <Empty>Belum ada pengajuan. Mulai dari <Link href="/papan-masalah" className="font-semibold text-teal-deep underline">Papan Masalah</Link> atau buat pengajuan baru.</Empty> : (
+        <ul className="space-y-4">
+          {rows.map((i) => (
+            <li key={i.id}><Card className="space-y-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div><Link href={`/dashboard/pengajuan/${i.id}`} className="text-lg font-bold text-teal-deep hover:underline">{i.judul || "(Draft tanpa judul)"}</Link>
+                  <p className="text-xs text-indigo-space/65">{i.kode_unik} · {i.kelurahan ? `Kel. ${i.kelurahan.kelurahan}, Kec. ${i.kelurahan.kecamatan}` : ""} · RAB {rupiah(i.total_rab)} · diperbarui {tanggal(i.status_changed_at)}</p></div>
+                <StatusBadge status={i.status} />
+              </div>
+              <PhaseTimeline current={phaseOf(i.status)} />
+              <p className="text-sm text-indigo-space/75">{STATUS_INFO[i.status]?.hint}</p>
+              {i.status === "REVISION_REQUESTED" && i.catatan_pemeriksaan && <p className="rounded-lg bg-gold/30 px-3 py-2 text-sm"><strong>Catatan Kelurahan:</strong> {i.catatan_pemeriksaan}</p>}
+            </Card></li>
+          ))}
+        </ul>)}
+    </Main>
+  );
 }

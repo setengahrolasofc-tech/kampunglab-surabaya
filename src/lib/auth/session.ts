@@ -1,26 +1,58 @@
 import "server-only";
+import { cache } from "react";
 import { redirect } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { needsDomicileCompletion } from "@/lib/auth/completion.mjs";
+import { createServerSupabaseClient, type ServerSupabase } from "@/lib/supabase/server";
+import type { AppRole, AppUserRow, MandateRow } from "@/lib/types";
+
+export interface SessionContext {
+  supabase: ServerSupabase;
+  userId: string;
+  profile: AppUserRow;
+  /** Mandat aktif (hanya akun Kelurahan). */
+  mandate: MandateRow | null;
+}
+
+/** Sesi opsional (untuk header dan halaman publik). Tidak pernah melempar bila konfigurasi/jaringan bermasalah. */
+export const getSession = cache(async (): Promise<SessionContext | null> => {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: auth, error } = await supabase.auth.getUser();
+    if (error || !auth.user) return null;
+    const { data: profile } = await supabase
+      .from("users").select("*, kelurahan:master_kelurahan(kecamatan, kelurahan)").eq("id", auth.user.id).maybeSingle();
+    if (!profile) return null;
+    let mandate: MandateRow | null = null;
+    if (profile.role === "KELURAHAN") {
+      const { data } = await supabase.from("kelurahan_mandates").select("*").eq("user_id", auth.user.id).is("dicabut_pada", null).maybeSingle();
+      mandate = (data as MandateRow | null) ?? null;
+    }
+    return { supabase, userId: auth.user.id, profile: profile as AppUserRow, mandate };
+  } catch {
+    return null;
+  }
+});
+
+/** Halaman beranda sesuai peran. */
+export const homeFor = (role: AppRole) => (role === "BRIDA_ADMIN" ? "/admin" : role === "KELURAHAN" ? "/kelurahan" : "/dashboard");
 
 /**
- * Mengembalikan sesi pengguna, atau mengarahkan ke halaman Masuk.
- * Bila konfigurasi Supabase belum lengkap (misalnya variabel lingkungan belum diisi di Vercel),
- * pengguna tetap diarahkan ke Masuk, yang menampilkan pesan "belum dikonfigurasi",
- * bukan halaman error server.
- * Akun Google yang belum mengisi nama dan domisili diarahkan ke /lengkapi-profil
- * (halaman itu memakai allowIncomplete agar tidak berputar).
+ * Wajib masuk dengan peran tertentu. Akun Kelurahan tanpa mandat aktif (atau berstatus bukan AKTIF)
+ * hanya boleh melihat /menunggu-verifikasi; semua fitur dashboard terkunci (Bab 3.2).
+ * UI hanyalah lapisan kedua: RLS database menolak akses yang sama.
  */
-export async function requireUser(options: { allowIncomplete?: boolean } = {}) {
-  let supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | null = null;
-  let user: User | null = null;
-  try {
-    supabase = await createServerSupabaseClient();
-    const { data, error } = await supabase.auth.getUser();
-    if (!error) user = data.user;
-  } catch { /* Konfigurasi atau layanan tidak tersedia: perlakukan sebagai belum masuk. */ }
-  if (!supabase || !user) redirect("/masuk?status=perlu-masuk");
-  if (!options.allowIncomplete && needsDomicileCompletion(user)) redirect("/lengkapi-profil");
-  return { supabase, user };
+export async function requireRole(role: AppRole): Promise<SessionContext> {
+  const session = await getSession();
+  if (!session) redirect("/masuk?status=perlu-masuk");
+  const { profile, mandate } = session;
+  if (profile.status === "DIBLOKIR") redirect("/masuk?status=diblokir");
+  if (profile.role !== role) redirect(homeFor(profile.role));
+  if (role === "KELURAHAN" && (profile.status !== "AKTIF" || !mandate)) redirect("/menunggu-verifikasi");
+  if (role !== "KELURAHAN" && profile.status !== "AKTIF") redirect("/masuk?status=diblokir");
+  return session;
+}
+
+export async function requireAnyUser(): Promise<SessionContext> {
+  const session = await getSession();
+  if (!session) redirect("/masuk?status=perlu-masuk");
+  return session;
 }
