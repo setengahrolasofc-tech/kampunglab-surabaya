@@ -10,7 +10,7 @@ Akun contoh ada di `docs/SETUP_DEPLOY.md` §4. Uji otomatis: `npm run typecheck 
 
 ## (b) Auth dan pendaftaran 3 role
 - Baru/ubah: `src/app/auth/actions.ts`, `src/components/auth-forms.tsx`, `src/lib/auth/{validation.mjs,session.ts,types.ts}`, `src/app/{masuk,daftar,lupa-kata-sandi,ubah-kata-sandi,menunggu-verifikasi}/page.tsx`, `src/lib/supabase/{server,public,browser,admin}.ts`, `src/proxy.ts`.
-- Uji manual: `/daftar` → pilih Inovator (langsung bisa masuk setelah OTP); pilih Kelurahan (akun `MENUNGGU_MANDAT`, hanya melihat `/menunggu-verifikasi`, semua `/kelurahan/*` mengarah ke sana); pilih BRIDA dengan kode salah → ditolak, kode benar → masuk `/admin`.
+- Uji manual: `/daftar` → pilih Inovator (langsung bisa masuk setelah OTP); pilih Kelurahan (akun `MENUNGGU_MANDAT`, hanya melihat `/menunggu-verifikasi`, semua `/kelurahan/*` mengarah ke sana); pilih "Minta akses Kelurahan" (tanpa pilihan BRIDA; Admin hanya dari `npm run seed:admin`). Masuk dengan Google dan alur akses Kelurahan: lihat `docs/GOOGLE_LOGIN.md`.
 
 ## (c) Antrean mandat, notifikasi, widget kelurahan kosong
 - `src/app/admin/{page,mandat/page,actions}.ts(x)`, `src/app/notifikasi/*`, `src/components/notification-bell.tsx`.

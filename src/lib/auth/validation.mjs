@@ -18,7 +18,37 @@ export const isValidEmail = (value) => value.length <= 254 && /^[^\s@]+@[^\s@]+\
 /** @param {string} v */
 const cleanPhone = (v) => String(v ?? "").replace(/[^0-9+]/g, "");
 
-export const ROLES_PENDAFTARAN = ["INNOVATOR", "KELURAHAN", "BRIDA_ADMIN"];
+/** Pendaftaran terbuka hanya untuk Inovator dan permintaan akses Kelurahan. Admin BRIDA dipilih lewat skrip seed, bukan pendaftaran. */
+export const ROLES_PENDAFTARAN = ["INNOVATOR", "KELURAHAN"];
+
+/** Pintu masuk yang dipilih pengunjung ("sebagai"). Hanya niat tampilan, bukan otorisasi. @param {unknown} value @returns {'inovator'|'kelurahan'} */
+export function normalizeIntent(value) {
+  return String(value ?? "").toLowerCase() === "kelurahan" ? "kelurahan" : "inovator";
+}
+
+/** Tujuan sesudah masuk menurut pintu yang dipilih. @param {'inovator'|'kelurahan'} intent */
+export const destinationForIntent = (intent) => (intent === "kelurahan" ? "/minta-akses" : "/dashboard");
+
+/**
+ * Permintaan akses Kelurahan dari akun yang sudah ada (email atau Google).
+ * @param {FormData} form
+ */
+export function validateKelurahanAccess(form) {
+  /** @type {Record<string, string>} */
+  const errors = {};
+  const txt = (/** @type {string} */ k) => String(form.get(k) ?? "").trim().replace(/\s+/g, " ");
+  const kecamatan = txt("kecamatan"), kelurahan = txt("kelurahan");
+  const nip = txt("nip").replace(/\s/g, "");
+  const jabatan = txt("jabatan");
+  const phone = cleanPhone(txt("phone_wa"));
+  const list = Object.hasOwn(KECAMATAN_KELURAHAN, kecamatan) ? KECAMATAN_KELURAHAN[kecamatan] : null;
+  if (!list) errors.kecamatan = "Pilih kecamatan.";
+  else if (!list.includes(kelurahan)) errors.kelurahan = "Pilih kelurahan sesuai kecamatan.";
+  if (!/^[0-9]{8,24}$/.test(nip)) errors.nip = "Isi NIP (hanya angka, 8–24 digit).";
+  if (jabatan.length < 3 || jabatan.length > 120) errors.jabatan = "Isi jabatan (3–120 karakter).";
+  if (!/^[0-9+]{8,16}$/.test(phone)) errors.phone_wa = "Isi nomor WA aktif (8–16 digit).";
+  return { errors, kecamatan, kelurahan, nip, jabatan, phone };
+}
 
 /** @param {FormData} form @param {'login'|'reset'|'password'} mode */
 export function validateAuthForm(form, mode) {
@@ -38,8 +68,8 @@ export function validateAuthForm(form, mode) {
 }
 
 /**
- * Pendaftaran per peran (Bab 3.1 prompt): INNOVATOR, KELURAHAN, BRIDA_ADMIN.
- * Peran yang dipilih hanyalah niat pendaftar, bukan otorisasi: BRIDA wajib kode undangan (server), Kelurahan menunggu mandat.
+ * Pendaftaran per peran: INNOVATOR atau KELURAHAN (permintaan akses).
+ * Peran yang dipilih hanyalah niat pendaftar, bukan otorisasi: akun Kelurahan menunggu mandat Admin BRIDA.
  * @param {FormData} form
  */
 export function validateSignup(form) {
@@ -55,7 +85,7 @@ export function validateSignup(form) {
   const name = txt("display_name");
   if (name.length < 2 || name.length > 100 || /[\u0000-\u001f\u007f]/.test(name)) errors.display_name = "Isi nama lengkap 2–100 karakter.";
   const phone = cleanPhone(txt("phone_wa"));
-  if (role !== "BRIDA_ADMIN" && !/^[0-9+]{8,16}$/.test(phone)) errors.phone_wa = "Isi nomor WA aktif (8–16 digit).";
+  if (!/^[0-9+]{8,16}$/.test(phone)) errors.phone_wa = "Isi nomor WA aktif (8–16 digit).";
   const meta = { role, display_name: name, phone_wa: phone };
   /** @type {Record<string, string>} */
   const extra = {};
@@ -78,9 +108,6 @@ export function validateSignup(form) {
     if (!(sk instanceof File) || sk.size === 0) errors.sk = "Unggah SK/surat tugas (PDF, JPG, atau PNG).";
     else if (!["application/pdf", "image/jpeg", "image/png"].includes(sk.type)) errors.sk = "SK harus berformat PDF, JPG, atau PNG.";
     else if (sk.size > 4 * 1024 * 1024) errors.sk = "Ukuran SK maksimal 4 MB.";
-  } else if (role === "BRIDA_ADMIN") {
-    extra.kode_undangan = String(form.get("kode_undangan") ?? "").trim();
-    if (extra.kode_undangan.length < 6) errors.kode_undangan = "Isi kode undangan staf BRIDA.";
   }
   /** @type {Record<string, string>} */
   const allMeta = { ...meta, ...extra };
@@ -100,7 +127,7 @@ export function validateOtp(form) {
 
 /** Hanya tujuan tetap yang diterima; tidak pernah memakai URL dari pengunjung. @param {string | null} value */
 export function safeAuthDestination(value) {
-  return value === "/ubah-kata-sandi" ? "/ubah-kata-sandi" : "/dashboard";
+  return value === "/ubah-kata-sandi" ? "/ubah-kata-sandi" : value === "/minta-akses" ? "/minta-akses" : "/dashboard";
 }
 
 /** Origin tepercaya untuk tautan Auth; tanpa header Host. @param {string | undefined} value */

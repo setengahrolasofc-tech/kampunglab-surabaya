@@ -5,7 +5,7 @@ import { rupiah, waLink, inisial } from "../src/lib/domain/format.mjs";
 import { checkSubmission, pembagianTahap, skalaOf, plafonOf, DEFAULT_PARAMS } from "../src/lib/domain/innovation-rules.mjs";
 import { evaluateStandards, keputusanTersedia, hashIp, parseSurveyForm, thresholds } from "../src/lib/domain/survey.mjs";
 import { TRANSITIONS, canTransition, actionsFor, STATUSES, STATUS_INFO } from "../src/lib/domain/workflow.mjs";
-import { validateSignup, isStrongPassword } from "../src/lib/auth/validation.mjs";
+import { validateSignup, isStrongPassword, normalizeIntent, destinationForIntent, safeAuthDestination, validateKelurahanAccess } from "../src/lib/auth/validation.mjs";
 
 test("format Rupiah dan WA", () => {
   assert.equal(rupiah(5000000).replace(/\s/g, ""), "Rp5.000.000");
@@ -145,6 +145,26 @@ test("validasi pendaftaran per peran", () => {
   assert.ok(kel.errors.sk, "SK wajib untuk Kelurahan");
   assert.ok(!kel.errors.nip && !kel.errors.kelurahan);
   assert.ok(validateSignup(f({ ...basis, role: "KELURAHAN", nip: "1", jabatan: "Lurah", kecamatan: "Gubeng", kelurahan: "Mojo Palsu" })).errors.kelurahan);
-  assert.ok(validateSignup(f({ ...basis, role: "BRIDA_ADMIN" })).errors.kode_undangan, "BRIDA wajib kode undangan");
+  assert.ok(validateSignup(f({ ...basis, role: "BRIDA_ADMIN" })).errors.role, "Admin BRIDA tidak bisa mendaftar lewat formulir");
   assert.ok(!isStrongPassword("abc"));
+});
+
+test("pintu masuk, tujuan sesudah masuk, dan permintaan akses Kelurahan", () => {
+  const f = (o) => { const d = new FormData(); for (const [k, v] of Object.entries(o)) d.set(k, v); return d; };
+  assert.equal(normalizeIntent("kelurahan"), "kelurahan");
+  assert.equal(normalizeIntent("KELURAHAN"), "kelurahan");
+  assert.equal(normalizeIntent("brida"), "inovator", "nilai tak dikenal jatuh ke Inovator");
+  assert.equal(normalizeIntent(undefined), "inovator");
+  assert.equal(destinationForIntent("kelurahan"), "/minta-akses");
+  assert.equal(destinationForIntent("inovator"), "/dashboard");
+  assert.equal(safeAuthDestination("/minta-akses"), "/minta-akses");
+  assert.equal(safeAuthDestination("https://jahat.example"), "/dashboard");
+  assert.equal(safeAuthDestination("/admin"), "/dashboard");
+  const ok = { kecamatan: "Gubeng", kelurahan: "Airlangga", nip: "198001012005011001", jabatan: "Lurah", phone_wa: "081234567890" };
+  assert.deepEqual(validateKelurahanAccess(f(ok)).errors, {});
+  assert.ok(validateKelurahanAccess(f({ ...ok, nip: "12" })).errors.nip);
+  assert.ok(validateKelurahanAccess(f({ ...ok, jabatan: "L" })).errors.jabatan);
+  assert.ok(validateKelurahanAccess(f({ ...ok, phone_wa: "abc" })).errors.phone_wa);
+  assert.ok(validateKelurahanAccess(f({ ...ok, kelurahan: "Mojo Palsu" })).errors.kelurahan);
+  assert.ok(validateKelurahanAccess(f({ ...ok, kecamatan: "__proto__" })).errors.kecamatan);
 });

@@ -22,7 +22,12 @@
   --color-celadon: var(--kl-celadon);
   --color-gold: var(--kl-gold);
   --color-surface: var(--kl-bg);
-  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  /* Warna mockup Landing Page & Dashboard */
+  --color-navy: #14304a;
+  --color-mint: #bdebcf;
+  --color-aqua: #1fa68a;
+  --color-skyblue: #0b5aa6;
+  --font-sans: var(--font-poppins), "Poppins", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
 }
 
 body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }

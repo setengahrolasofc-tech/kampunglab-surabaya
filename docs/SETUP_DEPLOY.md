@@ -2,7 +2,7 @@
 
 ## 1. Database
 1. Proyek Supabase baru atau yang sudah ada. Migrasi lama (`2026103*`–`20261101*`) sudah diterapkan di proyek `kampunglab-surabaya`; **jangan dijalankan ulang**.
-2. Terapkan migrasi baru: `npx supabase link --project-ref <ref>` lalu `npx supabase db push` (hanya `20261103090000_rev4_core.sql` yang baru).
+2. Terapkan migrasi baru: `npx supabase link --project-ref <ref>` lalu `npx supabase db push` (`20261103090000_rev4_core.sql` dan `20261104060000_google_login_and_kelurahan_access.sql` yang baru). Untuk tombol Google lihat `docs/GOOGLE_LOGIN.md`.
    Alternatif: tempel isi berkas itu di SQL Editor. Berkas membuat tabel, enum, RLS, fungsi RPC, parameter awal, 154 kelurahan, dan bucket privat `berkas`.
 3. Tabel alur lama tidak dihapus dan tidak dipakai. Edge Function `private-attachments` yang lama boleh dihapus dari dashboard.
 4. Pengujian migrasi di PostgreSQL biasa (tanpa Supabase): `PSQL="psql -U postgres" bash supabase/tests/run-local.sh`.

@@ -1,19 +1,41 @@
 "use server";
 
-import { timingSafeEqual } from "node:crypto";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient, hasServiceRole } from "@/lib/supabase/admin";
-import { getAppOrigin, validateAuthForm, validateOtp, validateSignup } from "@/lib/auth/validation.mjs";
+import { destinationForIntent, getAppOrigin, normalizeIntent, validateAuthForm, validateOtp, validateSignup } from "@/lib/auth/validation.mjs";
 import type { AuthActionState } from "@/lib/auth/types";
 
 const GENERIK = "Terjadi kendala. Coba lagi sebentar lagi.";
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+type AuthFailure = { code?: string; status?: number; message?: string } | null | undefined;
 
-function sameSecret(a: string, b: string) {
-  const x = Buffer.from(a), y = Buffer.from(b);
-  return x.length === y.length && timingSafeEqual(x, y);
+/**
+ * Pesan untuk kegagalan KIRIM EMAIL/KODE yang tidak bergantung pada alamat email tertentu (aman ditampilkan, tidak membuka
+ * daftar email). Kegagalan lain dikembalikan sebagai null agar pemanggil tetap memakai respons netral. Selalu dicatat di log server.
+ */
+function sendFailureMessage(where: string, error: AuthFailure): string | null {
+  if (!error) return null;
+  console.error(`[auth:${where}]`, error.status, error.code, error.message);
+  switch (error.code) {
+    case "over_email_send_rate_limit":
+      return "Batas pengiriman email sedang tercapai. Tunggu beberapa menit, lalu coba lagi.";
+    case "over_request_rate_limit":
+      return "Terlalu banyak percobaan. Tunggu sebentar, lalu coba lagi.";
+    case "email_address_not_authorized":
+      return "Layanan email bawaan Supabase hanya mengirim ke anggota tim proyek. Atur SMTP khusus di Supabase (Authentication → SMTP) atau gunakan email anggota tim.";
+    case "email_address_invalid":
+      return "Alamat email ditolak. Periksa penulisannya atau gunakan email lain.";
+    case "unexpected_failure":
+      return "Pendaftaran gagal di database (trigger pembuatan akun). Hubungi pengelola; penyebabnya ada di log Auth Supabase.";
+    case "smtp_error":
+    case "hook_timeout":
+      return "Layanan email belum dapat mengirim kode. Periksa pengaturan SMTP di Supabase.";
+    default:
+      return error.status && error.status >= 500 ? "Server autentikasi sedang bermasalah. Coba lagi beberapa saat lagi." : null;
+  }
 }
+
 
 export async function loginAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
   const { errors, email, password } = validateAuthForm(form, "login");
@@ -28,7 +50,7 @@ export async function loginAction(_: AuthActionState, form: FormData): Promise<A
     return { error: e instanceof Error && e.message.includes("NEXT_PUBLIC") ? e.message : GENERIK };
   }
   if (!ok) return { error: "Email atau password salah." };
-  redirect("/dashboard");
+  redirect(destinationForIntent(normalizeIntent(form.get("sebagai"))));
 }
 
 export async function signupAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
@@ -36,42 +58,9 @@ export async function signupAction(_: AuthActionState, form: FormData): Promise<
   if (Object.keys(v.errors).length) return { errors: v.errors };
   const origin = getAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
 
-  // ---- BRIDA: hanya dengan kode undangan staf (variabel lingkungan server) ----
-  if (v.role === "BRIDA_ADMIN") {
-    const expected = process.env.BRIDA_INVITE_CODE?.trim();
-    if (!expected || expected.length < 12 || !hasServiceRole()) {
-      return { error: "Pendaftaran Admin BRIDA belum dikonfigurasi di server (BRIDA_INVITE_CODE dan SUPABASE_SERVICE_ROLE_KEY)." };
-    }
-    if (!sameSecret(String(v.meta.kode_undangan), expected)) {
-      await sleep(800);
-      return { errors: { kode_undangan: "Kode undangan tidak valid." } };
-    }
-    try {
-      const admin = createAdminSupabaseClient();
-      const created = await admin.auth.admin.createUser({
-        email: v.email, password: v.password, email_confirm: true,
-        user_metadata: { display_name: v.meta.display_name, role: "INNOVATOR" },
-      });
-      if (created.error || !created.data.user) {
-        return { error: created.error?.code === "email_exists" ? "Email ini sudah terdaftar. Masuk atau gunakan email lain." : GENERIK };
-      }
-      const promoted = await admin.from("users").update({
-        role: "BRIDA_ADMIN", status: "AKTIF", is_verified: true, phone_wa: v.meta.phone_wa || null, name: v.meta.display_name,
-      }).eq("id", created.data.user.id);
-      if (promoted.error) return { error: GENERIK };
-      await admin.from("audit_logs").insert({ aktor_id: created.data.user.id, aksi: "AKUN BRIDA DIDAFTARKAN", target: `users/${created.data.user.id}`, detail_json: { lewat: "kode undangan" } });
-      const supabase = await createServerSupabaseClient();
-      const { error } = await supabase.auth.signInWithPassword({ email: v.email, password: v.password });
-      if (error) return { message: "Akun Admin BRIDA dibuat. Silakan masuk." };
-    } catch {
-      return { error: GENERIK };
-    }
-    redirect("/admin");
-  }
-
-  // ---- Inovator dan Kelurahan: pendaftaran biasa; akun Kelurahan tanpa wewenang sampai diberi mandat ----
-  const { kecamatan, kelurahan, kode_undangan: _kode, ...meta } = v.meta as Record<string, string>;
-  void _kode;
+  // ---- Inovator dan permintaan akses Kelurahan; akun Kelurahan tanpa wewenang sampai Admin BRIDA memberi mandat ----
+  // Admin BRIDA tidak bisa mendaftar di sini: hanya akun yang dipilih lewat skrip seed.
+  const { kecamatan, kelurahan, ...meta } = v.meta as Record<string, string>;
   let kelurahanId: string | null = null;
   if (v.role === "KELURAHAN") {
     try {
@@ -90,7 +79,7 @@ export async function signupAction(_: AuthActionState, form: FormData): Promise<
     });
     if (error) {
       if (error.code === "weak_password") return { errors: { password: "Password ditolak karena terlalu lemah." } };
-      return { error: GENERIK };
+      return { error: sendFailureMessage("signup", error) ?? GENERIK };
     }
     // Email sudah terdaftar: respons netral agar daftar email tidak bisa ditebak.
     if (data.user && data.user.identities?.length === 0) return { step: "otp", purpose: "signup", email: v.email, message: "Jika email ini belum terdaftar, kode OTP sudah dikirim." };
@@ -133,9 +122,10 @@ export async function resendOtpAction(_: AuthActionState, form: FormData): Promi
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ...base, error: "Alamat email tidak valid." };
   try {
     const supabase = await createServerSupabaseClient();
-    if (purpose === "recovery") await supabase.auth.resetPasswordForEmail(email);
-    else await supabase.auth.resend({ type: "signup", email });
-  } catch { /* respons netral */ }
+    const { error } = purpose === "recovery" ? await supabase.auth.resetPasswordForEmail(email) : await supabase.auth.resend({ type: "signup", email });
+    const failure = sendFailureMessage("resend", error);
+    if (failure) return { ...base, error: failure };
+  } catch (e) { console.error("[auth:resend]", e); }
   return { ...base, message: "Jika email terdaftar, kode baru sudah dikirim. Tunggu satu menit sebelum meminta lagi." };
 }
 
@@ -144,8 +134,10 @@ export async function requestResetAction(_: AuthActionState, form: FormData): Pr
   if (Object.keys(errors).length) return { errors };
   try {
     const supabase = await createServerSupabaseClient();
-    await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${getAppOrigin(process.env.NEXT_PUBLIC_APP_URL)}/auth/callback?next=/ubah-kata-sandi` });
-  } catch { /* respons netral */ }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${getAppOrigin(process.env.NEXT_PUBLIC_APP_URL)}/auth/callback?next=/ubah-kata-sandi` });
+    const failure = sendFailureMessage("reset", error);
+    if (failure) return { error: failure };
+  } catch (e) { console.error("[auth:reset]", e); }
   return { step: "otp", purpose: "recovery", email, message: "Jika email terdaftar, kode OTP pemulihan sudah dikirim." };
 }
 
@@ -160,6 +152,27 @@ export async function updatePasswordAction(_: AuthActionState, form: FormData): 
     return { error: GENERIK };
   }
   redirect("/dashboard");
+}
+
+/** Masuk/daftar dengan Google. Akun baru selalu Inovator; "sebagai" hanya menentukan halaman tujuan sesudah masuk. */
+export async function googleAction(form: FormData) {
+  const intent = normalizeIntent(form.get("sebagai"));
+  let url: string | null = null;
+  try {
+    const origin = getAppOrigin(process.env.NEXT_PUBLIC_APP_URL);
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${origin}/auth/callback`, queryParams: { prompt: "select_account" } },
+    });
+    if (!error && data.url) {
+      url = data.url;
+      // Tujuan disimpan di cookie singkat karena URL pengalihan OAuth harus persis sama dengan daftar yang diizinkan.
+      (await cookies()).set("kl_masuk_sebagai", intent, { httpOnly: true, sameSite: "lax", secure: origin.startsWith("https:"), path: "/auth", maxAge: 600 });
+    }
+  } catch { /* ditangani di bawah */ }
+  if (!url) redirect(`/masuk?status=google-gagal&sebagai=${intent}`);
+  redirect(url);
 }
 
 export async function signOutAction() {

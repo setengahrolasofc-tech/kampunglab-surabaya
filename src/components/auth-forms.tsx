@@ -5,8 +5,9 @@ import { KECAMATAN_KELURAHAN } from "@/lib/auth/surabaya-areas.mjs";
 import { OTP_LENGTH, PASSWORD_RULES } from "@/lib/auth/validation.mjs";
 import type { AuthActionState } from "@/lib/auth/types";
 import {
-  loginAction, requestResetAction, resendOtpAction, signupAction, updatePasswordAction, verifyOtpAction,
+  googleAction, loginAction, requestResetAction, resendOtpAction, signupAction, updatePasswordAction, verifyOtpAction,
 } from "@/app/auth/actions";
+import { requestKelurahanAccessAction } from "@/app/minta-akses/actions";
 import { SubmitButton } from "./submit-button";
 import { Alert, Field, cx, inputCls, linkCls } from "./ui";
 
@@ -51,38 +52,68 @@ export function OtpForm({ email, purpose, state: parent }: { email: string; purp
   );
 }
 
-export function LoginForm({ info }: { info?: string }) {
+/** Pemisah "atau" lalu tombol Google (form terpisah, tanpa JavaScript). */
+export function GoogleSection({ sebagai, label = "Lanjutkan dengan Google" }: { sebagai: "inovator" | "kelurahan"; label?: string }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-indigo-space/55" role="separator" aria-label="atau">
+        <span className="h-px flex-1 bg-celadon" /><span>atau</span><span className="h-px flex-1 bg-celadon" />
+      </div>
+      <form action={googleAction}>
+        <input type="hidden" name="sebagai" value={sebagai} />
+        <SubmitButton className="inline-flex w-full items-center justify-center gap-3 rounded-lg border border-indigo-space/25 bg-white px-4 py-2 text-sm font-semibold text-indigo-space hover:bg-celadon/30" pending="Mengalihkan ke Google…">
+          <svg aria-hidden="true" viewBox="0 0 48 48" className="h-5 w-5">
+            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.4 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z" />
+            <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z" />
+            <path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z" />
+            <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z" />
+          </svg>
+          {label}
+        </SubmitButton>
+      </form>
+    </div>
+  );
+}
+
+export function LoginForm({ info, sebagai = "inovator" }: { info?: string; sebagai?: "inovator" | "kelurahan" }) {
   const [state, action] = useActionState(loginAction, init);
   return (
-    <form action={action} className="space-y-4" noValidate>
-      {info && <Alert tone="perhatian">{info}</Alert>}
-      <Field label="Email" htmlFor="email" error={state.errors?.email}><input id="email" name="email" type="email" autoComplete="email" className={inputCls} /></Field>
-      <Field label="Password" htmlFor="password" error={state.errors?.password}><input id="password" name="password" type="password" autoComplete="current-password" className={inputCls} /></Field>
-      <Msg state={state} />
-      <SubmitButton className="w-full inline-flex justify-center rounded-lg bg-teal-deep px-4 py-2 text-sm font-semibold text-white">Masuk</SubmitButton>
-      <p className="flex justify-between text-sm"><Link href="/lupa-kata-sandi" className={linkCls}>Lupa password?</Link><Link href="/daftar" className={linkCls}>Daftar akun</Link></p>
-    </form>
+    <div className="space-y-4">
+      <form action={action} className="space-y-4" noValidate>
+        <input type="hidden" name="sebagai" value={sebagai} />
+        {info && <Alert tone="perhatian">{info}</Alert>}
+        <Field label="Email" htmlFor="email" error={state.errors?.email}><input id="email" name="email" type="email" autoComplete="email" className={inputCls} /></Field>
+        <Field label="Password" htmlFor="password" error={state.errors?.password}><input id="password" name="password" type="password" autoComplete="current-password" className={inputCls} /></Field>
+        <Msg state={state} />
+        <SubmitButton className="w-full inline-flex justify-center rounded-lg bg-teal-deep px-4 py-2 text-sm font-semibold text-white">Masuk</SubmitButton>
+      </form>
+      <GoogleSection sebagai={sebagai} />
+      <p className="flex flex-wrap justify-between gap-2 text-sm">
+        <Link href="/lupa-kata-sandi" className={linkCls}>Lupa password?</Link>
+        <Link href={`/daftar?sebagai=${sebagai}`} className={linkCls}>{sebagai === "kelurahan" ? "Minta akses Kelurahan" : "Daftar akun"}</Link>
+      </p>
+    </div>
   );
 }
 
 const ROLE_INFO = [
-  { v: "INNOVATOR", t: "Inovator", d: "Tim/warga yang mengajukan inovasi. Langsung bisa membuat draft." },
-  { v: "KELURAHAN", t: "Kelurahan", d: "Lurah/staf bertugas. Perlu SK dan mandat dari BRIDA sebelum akses dibuka." },
-  { v: "BRIDA_ADMIN", t: "Staf BRIDA", d: "Hanya dengan kode undangan staf BRIDA." },
+  { v: "INNOVATOR", t: "Inovator / Warga", d: "Tim atau warga yang mengajukan inovasi. Langsung bisa membuat draft." },
+  { v: "KELURAHAN", t: "Minta akses Kelurahan", d: "Lurah/staf bertugas. Akses baru terbuka setelah Admin BRIDA menyetujui SK Anda." },
 ];
 
-export function SignupForm() {
+export function SignupForm({ initialRole = "INNOVATOR" }: { initialRole?: "INNOVATOR" | "KELURAHAN" }) {
   const [state, action] = useActionState(signupAction, init);
-  const [role, setRole] = useState("INNOVATOR");
+  const [role, setRole] = useState<string>(initialRole);
   const [kec, setKec] = useState("");
   const [pw, setPw] = useState("");
   if (state.step === "otp" && state.email) return <OtpForm email={state.email} purpose={state.purpose ?? "signup"} state={state} />;
   const e = state.errors ?? {};
   return (
+    <div className="space-y-5">
     <form action={action} className="space-y-4" noValidate>
       <fieldset>
         <legend className="mb-2 text-sm font-semibold">Daftar sebagai</legend>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2">
           {ROLE_INFO.map((r) => (
             <label key={r.v} className={cx("cursor-pointer rounded-xl border p-3 text-sm", role === r.v ? "border-teal-deep bg-teal-deep/5 ring-2 ring-teal-deep/30" : "border-celadon bg-white")}>
               <input type="radio" name="role" value={r.v} checked={role === r.v} onChange={() => setRole(r.v)} className="sr-only" />
@@ -95,7 +126,7 @@ export function SignupForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nama lengkap" htmlFor="display_name" error={e.display_name}><input id="display_name" name="display_name" autoComplete="name" className={inputCls} /></Field>
         <Field label="Email" htmlFor="email" error={e.email}><input id="email" name="email" type="email" autoComplete="email" className={inputCls} /></Field>
-        {role !== "BRIDA_ADMIN" && <Field label="Nomor WhatsApp" htmlFor="phone_wa" error={e.phone_wa} hint="Contoh: 081234567890"><input id="phone_wa" name="phone_wa" inputMode="tel" autoComplete="tel" className={inputCls} /></Field>}
+        <Field label="Nomor WhatsApp" htmlFor="phone_wa" error={e.phone_wa} hint="Contoh: 081234567890"><input id="phone_wa" name="phone_wa" inputMode="tel" autoComplete="tel" className={inputCls} /></Field>
         {role === "INNOVATOR" && <>
           <Field label="Institusi / komunitas" htmlFor="institusi" error={e.institusi}><input id="institusi" name="institusi" className={inputCls} placeholder="Universitas / sekolah / komunitas" /></Field>
           <Field label="Kota domisili" htmlFor="kota_domisili" error={e.kota_domisili} hint="Boleh dari luar Surabaya."><input id="kota_domisili" name="kota_domisili" className={inputCls} /></Field>
@@ -117,16 +148,17 @@ export function SignupForm() {
             <input id="sk" name="sk" type="file" accept=".pdf,.jpg,.jpeg,.png" className="text-sm file:mr-3 file:rounded-md file:border-0 file:bg-celadon file:px-3 file:py-1.5 file:text-xs file:font-semibold" />
           </Field></div>
         </>}
-        {role === "BRIDA_ADMIN" && <div className="sm:col-span-2"><Field label="Kode undangan staf BRIDA" htmlFor="kode_undangan" error={e.kode_undangan}><input id="kode_undangan" name="kode_undangan" type="password" autoComplete="off" className={inputCls} /></Field></div>}
         <Field label="Password" htmlFor="password" error={e.password}><input id="password" name="password" type="password" autoComplete="new-password" value={pw} onChange={(ev) => setPw(ev.target.value)} className={inputCls} /></Field>
         <Field label="Ulangi password" htmlFor="confirmation" error={e.confirmation}><input id="confirmation" name="confirmation" type="password" autoComplete="new-password" className={inputCls} /></Field>
       </div>
       <PasswordRules value={pw} />
-      {role === "KELURAHAN" && <Alert tone="perhatian">Setelah mendaftar, akun Anda berstatus <strong>menunggu mandat</strong>. Semua fitur dashboard Kelurahan terkunci sampai Admin BRIDA memverifikasi SK dan memberi mandat.</Alert>}
+      {role === "KELURAHAN" && <Alert tone="perhatian">Setelah mengirim, akun Anda berstatus <strong>menunggu mandat</strong>. Semua fitur dashboard Kelurahan terkunci sampai Admin BRIDA memeriksa SK dan memberi izin.</Alert>}
       <Msg state={state} />
-      <SubmitButton className="inline-flex justify-center rounded-lg bg-teal-deep px-5 py-2.5 text-sm font-semibold text-white">Daftar</SubmitButton>
-      <p className="text-sm">Sudah punya akun? <Link href="/masuk" className={linkCls}>Masuk</Link></p>
+      <SubmitButton className="inline-flex justify-center rounded-lg bg-teal-deep px-5 py-2.5 text-sm font-semibold text-white">{role === "KELURAHAN" ? "Kirim permintaan akses" : "Daftar"}</SubmitButton>
     </form>
+    <GoogleSection sebagai={role === "KELURAHAN" ? "kelurahan" : "inovator"} label={role === "KELURAHAN" ? "Lanjutkan dengan Google (lalu minta akses)" : "Daftar dengan Google"} />
+    <p className="text-sm">Sudah punya akun? <Link href={`/masuk?sebagai=${role === "KELURAHAN" ? "kelurahan" : "inovator"}`} className={linkCls}>Masuk</Link></p>
+    </div>
   );
 }
 
@@ -152,6 +184,31 @@ export function PasswordForm() {
       <Field label="Ulangi password baru" htmlFor="confirmation" error={state.errors?.confirmation}><input id="confirmation" name="confirmation" type="password" autoComplete="new-password" className={inputCls} /></Field>
       <Msg state={state} />
       <SubmitButton className="w-full inline-flex justify-center rounded-lg bg-teal-deep px-4 py-2 text-sm font-semibold text-white">Simpan password</SubmitButton>
+    </form>
+  );
+}
+
+/** Akun yang sudah masuk (email atau Google) meminta akses Kelurahan. Tidak membuka wewenang sebelum Admin BRIDA memberi mandat. */
+export function KelurahanAccessForm({ defaultPhone }: { defaultPhone?: string | null }) {
+  const [kec, setKec] = useState("");
+  return (
+    <form action={requestKelurahanAccessAction} className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Kecamatan" htmlFor="kecamatan">
+          <select id="kecamatan" name="kecamatan" required value={kec} onChange={(ev) => setKec(ev.target.value)} className={inputCls}>
+            <option value="">Pilih kecamatan</option>{Object.keys(KECAMATAN_KELURAHAN).map((k) => <option key={k}>{k}</option>)}
+          </select>
+        </Field>
+        <Field label="Kelurahan" htmlFor="kelurahan">
+          <select id="kelurahan" name="kelurahan" required className={inputCls} disabled={!kec}>
+            <option value="">Pilih kelurahan</option>{(KECAMATAN_KELURAHAN[kec as keyof typeof KECAMATAN_KELURAHAN] ?? []).map((k: string) => <option key={k}>{k}</option>)}
+          </select>
+        </Field>
+        <Field label="NIP" htmlFor="nip" hint="Hanya angka."><input id="nip" name="nip" inputMode="numeric" required className={inputCls} /></Field>
+        <Field label="Jabatan" htmlFor="jabatan"><input id="jabatan" name="jabatan" required className={inputCls} placeholder="Lurah / Sekretaris / Staf" /></Field>
+        <div className="sm:col-span-2"><Field label="Nomor WhatsApp resmi" htmlFor="phone_wa" hint="Contoh: 081234567890"><input id="phone_wa" name="phone_wa" inputMode="tel" required defaultValue={defaultPhone ?? ""} className={inputCls} /></Field></div>
+      </div>
+      <SubmitButton className="inline-flex justify-center rounded-lg bg-teal-deep px-5 py-2.5 text-sm font-semibold text-white">Kirim permintaan akses</SubmitButton>
     </form>
   );
 }

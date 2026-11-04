@@ -8,3 +8,5 @@ PSQL="${PSQL:-psql}"
 $PSQL -q -v ON_ERROR_STOP=1 -f supabase/tests/mock-supabase.sql 2>&1 | grep -v NOTICE || true
 $PSQL -q -v ON_ERROR_STOP=1 -d kl -f supabase/migrations/20261103090000_rev4_core.sql
 $PSQL -q -v ON_ERROR_STOP=1 -d kl -f supabase/tests/rev4_workflow.sql
+$PSQL -q -v ON_ERROR_STOP=1 -d kl -f supabase/migrations/20261104060000_google_login_and_kelurahan_access.sql
+$PSQL -q -v ON_ERROR_STOP=1 -d kl -f supabase/tests/google_access.sql
