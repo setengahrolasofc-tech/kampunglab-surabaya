@@ -29,14 +29,15 @@ export default async function Beranda() {
       <LandingHeader masukHref={masukHref} masukLabel={masukLabel} />
 
       {/* ===== Hero layar penuh (mockup "LANDING PAGE" dan "2") ===== */}
-      <section className="relative isolate min-h-[640px] overflow-hidden text-white" style={{ height: "max(100svh, 640px)" }}>
+      <section className="relative isolate min-h-[560px] overflow-hidden text-white" style={{ height: "max(100svh, 560px)" }}>
         <HeroSlides />
-        <div className="absolute inset-x-0 bottom-0 -z-10 h-1/3 bg-gradient-to-t from-black/20 to-transparent" aria-hidden />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/25 via-black/5 to-transparent max-sm:from-black/35 max-sm:via-black/15" aria-hidden />
+        <div className="absolute inset-x-0 bottom-0 -z-10 h-1/3 bg-gradient-to-t from-black/25 to-transparent" aria-hidden />
         <div className="absolute left-[20px] right-[20px] top-[35%] sm:left-[8.1%] sm:right-[6%]">
-          <h1 className="text-[clamp(2.3rem,4.65vw,5rem)] font-bold leading-[1.07] tracking-[-0.01em]">
+          <h1 className="text-[clamp(2rem,4.65vw,5rem)] font-bold leading-[1.07] tracking-[-0.01em] [text-shadow:0_2px_14px_rgba(0,0,0,0.3)]">
             Inovasi Berkarya<br />Kampung Berdaya
           </h1>
-          <p className="mt-2 max-w-[min(50vw,52rem)] max-sm:max-w-none text-[clamp(0.95rem,1.28vw,1.3rem)] leading-[1.15]">
+          <p className="mt-2 max-w-[min(50vw,52rem)] max-sm:max-w-none text-[clamp(0.95rem,1.28vw,1.3rem)] leading-[1.15] [text-shadow:0_1px_8px_rgba(0,0,0,0.35)]">
             Mari bersama mengenali tantangan, mengembangkan gagasan, dan berkolaborasi menghadirkan solusi nyata untuk kampung yang lebih baik.
           </p>
           <div className="mt-12 flex flex-wrap gap-4">

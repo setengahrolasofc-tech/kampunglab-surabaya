@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Montserrat, Poppins } from "next/font/google";
 import type { ReactNode } from "react";
 import { ChromeVisibility } from "@/components/chrome-visibility";
@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description:
     "Platform inovasi warga Surabaya: pengajuan ke Kelurahan, dana bertahap 30-30-40, uji oleh warga di kampung, dan Rapor Bukti Inovasi yang dapat diverifikasi lewat QR.",
 };
+
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#14455c" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

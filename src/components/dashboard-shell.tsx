@@ -33,7 +33,7 @@ export function DashboardShell({ name, roleLabel, unread, children }: { name: st
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Bilah atas ponsel */}
-        <div className="no-print bg-[#14304a] px-3 py-2 lg:hidden">
+        <div className="no-print bg-[#14304a] px-3 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] lg:hidden">
           <Link href="/" className="mb-2 block"><LogoHouse size={26} light /></Link>
           <SidebarNav items={ITEMS} orientation="horizontal" />
         </div>
@@ -42,7 +42,7 @@ export function DashboardShell({ name, roleLabel, unread, children }: { name: st
           <form action="/papan-masalah" role="search" className="relative max-w-md flex-1">
             <label htmlFor="cari-dashboard" className="sr-only">Cari proyek, inovasi, atau kelurahan</label>
             <IconSearch size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#14304a]/45" />
-            <input id="cari-dashboard" name="q" placeholder="Cari proyek, inovasi, atau kelurahan..." className="w-full rounded-full border-0 bg-[#e6ecf2] py-2 pl-9 pr-4 text-xs text-[#14304a] placeholder:text-[#14304a]/45 focus:outline-none focus:ring-2 focus:ring-[#1fa68a]/40" />
+            <input id="cari-dashboard" name="q" placeholder="Cari proyek, inovasi, atau kelurahan..." className="w-full rounded-full border-0 bg-[#e6ecf2] py-2 pl-9 pr-4 text-base text-[#14304a] sm:text-xs placeholder:text-[#14304a]/45 focus:outline-none focus:ring-2 focus:ring-[#1fa68a]/40" />
           </form>
           <div className="ml-auto flex items-center gap-4">
             <Link href="/notifikasi" className="relative p-1.5 text-[#14304a]" aria-label={unread ? `Notifikasi, ${unread} belum dibaca` : "Notifikasi"}>
