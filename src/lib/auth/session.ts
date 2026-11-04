@@ -3,6 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient, type ServerSupabase } from "@/lib/supabase/server";
 import type { AppRole, AppUserRow, MandateRow } from "@/lib/types";
+import { needsProfileCompletion } from "@/lib/auth/profile.mjs";
 
 export interface SessionContext {
   supabase: ServerSupabase;
@@ -48,6 +49,8 @@ export async function requireRole(role: AppRole): Promise<SessionContext> {
   if (profile.role !== role) redirect(homeFor(profile.role));
   if (role === "KELURAHAN" && (profile.status !== "AKTIF" || !mandate)) redirect("/menunggu-verifikasi");
   if (role !== "KELURAHAN" && profile.status !== "AKTIF") redirect("/masuk?status=diblokir");
+  // Akun Inovator baru (mis. dari Google) wajib melengkapi data diri dulu.
+  if (role === "INNOVATOR" && needsProfileCompletion(profile)) redirect("/lengkapi-profil");
   return session;
 }
 

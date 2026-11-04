@@ -5,9 +5,12 @@ import { KECAMATAN_KELURAHAN } from "@/lib/auth/surabaya-areas.mjs";
 import { OTP_LENGTH, PASSWORD_RULES } from "@/lib/auth/validation.mjs";
 import type { AuthActionState } from "@/lib/auth/types";
 import {
-  googleAction, loginAction, requestResetAction, resendOtpAction, signupAction, updatePasswordAction, verifyOtpAction,
+  googleAction, loginAction, requestPasswordChangeCodeAction, requestResetAction, resendOtpAction, resetPasswordWithCodeAction,
+  signupAction, verifyOtpAction,
 } from "@/app/auth/actions";
+import { completeProfileAction } from "@/app/lengkapi-profil/actions";
 import { requestKelurahanAccessAction } from "@/app/minta-akses/actions";
+import { PasswordInput } from "./password-input";
 import { SubmitButton } from "./submit-button";
 import { Alert, Field, cx, inputCls, linkCls } from "./ui";
 
@@ -83,7 +86,7 @@ export function LoginForm({ info, sebagai = "inovator" }: { info?: string; sebag
         <input type="hidden" name="sebagai" value={sebagai} />
         {info && <Alert tone="perhatian">{info}</Alert>}
         <Field label="Email" htmlFor="email" error={state.errors?.email}><input id="email" name="email" type="email" autoComplete="email" className={inputCls} /></Field>
-        <Field label="Password" htmlFor="password" error={state.errors?.password}><input id="password" name="password" type="password" autoComplete="current-password" className={inputCls} /></Field>
+        <Field label="Password" htmlFor="password" error={state.errors?.password}><PasswordInput id="password" name="password" autoComplete="current-password" /></Field>
         <Msg state={state} />
         <SubmitButton className="w-full inline-flex justify-center rounded-lg bg-teal-deep px-4 py-2 text-sm font-semibold text-white">Masuk</SubmitButton>
       </form>
@@ -148,8 +151,8 @@ export function SignupForm({ initialRole = "INNOVATOR" }: { initialRole?: "INNOV
             <input id="sk" name="sk" type="file" accept=".pdf,.jpg,.jpeg,.png" className="text-sm file:mr-3 file:rounded-md file:border-0 file:bg-celadon file:px-3 file:py-1.5 file:text-xs file:font-semibold" />
           </Field></div>
         </>}
-        <Field label="Password" htmlFor="password" error={e.password}><input id="password" name="password" type="password" autoComplete="new-password" value={pw} onChange={(ev) => setPw(ev.target.value)} className={inputCls} /></Field>
-        <Field label="Ulangi password" htmlFor="confirmation" error={e.confirmation}><input id="confirmation" name="confirmation" type="password" autoComplete="new-password" className={inputCls} /></Field>
+        <Field label="Password" htmlFor="password" error={e.password}><PasswordInput id="password" name="password" autoComplete="new-password" value={pw} onChange={(ev) => setPw(ev.target.value)} /></Field>
+        <Field label="Ulangi password" htmlFor="confirmation" error={e.confirmation}><PasswordInput id="confirmation" name="confirmation" autoComplete="new-password" /></Field>
       </div>
       <PasswordRules value={pw} />
       {role === "KELURAHAN" && <Alert tone="perhatian">Setelah mengirim, akun Anda berstatus <strong>menunggu mandat</strong>. Semua fitur dashboard Kelurahan terkunci sampai Admin BRIDA memeriksa SK dan memberi izin.</Alert>}
@@ -162,9 +165,40 @@ export function SignupForm({ initialRole = "INNOVATOR" }: { initialRole?: "INNOV
   );
 }
 
+/** Langkah 2 pemulihan/ganti password: kode OTP + password baru dikirim sekaligus dan diverifikasi di server. */
+export function RecoveryCodeForm({ email, mode, notice }: { email: string; mode: "lupa" | "ubah"; notice?: string }) {
+  const [state, action] = useActionState(resetPasswordWithCodeAction, { ...init, step: "otp" as const, email, mode });
+  const [rs, resend] = useActionState(resendOtpAction, init);
+  const [pw, setPw] = useState("");
+  const e = state.errors ?? {};
+  return (
+    <div className="space-y-4">
+      <Alert tone="info">{notice ?? "Kami mengirim kode"} {OTP_LENGTH} digit ke <strong>{email}</strong>. Masukkan kode itu dan password baru.</Alert>
+      <form action={action} className="space-y-4" noValidate>
+        <input type="hidden" name="email" value={email} /><input type="hidden" name="mode" value={mode} />
+        <Field label="Kode OTP" htmlFor="token" error={e.token}>
+          <input id="token" name="token" inputMode="numeric" autoComplete="one-time-code" maxLength={OTP_LENGTH + 2} className={cx(inputCls, "text-center text-lg tracking-[0.5em]")} />
+        </Field>
+        <Field label="Password baru" htmlFor="password" error={e.password}><PasswordInput id="password" name="password" autoComplete="new-password" value={pw} onChange={(ev) => setPw(ev.target.value)} /></Field>
+        <PasswordRules value={pw} />
+        <Field label="Ulangi password baru" htmlFor="confirmation" error={e.confirmation}><PasswordInput id="confirmation" name="confirmation" autoComplete="new-password" /></Field>
+        <Msg state={{ error: state.error }} />
+        <SubmitButton className="w-full inline-flex justify-center rounded-lg bg-teal-deep px-4 py-2 text-sm font-semibold text-white">Simpan password baru</SubmitButton>
+      </form>
+      <form action={resend} className="text-center text-sm">
+        <input type="hidden" name="email" value={email} /><input type="hidden" name="purpose" value="recovery" />
+        <SubmitButton className={linkCls} pending="Mengirim…">Kirim ulang kode</SubmitButton>
+        {rs.message && <p className="mt-1 text-xs text-indigo-space/70">{rs.message}</p>}
+        {rs.error && <p className="mt-1 text-xs text-red-700">{rs.error}</p>}
+      </form>
+    </div>
+  );
+}
+
+/** Lupa password (belum masuk): email dulu, lalu kode OTP + password baru. */
 export function ResetForm() {
   const [state, action] = useActionState(requestResetAction, init);
-  if (state.step === "otp" && state.email) return <OtpForm email={state.email} purpose="recovery" state={state} />;
+  if (state.step === "otp" && state.email) return <RecoveryCodeForm email={state.email} mode="lupa" notice="Jika email terdaftar, kami mengirim kode" />;
   return (
     <form action={action} className="space-y-4" noValidate>
       <Field label="Email akun" htmlFor="email" error={state.errors?.email}><input id="email" name="email" type="email" autoComplete="email" className={inputCls} /></Field>
@@ -174,16 +208,72 @@ export function ResetForm() {
   );
 }
 
-export function PasswordForm() {
-  const [state, action] = useActionState(updatePasswordAction, init);
-  const [pw, setPw] = useState("");
+/** Ganti password (sudah masuk): wajib kode OTP yang dikirim ke email akun ini. */
+export function ChangePasswordForm({ email }: { email: string }) {
+  const [state, action] = useActionState(requestPasswordChangeCodeAction, init);
+  if (state.step === "otp" && state.email) return <RecoveryCodeForm email={state.email} mode="ubah" notice="Kami mengirim kode" />;
+  return (
+    <form action={action} className="space-y-4">
+      <p className="rounded-lg bg-celadon/40 px-3 py-2 text-sm">Kode akan dikirim ke <strong>{email}</strong>.</p>
+      <Msg state={state} />
+      <SubmitButton className="w-full inline-flex justify-center rounded-lg bg-teal-deep px-4 py-2 text-sm font-semibold text-white" pending="Mengirim kode…">Kirim kode OTP</SubmitButton>
+    </form>
+  );
+}
+
+/**
+ * Melengkapi data diri setelah masuk dengan Google untuk pertama kali. Isiannya sama dengan pendaftaran, tanpa email dan password
+ * (email dari Google, tidak ada password). SK Kelurahan diunggah di halaman "Menunggu verifikasi" setelah ini.
+ */
+export function CompleteProfileForm({ defaultName, email, defaultPhone, initialRole = "INNOVATOR" }: {
+  defaultName: string; email: string; defaultPhone?: string | null; initialRole?: "INNOVATOR" | "KELURAHAN";
+}) {
+  const [state, action] = useActionState(completeProfileAction, init);
+  const [role, setRole] = useState<string>(initialRole);
+  const [kec, setKec] = useState("");
+  const e = state.errors ?? {};
   return (
     <form action={action} className="space-y-4" noValidate>
-      <Field label="Password baru" htmlFor="password" error={state.errors?.password}><input id="password" name="password" type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} className={inputCls} /></Field>
-      <PasswordRules value={pw} />
-      <Field label="Ulangi password baru" htmlFor="confirmation" error={state.errors?.confirmation}><input id="confirmation" name="confirmation" type="password" autoComplete="new-password" className={inputCls} /></Field>
-      <Msg state={state} />
-      <SubmitButton className="w-full inline-flex justify-center rounded-lg bg-teal-deep px-4 py-2 text-sm font-semibold text-white">Simpan password</SubmitButton>
+      <fieldset>
+        <legend className="mb-2 text-sm font-semibold">Daftar sebagai</legend>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {ROLE_INFO.map((r) => (
+            <label key={r.v} className={cx("cursor-pointer rounded-xl border p-3 text-sm", role === r.v ? "border-teal-deep bg-teal-deep/5 ring-2 ring-teal-deep/30" : "border-celadon bg-white")}>
+              <input type="radio" name="role" value={r.v} checked={role === r.v} onChange={() => setRole(r.v)} className="sr-only" />
+              <span className="block font-bold">{r.t}</span><span className="text-xs text-indigo-space/70">{r.d}</span>
+            </label>
+          ))}
+        </div>
+        {e.role && <p className="mt-1 text-xs text-red-700">{e.role}</p>}
+      </fieldset>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Nama lengkap" htmlFor="display_name" error={e.display_name} hint="Diambil dari Google; ubah bila perlu.">
+          <input id="display_name" name="display_name" autoComplete="name" defaultValue={defaultName} className={inputCls} />
+        </Field>
+        <Field label="Email (dari Google)" htmlFor="email_tampil"><input id="email_tampil" value={email} readOnly className={cx(inputCls, "bg-celadon/20")} /></Field>
+        <Field label="Nomor WhatsApp" htmlFor="phone_wa" error={e.phone_wa} hint="Contoh: 081234567890"><input id="phone_wa" name="phone_wa" inputMode="tel" autoComplete="tel" defaultValue={defaultPhone ?? ""} className={inputCls} /></Field>
+        {role === "INNOVATOR" && <>
+          <Field label="Institusi / komunitas" htmlFor="institusi" error={e.institusi}><input id="institusi" name="institusi" className={inputCls} placeholder="Universitas / sekolah / komunitas" /></Field>
+          <Field label="Kota domisili" htmlFor="kota_domisili" error={e.kota_domisili} hint="Boleh dari luar Surabaya."><input id="kota_domisili" name="kota_domisili" className={inputCls} /></Field>
+        </>}
+        {role === "KELURAHAN" && <>
+          <Field label="NIP" htmlFor="nip" error={e.nip}><input id="nip" name="nip" inputMode="numeric" className={inputCls} /></Field>
+          <Field label="Jabatan" htmlFor="jabatan" error={e.jabatan}><input id="jabatan" name="jabatan" className={inputCls} placeholder="Lurah / Sekretaris / Staf" /></Field>
+          <Field label="Kecamatan" htmlFor="kecamatan" error={e.kecamatan}>
+            <select id="kecamatan" name="kecamatan" value={kec} onChange={(ev) => setKec(ev.target.value)} className={inputCls}>
+              <option value="">Pilih kecamatan</option>{Object.keys(KECAMATAN_KELURAHAN).map((k) => <option key={k}>{k}</option>)}
+            </select>
+          </Field>
+          <Field label="Kelurahan" htmlFor="kelurahan" error={e.kelurahan}>
+            <select id="kelurahan" name="kelurahan" className={inputCls} disabled={!kec}>
+              <option value="">Pilih kelurahan</option>{(KECAMATAN_KELURAHAN[kec as keyof typeof KECAMATAN_KELURAHAN] ?? []).map((k: string) => <option key={k}>{k}</option>)}
+            </select>
+          </Field>
+        </>}
+      </div>
+      {role === "KELURAHAN" && <Alert tone="perhatian">Setelah mengirim, akun Anda berstatus <strong>menunggu mandat</strong>. Unggah SK/surat tugas di halaman berikutnya; semua fitur Kelurahan terkunci sampai Admin BRIDA memberi izin.</Alert>}
+      <Msg state={{ error: state.error }} />
+      <SubmitButton className="inline-flex justify-center rounded-lg bg-teal-deep px-5 py-2.5 text-sm font-semibold text-white">{role === "KELURAHAN" ? "Kirim permintaan akses" : "Selesaikan pendaftaran"}</SubmitButton>
     </form>
   );
 }

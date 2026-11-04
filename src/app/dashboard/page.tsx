@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Flash } from "@/components/flash";
 import { IconArrow, IconBell, IconBulb, IconCheck, IconDoc, IconDownload, IconInfo, IconPeople, IconPin, IconQr, IconSend, IconTrophy } from "@/components/icons";
 import { homeFor, requireAnyUser } from "@/lib/auth/session";
+import { needsProfileCompletion } from "@/lib/auth/profile.mjs";
 import { angka, tanggal } from "@/lib/domain/format.mjs";
 import { FINAL_STATUSES, phaseOf, STATUS_INFO } from "@/lib/domain/workflow.mjs";
 
@@ -35,6 +36,7 @@ export default async function DashboardBeranda({ searchParams }: { searchParams:
   const sp = await searchParams;
   const session = await requireAnyUser();
   if (session.profile.role !== "INNOVATOR") redirect(homeFor(session.profile.role));
+  if (needsProfileCompletion(session.profile)) redirect("/lengkapi-profil");
   if (session.profile.status === "DIBLOKIR") redirect("/masuk?status=diblokir");
   const { supabase, userId } = session;
   await supabase.rpc("sync_due_tests");

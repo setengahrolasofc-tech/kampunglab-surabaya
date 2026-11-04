@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { destinationForIntent, getAppOrigin, normalizeIntent, safeAuthDestination } from "@/lib/auth/validation.mjs";
+import { lengkapiProfilUrl, needsProfileCompletion } from "@/lib/auth/profile.mjs";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
@@ -13,7 +14,16 @@ export async function GET(request: NextRequest) {
       if (!error) {
         const next = request.nextUrl.searchParams.get("next");
         // Tanpa ?next= (masuk dengan Google): pakai pintu yang dipilih di halaman Masuk.
-        destination = next ? safeAuthDestination(next) : destinationForIntent(normalizeIntent(request.cookies.get("kl_masuk_sebagai")?.value));
+        const intent = normalizeIntent(request.cookies.get("kl_masuk_sebagai")?.value);
+        destination = next ? safeAuthDestination(next) : destinationForIntent(intent);
+        // Akun baru dari Google belum punya nama lengkap, WA, institusi, dst.: wajib melengkapi data (kecuali password) dulu.
+        if (!next) {
+          const { data: auth } = await supabase.auth.getUser();
+          if (auth.user) {
+            const { data: profile } = await supabase.from("users").select("role, phone_wa, institusi, kota_domisili").eq("id", auth.user.id).maybeSingle();
+            if (needsProfileCompletion(profile)) destination = lengkapiProfilUrl(intent);
+          }
+        }
       }
     } catch { /* No tokens or provider error bodies are exposed. */ }
   }

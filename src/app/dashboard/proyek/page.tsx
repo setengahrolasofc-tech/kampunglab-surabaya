@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Flash } from "@/components/flash";
 import { Card, Empty, Main, PageHeader, PhaseTimeline, StatusBadge, btnPrimary } from "@/components/ui";
 import { requireAnyUser, homeFor } from "@/lib/auth/session";
+import { needsProfileCompletion } from "@/lib/auth/profile.mjs";
 import { rupiah, tanggal } from "@/lib/domain/format.mjs";
 import { phaseOf, STATUS_INFO } from "@/lib/domain/workflow.mjs";
 import type { InnovationRow } from "@/lib/types";
@@ -14,6 +15,7 @@ export default async function ProyekSayaPage({ searchParams }: { searchParams: P
   const sp = await searchParams;
   const session = await requireAnyUser();
   if (session.profile.role !== "INNOVATOR") redirect(homeFor(session.profile.role));
+  if (needsProfileCompletion(session.profile)) redirect("/lengkapi-profil");
   if (session.profile.status === "DIBLOKIR") redirect("/masuk?status=diblokir");
   const { supabase, userId } = session;
   await supabase.rpc("sync_due_tests");

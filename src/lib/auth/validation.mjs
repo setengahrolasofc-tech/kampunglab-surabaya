@@ -114,6 +114,60 @@ export function validateSignup(form) {
   return { errors, email, password: String(form.get("password") ?? ""), role, meta: allMeta };
 }
 
+/**
+ * Lengkapi profil untuk akun yang sudah masuk (mis. baru dibuat lewat Google). Sama seperti pendaftaran, tanpa email, password, dan SK
+ * (SK diunggah di halaman "Menunggu verifikasi" setelah permintaan akses Kelurahan terkirim).
+ * @param {FormData} form
+ */
+export function validateCompleteProfile(form) {
+  /** @type {Record<string, string>} */
+  const errors = {};
+  const txt = (/** @type {string} */ k) => String(form.get(k) ?? "").trim().replace(/\s+/g, " ");
+  const role = txt("role");
+  if (!ROLES_PENDAFTARAN.includes(role)) errors.role = "Pilih peran pendaftaran.";
+  const name = txt("display_name");
+  if (name.length < 2 || name.length > 100 || /[\u0000-\u001f\u007f]/.test(name)) errors.display_name = "Isi nama lengkap 2–100 karakter.";
+  const phone = cleanPhone(txt("phone_wa"));
+  if (!/^[0-9+]{8,16}$/.test(phone)) errors.phone_wa = "Isi nomor WA aktif (8–16 digit).";
+  const institusi = txt("institusi"), kota = txt("kota_domisili");
+  let nip = "", jabatan = "", kecamatan = "", kelurahan = "";
+  if (role === "INNOVATOR") {
+    if (institusi.length < 2 || institusi.length > 120) errors.institusi = "Isi institusi/komunitas (2–120 karakter). Tulis \"Warga umum\" bila tidak ada.";
+    if (kota.length < 2 || kota.length > 80) errors.kota_domisili = "Isi kota domisili.";
+  } else if (role === "KELURAHAN") {
+    nip = txt("nip").replace(/\s/g, "");
+    jabatan = txt("jabatan");
+    kecamatan = txt("kecamatan"); kelurahan = txt("kelurahan");
+    if (!/^[0-9]{8,24}$/.test(nip)) errors.nip = "Isi NIP (hanya angka, 8–24 digit).";
+    if (jabatan.length < 3 || jabatan.length > 120) errors.jabatan = "Isi jabatan (3–120 karakter).";
+    const list = Object.hasOwn(KECAMATAN_KELURAHAN, kecamatan) ? KECAMATAN_KELURAHAN[kecamatan] : null;
+    if (!list) errors.kecamatan = "Pilih kecamatan.";
+    else if (!list.includes(kelurahan)) errors.kelurahan = "Pilih kelurahan sesuai kecamatan.";
+  }
+  return { errors, role, name, phone, institusi, kota, nip, jabatan, kecamatan, kelurahan };
+}
+
+/**
+ * Ganti/pulihkan password dengan kode OTP email sekaligus password baru dalam satu langkah (kode diverifikasi di server
+ * tepat sebelum password diubah, sehingga tidak ada jalan pintas hanya dengan sesi login).
+ * @param {FormData} form
+ */
+export function validateRecovery(form) {
+  /** @type {Record<string, string>} */
+  const errors = {};
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  const token = String(form.get("token") ?? "").replace(/\s/g, "");
+  const password = String(form.get("password") ?? "");
+  const confirmation = String(form.get("confirmation") ?? "");
+  if (!isValidEmail(email)) errors.email = "Alamat email tidak valid.";
+  if (!new RegExp(`^\\d{${OTP_LENGTH}}$`).test(token)) errors.token = `Masukkan ${OTP_LENGTH} digit kode OTP.`;
+  if (!password) errors.password = "Isi password baru.";
+  else if (new TextEncoder().encode(password).length > 72) errors.password = "Password terlalu panjang (maks. 72 byte).";
+  else if (!isStrongPassword(password)) errors.password = "Password belum memenuhi semua aturan di atas.";
+  if (password !== confirmation) errors.confirmation = "Konfirmasi password belum sama.";
+  return { errors, email, token, password };
+}
+
 /** Kode OTP email untuk verifikasi daftar atau pemulihan. @param {FormData} form */
 export function validateOtp(form) {
   /** @type {Record<string, string>} */

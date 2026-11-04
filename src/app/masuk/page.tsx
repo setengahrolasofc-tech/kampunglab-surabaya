@@ -6,6 +6,7 @@ import { LogoFull } from "@/components/logo";
 import { Alert, Card, Main, cx } from "@/components/ui";
 import { getSession, homeFor } from "@/lib/auth/session";
 import { destinationForIntent, normalizeIntent } from "@/lib/auth/validation.mjs";
+import { lengkapiProfilUrl, needsProfileCompletion } from "@/lib/auth/profile.mjs";
 
 export const metadata: Metadata = { title: "Masuk" };
 
@@ -21,6 +22,7 @@ export default async function MasukPage({ searchParams }: { searchParams: Promis
   const intent = normalizeIntent(sebagai);
   const session = await getSession();
   if (session && session.profile.status !== "DIBLOKIR") {
+    if (needsProfileCompletion(session.profile)) redirect(lengkapiProfilUrl(intent));
     redirect(session.profile.role === "INNOVATOR" && intent === "kelurahan" ? destinationForIntent(intent) : homeFor(session.profile.role));
   }
   return (

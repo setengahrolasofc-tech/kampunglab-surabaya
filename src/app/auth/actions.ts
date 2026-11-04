@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient, hasServiceRole } from "@/lib/supabase/admin";
-import { destinationForIntent, getAppOrigin, normalizeIntent, validateAuthForm, validateOtp, validateSignup } from "@/lib/auth/validation.mjs";
+import { destinationForIntent, getAppOrigin, normalizeIntent, validateAuthForm, validateOtp, validateRecovery, validateSignup } from "@/lib/auth/validation.mjs";
 import type { AuthActionState } from "@/lib/auth/types";
 
 const GENERIK = "Terjadi kendala. Coba lagi sebentar lagi.";
@@ -101,18 +101,18 @@ export async function signupAction(_: AuthActionState, form: FormData): Promise<
   }
 }
 
+/** Verifikasi kode OTP pendaftaran. Pemulihan/ganti password memakai resetPasswordWithCodeAction (kode + password baru sekaligus). */
 export async function verifyOtpAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
   const { errors, email, token } = validateOtp(form);
-  const purpose: "recovery" | "signup" = form.get("purpose") === "recovery" ? "recovery" : "signup";
-  if (Object.keys(errors).length) return { errors, step: "otp", email, purpose };
+  if (Object.keys(errors).length) return { errors, step: "otp", email, purpose: "signup" };
   try {
     const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.verifyOtp({ email, token, type: purpose === "recovery" ? "recovery" : "signup" });
-    if (error) return { step: "otp", email, purpose, error: "Kode salah atau sudah kedaluwarsa." };
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: "signup" });
+    if (error) return { step: "otp", email, purpose: "signup", error: "Kode salah atau sudah kedaluwarsa." };
   } catch {
-    return { step: "otp", email, purpose, error: GENERIK };
+    return { step: "otp", email, purpose: "signup", error: GENERIK };
   }
-  redirect(purpose === "recovery" ? "/ubah-kata-sandi" : "/dashboard");
+  redirect("/dashboard");
 }
 
 export async function resendOtpAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
@@ -129,27 +129,68 @@ export async function resendOtpAction(_: AuthActionState, form: FormData): Promi
   return { ...base, message: "Jika email terdaftar, kode baru sudah dikirim. Tunggu satu menit sebelum meminta lagi." };
 }
 
+/** Lupa password (belum masuk): kirim kode OTP ke email. Respons netral agar daftar email tidak bisa ditebak. */
 export async function requestResetAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
   const { errors, email } = validateAuthForm(form, "reset");
   if (Object.keys(errors).length) return { errors };
   try {
     const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${getAppOrigin(process.env.NEXT_PUBLIC_APP_URL)}/auth/callback?next=/ubah-kata-sandi` });
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
     const failure = sendFailureMessage("reset", error);
     if (failure) return { error: failure };
   } catch (e) { console.error("[auth:reset]", e); }
-  return { step: "otp", purpose: "recovery", email, message: "Jika email terdaftar, kode OTP pemulihan sudah dikirim." };
+  return { step: "otp", purpose: "recovery", mode: "lupa", email, message: "Jika email terdaftar, kode OTP pemulihan sudah dikirim." };
 }
 
-export async function updatePasswordAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
-  const { errors, password } = validateAuthForm(form, "password");
-  if (Object.keys(errors).length) return { errors };
+/** Ganti password (sudah masuk): kode OTP dikirim ke email akun yang sedang masuk untuk membuktikan pemilik akun. */
+export async function requestPasswordChangeCodeAction(): Promise<AuthActionState> {
+  let email = "";
   try {
     const supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) return { error: error.code === "same_password" ? "Gunakan password yang berbeda dari sebelumnya." : "Sesi pemulihan sudah berakhir. Minta kode baru." };
-  } catch {
+    const { data } = await supabase.auth.getUser();
+    email = data.user?.email?.toLowerCase() ?? "";
+    if (!email) return { error: "Sesi berakhir. Masuk lagi untuk mengganti password." };
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const failure = sendFailureMessage("change-code", error);
+    if (failure) return { error: failure };
+  } catch (e) {
+    console.error("[auth:change-code]", e);
     return { error: GENERIK };
+  }
+  return { step: "otp", purpose: "recovery", mode: "ubah", email, message: "Kode OTP sudah dikirim ke email akun Anda." };
+}
+
+/**
+ * Pulihkan atau ganti password: kode OTP diverifikasi DI SINI tepat sebelum password diubah, dalam satu permintaan.
+ * Tidak ada lagi halaman yang bisa mengganti password hanya dengan sesi login. Pada mode "ubah", email diambil dari
+ * sesi yang sedang masuk (bukan dari form), sehingga kode harus milik akun itu sendiri.
+ */
+export async function resetPasswordWithCodeAction(_: AuthActionState, form: FormData): Promise<AuthActionState> {
+  const mode: "lupa" | "ubah" = form.get("mode") === "ubah" ? "ubah" : "lupa";
+  const v = validateRecovery(form);
+  try {
+    const supabase = await createServerSupabaseClient();
+    let email = v.email;
+    if (mode === "ubah") {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user?.email) return { step: "otp", purpose: "recovery", mode, email, error: "Sesi berakhir. Masuk lagi untuk mengganti password." };
+      email = data.user.email.toLowerCase();
+      delete v.errors.email;
+    }
+    const base = { step: "otp" as const, purpose: "recovery" as const, mode, email };
+    if (Object.keys(v.errors).length) return { ...base, errors: v.errors };
+    const { error } = await supabase.auth.verifyOtp({ email, token: v.token, type: "recovery" });
+    if (error) return { ...base, error: "Kode salah atau sudah kedaluwarsa. Minta kode baru bila perlu." };
+    const { error: updateError } = await supabase.auth.updateUser({ password: v.password });
+    if (updateError) {
+      if (updateError.code === "same_password") return { ...base, errors: { password: "Gunakan password yang berbeda dari sebelumnya." } };
+      if (updateError.code === "weak_password") return { ...base, errors: { password: "Password ditolak karena terlalu lemah." } };
+      console.error("[auth:update-password]", updateError.status, updateError.code);
+      return { ...base, error: "Password belum dapat diubah. Minta kode baru lalu coba lagi." };
+    }
+  } catch (e) {
+    console.error("[auth:reset-with-code]", e);
+    return { step: "otp", purpose: "recovery", mode, email: v.email, error: GENERIK };
   }
   redirect("/dashboard");
 }
