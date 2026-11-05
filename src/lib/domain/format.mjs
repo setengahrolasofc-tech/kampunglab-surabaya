@@ -44,3 +44,13 @@ export function inisial(name) {
 /** Hanya angka dan plus untuk nomor telepon. @param {string} v */
 export const cleanPhone = (v) => String(v ?? "").replace(/[^0-9+]/g, "");
 export const isPhone = (/** @type {string} */ v) => /^[0-9+]{8,16}$/.test(cleanPhone(v));
+
+/** Hanya angka, tanpa nol di depan, maks 12 digit. "000" -> "", "0042" -> "42". @param {unknown} value */
+export function digitsOnly(value) {
+  return String(value ?? "").replace(/\D/g, "").replace(/^0+/, "").slice(0, 12);
+}
+
+/** Pemisah ribuan titik gaya Indonesia: "1500000" -> "1.500.000". @param {unknown} raw */
+export function formatRibuan(raw) {
+  return digitsOnly(raw).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}

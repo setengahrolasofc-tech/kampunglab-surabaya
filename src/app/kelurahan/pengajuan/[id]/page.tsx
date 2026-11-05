@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Flash } from "@/components/flash";
 import { DocLinks, FundsSummary, LogbookList, TeamList, TestPanel, TIPE_LABEL } from "@/components/innovation-views";
 import { SubmitButton } from "@/components/submit-button";
+import { RupiahInput } from "@/components/rupiah-input";
 import { UploadField } from "@/components/upload-field";
 import { Alert, Badge, Card, Field, Main, PageHeader, PhaseTimeline, SectionTitle, StatusBadge, btnDanger, btnOutline, btnPrimary, inputCls } from "@/components/ui";
 import { BerkasLink } from "@/components/berkas-link";
@@ -26,7 +27,7 @@ function Transfer({ id, tahap, nominal, label }: { id: string; tahap: string; no
       <form action={transferAction} className="space-y-3">
         <input type="hidden" name="id" value={id} /><input type="hidden" name="tahap" value={tahap} />
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Nominal ditransfer (Rp)" htmlFor={`nom-${tahap}`}><input id={`nom-${tahap}`} name="nominal" inputMode="numeric" defaultValue={nominal} className={inputCls} /></Field>
+          <Field label="Nominal ditransfer (Rp)" htmlFor={`nom-${tahap}`}><RupiahInput id={`nom-${tahap}`} name="nominal" defaultValue={nominal} /></Field>
           <UploadField name="bukti" prefix={`${id}/transfer`} label="Bukti transfer (PDF/gambar)" required />
         </div>
         <Field label="Catatan (opsional)" htmlFor={`cat-${tahap}`}><input id={`cat-${tahap}`} name="catatan" className={inputCls} /></Field>

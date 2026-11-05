@@ -4,6 +4,7 @@ import { Flash } from "@/components/flash";
 import { FundsSummary, LogbookList } from "@/components/innovation-views";
 import { ProjectNav } from "@/components/project-nav";
 import { SubmitButton } from "@/components/submit-button";
+import { RupiahInput } from "@/components/rupiah-input";
 import { UploadField } from "@/components/upload-field";
 import { Alert, Card, Field, Main, PageHeader, SectionTitle, btnOutline, inputCls } from "@/components/ui";
 import { actionsFor } from "@/lib/domain/workflow.mjs";
@@ -32,7 +33,7 @@ export default async function LogbookPage({ params, searchParams }: { params: Pr
                 <Field label="Progres kegiatan" htmlFor="deskripsi"><textarea id="deskripsi" name="deskripsi" rows={3} required minLength={5} className={inputCls} placeholder="Apa yang dikerjakan dan dibeli?" /></Field>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Tanggal" htmlFor="tanggal"><input id="tanggal" name="tanggal" type="date" className={inputCls} /></Field>
-                  <Field label="Nominal belanja (Rp)" htmlFor="nominal" hint="Isi 0 bila tidak ada belanja. Belanja wajib bernota."><input id="nominal" name="nominal" inputMode="numeric" defaultValue={0} className={inputCls} /></Field>
+                  <Field label="Nominal belanja (Rp)" htmlFor="nominal" hint="Isi 0 bila tidak ada belanja. Belanja wajib bernota."><RupiahInput id="nominal" name="nominal" defaultValue={0} /></Field>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <UploadField name="nota" prefix={`${id}/nota`} label="Foto/scan nota belanja" />

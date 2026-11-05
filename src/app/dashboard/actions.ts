@@ -7,7 +7,7 @@ import { back } from "@/lib/flash";
 import { int, isUuid, optStr, str } from "@/lib/form";
 
 const TIPE = ["PROGRAM", "PRODUK", "PROTOTIPE", "TEKNOLOGI"];
-const JENJANG = ["SMA_SMK", "MAHASISWA_DIPLOMA_S1", "PASCASARJANA", "WARGA_UMUM", "SMP_KE_BAWAH"];
+const JENJANG = ["SMA_SMK", "MAHASISWA_D3", "MAHASISWA_D4", "MAHASISWA_S1", "MAHASISWA_DIPLOMA_S1", "PASCASARJANA", "WARGA_UMUM", "SMP_KE_BAWAH"];
 const base = (id: string) => `/dashboard/pengajuan/${id}`;
 
 export async function createDraftAction(form: FormData) {
@@ -39,10 +39,13 @@ export async function createDraftAction(form: FormData) {
   back(base(created.id), "ok", "Draft dibuat. Lengkapi data, tim, dan dokumen, lalu kirim ke Kelurahan.");
 }
 
-export async function saveDraftAction(form: FormData) {
+export type DraftResult = { ok: boolean; message: string; redirectTo?: string };
+
+/** Menyimpan isian draft. Mengembalikan hasil (bukan redirect) supaya isian di layar tidak hilang saat ada kesalahan. */
+async function saveDraftData(form: FormData): Promise<DraftResult> {
   const { supabase } = await requireRole("INNOVATOR");
   const id = str(form, "id");
-  if (!isUuid(id)) back("/dashboard", "err", "Pengajuan tidak ditemukan.");
+  if (!isUuid(id)) return { ok: false, message: "Pengajuan tidak ditemukan." };
   const tipe = TIPE.includes(str(form, "tipe_inovasi")) ? str(form, "tipe_inovasi") : "PROGRAM";
   const nz = (k: string) => { const n = int(form, k); return Number.isFinite(n) && n >= 0 ? n : 0; };
   const perawatan = int(form, "rencana_perawatan_bulan");
@@ -53,10 +56,27 @@ export async function saveDraftAction(form: FormData) {
     rencana_perawatan_bulan: Number.isFinite(perawatan) && perawatan > 0 ? perawatan : null,
     prd_url: optStr(form, "prd_url"), rab_url: optStr(form, "rab_url"), surat_keaslian_url: optStr(form, "surat_keaslian_url"), surat_kesepakatan_url: optStr(form, "surat_kesepakatan_url"),
   }).eq("id", id).select("id");
-  if (error) back(base(id), "err", dbMessage(error, "Perubahan belum dapat disimpan. Periksa panjang isian dan nominal."));
-  if (!data?.length) back(base(id), "err", "Pengajuan tidak dapat diubah pada status ini.");
+  if (error) return { ok: false, message: dbMessage(error, "Perubahan belum dapat disimpan. Periksa panjang isian dan nominal. Isian Anda masih ada di layar.") };
+  if (!data?.length) return { ok: false, message: "Pengajuan tidak dapat diubah pada status ini." };
   revalidatePath(base(id));
-  back(base(id), "ok", "Perubahan disimpan.");
+  return { ok: true, message: "Perubahan disimpan." };
+}
+
+/** Simpan draft; isian dan berkas yang sudah diunggah tetap di layar apa pun hasilnya. */
+export async function saveDraftStateAction(form: FormData): Promise<DraftResult> {
+  return saveDraftData(form);
+}
+
+/** Simpan lalu kirim ke Kelurahan. Bila penyimpanan atau pemeriksaan gagal, tidak ada yang hilang dari layar. */
+export async function saveAndSubmitAction(form: FormData): Promise<DraftResult> {
+  const saved = await saveDraftData(form);
+  if (!saved.ok) return saved;
+  const { supabase } = await requireRole("INNOVATOR");
+  const id = str(form, "id");
+  const { error } = await supabase.rpc("submit_innovation", { p_id: id });
+  if (error) return { ok: false, message: "Draft sudah tersimpan, tetapi belum dapat dikirim: " + dbMessage(error) };
+  revalidatePath(base(id));
+  return { ok: true, message: "Pengajuan dikirim. Anda akan diberi notifikasi saat ada keputusan.", redirectTo: `${base(id)}?ok=${encodeURIComponent("Pengajuan dikirim. Anda akan diberi notifikasi saat ada keputusan.")}` };
 }
 
 export async function addMemberAction(form: FormData) {

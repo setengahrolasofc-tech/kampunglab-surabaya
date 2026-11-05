@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { rupiah, waLink, inisial } from "../src/lib/domain/format.mjs";
-import { checkSubmission, pembagianTahap, skalaOf, plafonOf, DEFAULT_PARAMS } from "../src/lib/domain/innovation-rules.mjs";
+import { rupiah, waLink, inisial, digitsOnly, formatRibuan } from "../src/lib/domain/format.mjs";
+import { checkSubmission, pembagianTahap, skalaOf, plafonOf, DEFAULT_PARAMS, JENJANG } from "../src/lib/domain/innovation-rules.mjs";
 import { evaluateStandards, keputusanTersedia, hashIp, parseSurveyForm, thresholds } from "../src/lib/domain/survey.mjs";
 import { TRANSITIONS, canTransition, actionsFor, STATUSES, STATUS_INFO } from "../src/lib/domain/workflow.mjs";
 import { validateSignup, isStrongPassword, normalizeIntent, destinationForIntent, safeAuthDestination, validateKelurahanAccess } from "../src/lib/auth/validation.mjs";
@@ -167,4 +167,24 @@ test("pintu masuk, tujuan sesudah masuk, dan permintaan akses Kelurahan", () => 
   assert.ok(validateKelurahanAccess(f({ ...ok, phone_wa: "abc" })).errors.phone_wa);
   assert.ok(validateKelurahanAccess(f({ ...ok, kelurahan: "Mojo Palsu" })).errors.kelurahan);
   assert.ok(validateKelurahanAccess(f({ ...ok, kecamatan: "__proto__" })).errors.kecamatan);
+});
+
+test("isian uang: nol di depan dibuang, titik tiap tiga angka", () => {
+  assert.equal(digitsOnly("0"), "");
+  assert.equal(digitsOnly("000"), "");
+  assert.equal(digitsOnly("0042"), "42");
+  assert.equal(digitsOnly("Rp 1.500.000"), "1500000");
+  assert.equal(digitsOnly("12345678901234"), "123456789012", "maks 12 digit");
+  assert.equal(formatRibuan(""), "");
+  assert.equal(formatRibuan("5"), "5");
+  assert.equal(formatRibuan("1000"), "1.000");
+  assert.equal(formatRibuan("1500000"), "1.500.000");
+  assert.equal(formatRibuan("05000000"), "5.000.000");
+  assert.equal(formatRibuan("1.000.000"), "1.000.000");
+});
+
+test("jenjang: D3, D4, S1 tersedia; SMP/SD ke bawah tetap bisa dikenali untuk ditolak", () => {
+  const nilai = JENJANG.map((j) => j.value);
+  for (const v of ["SMA_SMK", "MAHASISWA_D3", "MAHASISWA_D4", "MAHASISWA_S1", "PASCASARJANA", "WARGA_UMUM"]) assert.ok(nilai.includes(v), v);
+  assert.ok(!nilai.includes("MAHASISWA_DIPLOMA_S1"), "nilai lama tidak ditawarkan lagi");
 });

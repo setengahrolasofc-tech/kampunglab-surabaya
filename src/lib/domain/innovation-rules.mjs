@@ -15,7 +15,9 @@ export const TIPE_INOVASI = [
 ];
 export const JENJANG = [
   { value: "SMA_SMK", label: "SMA/SMK" },
-  { value: "MAHASISWA_DIPLOMA_S1", label: "Mahasiswa D3/S1" },
+  { value: "MAHASISWA_D3", label: "Mahasiswa D3" },
+  { value: "MAHASISWA_D4", label: "Mahasiswa D4" },
+  { value: "MAHASISWA_S1", label: "Mahasiswa S1" },
   { value: "PASCASARJANA", label: "Pascasarjana" },
   { value: "WARGA_UMUM", label: "Warga umum / komunitas" },
   { value: "SMP_KE_BAWAH", label: "SMP/SD ke bawah (tidak diizinkan)" },

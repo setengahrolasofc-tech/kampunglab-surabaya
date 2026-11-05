@@ -6,7 +6,7 @@ import { BerkasLink } from "./berkas-link";
 import { Badge, Card, SectionTitle, Stars, cx } from "./ui";
 
 const TAHAP_LABEL: Record<string, string> = { TAHAP_1_30: "Tahap 1 (30%)", TAHAP_2_30: "Tahap 2 (30%)", TAHAP_3_40: "Tahap 3 (40%)" };
-export const JENJANG_LABEL: Record<string, string> = { SMA_SMK: "SMA/SMK", MAHASISWA_DIPLOMA_S1: "Mahasiswa D3/S1", PASCASARJANA: "Pascasarjana", WARGA_UMUM: "Warga umum", SMP_KE_BAWAH: "SMP/SD ke bawah" };
+export const JENJANG_LABEL: Record<string, string> = { SMA_SMK: "SMA/SMK", MAHASISWA_D3: "Mahasiswa D3", MAHASISWA_D4: "Mahasiswa D4", MAHASISWA_S1: "Mahasiswa S1", MAHASISWA_DIPLOMA_S1: "Mahasiswa D3/S1", PASCASARJANA: "Pascasarjana", WARGA_UMUM: "Warga umum", SMP_KE_BAWAH: "SMP/SD ke bawah" };
 export const TIPE_LABEL: Record<string, string> = { PROGRAM: "Program", PRODUK: "Produk sederhana", PROTOTIPE: "Prototipe", TEKNOLOGI: "Teknologi" };
 
 /** Empat standar kelayakan + rekap real-time. Data berasal dari get_test_summary() (ulasan sudah tersamarkan). */

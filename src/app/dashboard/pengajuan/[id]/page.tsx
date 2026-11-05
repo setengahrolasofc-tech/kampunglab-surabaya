@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Flash } from "@/components/flash";
 import { DocLinks, JENJANG_LABEL, TeamList, TIPE_LABEL } from "@/components/innovation-views";
 import { ProjectNav } from "@/components/project-nav";
+import { DraftSaveForm } from "@/components/draft-save-form";
+import { RupiahInput } from "@/components/rupiah-input";
 import { SubmitButton } from "@/components/submit-button";
 import { UploadField } from "@/components/upload-field";
 import { Alert, Card, Field, Main, PageHeader, PhaseTimeline, SectionTitle, StatusBadge, btnDanger, btnOutline, inputCls } from "@/components/ui";
@@ -10,7 +12,7 @@ import { actionsFor, phaseOf, STATUS_INFO } from "@/lib/domain/workflow.mjs";
 import { checkSubmission, DEFAULT_PARAMS, JENJANG, pembagianTahap, plafonOf, TIPE_INOVASI } from "@/lib/domain/innovation-rules.mjs";
 import { rupiah } from "@/lib/domain/format.mjs";
 import { loadOwnProject, loadParams } from "@/lib/loaders";
-import { addMemberAction, deleteDraftAction, removeMemberAction, saveDraftAction, submitAction } from "../../actions";
+import { addMemberAction, deleteDraftAction, removeMemberAction } from "../../actions";
 
 export const metadata: Metadata = { title: "Pengajuan" };
 
@@ -39,8 +41,7 @@ export default async function PengajuanPage({ params, searchParams }: { params: 
 
       {editable ? (
         <div className="grid gap-6 lg:grid-cols-3">
-          <form action={saveDraftAction} className="space-y-6 lg:col-span-2">
-            <input type="hidden" name="id" value={id} />
+          <DraftSaveForm id={id}>
             <Card className="space-y-4">
               <SectionTitle>Data inovasi</SectionTitle>
               <Field label="Judul" htmlFor="judul"><input id="judul" name="judul" defaultValue={inv.judul} maxLength={160} className={inputCls} /></Field>
@@ -57,9 +58,9 @@ export default async function PengajuanPage({ params, searchParams }: { params: 
             <Card className="space-y-4">
               <SectionTitle>RAB & perawatan</SectionTitle>
               <div className="grid gap-4 sm:grid-cols-3">
-                <Field label="Total RAB (Rp)" htmlFor="total_rab" hint={`Maks ${rupiah(plafon)}`}><input id="total_rab" name="total_rab" inputMode="numeric" defaultValue={inv.total_rab} className={inputCls} /></Field>
-                <Field label="Dana tak terduga (Rp)" htmlFor="rab_tak_terduga" hint={`Maks ${p.tak_terduga_maks_pct}% total`}><input id="rab_tak_terduga" name="rab_tak_terduga" inputMode="numeric" defaultValue={inv.rab_tak_terduga} className={inputCls} /></Field>
-                <Field label="Honor tim (Rp)" htmlFor="rab_honor" hint={`Maks ${p.honor_maks_pct}% total`}><input id="rab_honor" name="rab_honor" inputMode="numeric" defaultValue={inv.rab_honor} className={inputCls} /></Field>
+                <Field label="Total RAB (Rp)" htmlFor="total_rab" hint={`Maks ${rupiah(plafon)}`}><RupiahInput id="total_rab" name="total_rab" defaultValue={inv.total_rab} /></Field>
+                <Field label="Dana tak terduga (Rp)" htmlFor="rab_tak_terduga" hint={`Maks ${p.tak_terduga_maks_pct}% total`}><RupiahInput id="rab_tak_terduga" name="rab_tak_terduga" defaultValue={inv.rab_tak_terduga} /></Field>
+                <Field label="Honor tim (Rp)" htmlFor="rab_honor" hint={`Maks ${p.honor_maks_pct}% total`}><RupiahInput id="rab_honor" name="rab_honor" defaultValue={inv.rab_honor} /></Field>
               </div>
               <Field label="Rencana perawatan (bulan)" htmlFor="rencana_perawatan_bulan" hint={`${p.perawatan_min_bulan}–${p.perawatan_maks_bulan} bulan`}><input id="rencana_perawatan_bulan" name="rencana_perawatan_bulan" inputMode="numeric" defaultValue={inv.rencana_perawatan_bulan ?? ""} className={inputCls + " sm:max-w-[10rem]"} /></Field>
               {inv.total_rab > 0 && <p className="text-sm text-indigo-space/75">Pencairan 30-30-40 (setelah disimpan): {rupiah(split.TAHAP_1_30)} · {rupiah(split.TAHAP_2_30)} · {rupiah(split.TAHAP_3_40)}.</p>}
@@ -74,8 +75,7 @@ export default async function PengajuanPage({ params, searchParams }: { params: 
                 <UploadField name="surat_kesepakatan_url" prefix={`${id}/kesepakatan`} label="Scan Surat Kesepakatan Lokasi Uji" initial={inv.surat_kesepakatan_url} />
               </div>
             </Card>
-            <div className="flex flex-wrap gap-3"><SubmitButton className="inline-flex rounded-lg bg-teal-deep px-5 py-2.5 text-sm font-semibold text-white">Simpan draft</SubmitButton></div>
-          </form>
+          </DraftSaveForm>
 
           <aside className="space-y-6">
             <Card className="space-y-3">
@@ -92,7 +92,7 @@ export default async function PengajuanPage({ params, searchParams }: { params: 
                   <input name="peran_dalam_tim" placeholder="Peran (mis. Hardware)" aria-label="Peran" className={inputCls} />
                   <input name="institusi_asal" placeholder="Institusi asal" aria-label="Institusi" className={inputCls} />
                   <input name="kota_domisili" placeholder="Kota domisili" aria-label="Kota" className={inputCls} />
-                  <select name="jenjang_pendidikan" defaultValue="MAHASISWA_DIPLOMA_S1" aria-label="Jenjang" className={inputCls}>{JENJANG.map((j) => <option key={j.value} value={j.value}>{j.label}</option>)}</select>
+                  <select name="jenjang_pendidikan" defaultValue="MAHASISWA_S1" aria-label="Jenjang" className={inputCls}>{JENJANG.map((j) => <option key={j.value} value={j.value}>{j.label}</option>)}</select>
                   <SubmitButton className={btnOutline}>+ Tambah anggota</SubmitButton>
                 </form>)}
               <p className="text-xs text-indigo-space/60">Tim wajib {p.tim_min}–{p.tim_maks} orang; pelajar SMP/SD ke bawah ditolak.</p>
@@ -101,7 +101,7 @@ export default async function PengajuanPage({ params, searchParams }: { params: 
               <SectionTitle>Kelengkapan</SectionTitle>
               {kurang.length === 0 ? <p className="text-sm font-semibold text-[#2c6b5b]">✓ Lengkap. Simpan draft lalu kirim.</p> : <ul className="list-disc space-y-1 pl-5 text-sm">{kurang.map((k) => <li key={k}>{k}</li>)}</ul>}
               <p className="text-xs text-indigo-space/60">Daftar ini dihitung dari data yang sudah tersimpan. Pemeriksaan resmi dilakukan sistem saat Anda menekan Kirim.</p>
-              <form action={submitAction}><input type="hidden" name="id" value={id} /><SubmitButton confirm="Kirim pengajuan ke Kelurahan? Data tidak dapat diubah sampai ada keputusan.">Kirim ke Kelurahan</SubmitButton></form>
+              <p className="text-xs text-indigo-space/60">Tombol "Simpan &amp; kirim ke Kelurahan" ada di bawah formulir dan menyimpan isian lebih dulu.</p>
               {acts.includes("hapus") && <form action={deleteDraftAction}><input type="hidden" name="id" value={id} /><SubmitButton className={btnDanger} confirm="Hapus draft ini?">Hapus draft</SubmitButton></form>}
             </Card>
           </aside>
